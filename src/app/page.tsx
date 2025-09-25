@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -438,13 +439,13 @@ export default function OrcaFastPage() {
 
         const subtotal = itemsWithTotals.reduce((acc, item) => acc + item.itemTotal, 0);
         
-        let generalDiscountValue = generalDiscount;
+        let generalDiscountValue = generalDiscount || 0;
         let generalDiscountPercentage = 0;
 
-        if(generalDiscountType === 'percentage' && generalDiscount > 0) {
-            generalDiscountValue = subtotal * (generalDiscount / 100);
-            generalDiscountPercentage = generalDiscount;
-        } else if (subtotal > 0 && generalDiscount > 0) {
+        if(generalDiscountType === 'percentage' && generalDiscountValue > 0) {
+            generalDiscountValue = subtotal * (generalDiscountValue / 100);
+            generalDiscountPercentage = generalDiscount || 0;
+        } else if (subtotal > 0 && generalDiscountValue > 0) {
             generalDiscountPercentage = (generalDiscountValue / subtotal) * 100;
         }
         
@@ -565,3 +566,5 @@ export default function OrcaFastPage() {
         </main>
     );
 }
+
+    

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -133,7 +134,7 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
 
                         {generalDiscountValue > 0 && (
                             <div className="flex justify-between py-1 text-lg text-green-400">
-                                <span>Desconto Geral ({(generalDiscountPercentage || 0).toFixed(2)}%):</span>
+                                <span>Desconto Geral ({Number(generalDiscountPercentage).toFixed(2)}%):</span>
                                 <span>-{formatCurrency(generalDiscountValue)}</span>
                             </div>
                         )}
@@ -160,3 +161,5 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
         </Card>
     );
 };
+
+    
