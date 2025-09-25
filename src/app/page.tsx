@@ -58,20 +58,12 @@ export type BudgetFormValues = z.infer<typeof budgetSchema>;
 export type CompanyInfo = {
   name: string;
   logoUrl: string;
-  address: string;
-  email: string;
-  phone: string;
-  cnpj: string;
   slogan: string;
 }
 
 export const companyInfo: CompanyInfo = {
   name: "FastFilms",
   logoUrl: "https://raw.githubusercontent.com/Lyd09/FF/587b5eb4cf0fc07885618620dc1f18e8d6e0aef4/LOGO%20SVG.svg",
-  address: "Rua Bartolomeu Bueno de Gusmao, 594 - Aeronautas, Lagoa Santa - MG, 33.236- 454",
-  email: "fastfilmsoficial@gmail.com",
-  phone: "(11) 98765-4321",
-  cnpj: "53.525.841/0001-89",
   slogan: "Cada momento merece um bom take!"
 };
 
@@ -103,6 +95,23 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
         return total - discountValue;
     }
     
+    const fillWithTestData = () => {
+        form.reset({
+            ...form.getValues(),
+            clientName: "Cliente de Exemplo",
+            clientAddress: "Rua Fictícia, 123, Bairro dos Sonhos, Cidade Imaginária - IS",
+            items: [
+                { description: 'Gravação de vídeo institucional com equipe completa e edição profissional.', unit: 'Serviço', quantity: 1, unitPrice: 5500, discount: 500, discountType: 'fixed' },
+                { description: 'Fotografia de produto para e-commerce (50 produtos).', unit: 'Pacote', quantity: 1, unitPrice: 3000, discount: 10, discountType: 'percentage' },
+                { description: 'Aluguel de equipamento de iluminação (diária).', unit: 'Diária', quantity: 3, unitPrice: 250, discount: 0, discountType: 'fixed' },
+            ],
+            paymentConditions: 'Sinal de 50% na aprovação do orçamento. Restante na entrega do material final.',
+            generalDiscount: 150,
+            generalDiscountType: 'fixed',
+            observations: 'Orçamento válido por 15 dias. Prazos de entrega a combinar.'
+        });
+    }
+
     return (
         <FormProvider {...form}>
             <Form {...form}>
@@ -222,7 +231,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                         </CardContent>
                         <CardFooter className="flex-col items-start gap-4">
                              <div className="flex items-center justify-between w-full">
-                                <Button type="button" variant="ghost" onClick={() => { /* logic for test data */ }}>
+                                <Button type="button" variant="ghost" onClick={fillWithTestData}>
                                     <Pencil className="mr-2 h-4 w-4" /> Preencher Teste
                                 </Button>
                                 <Button type="submit" size="lg" disabled={isGeneratingPdf} className="font-sans">
@@ -242,7 +251,7 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
         <div className="bg-white text-black p-10" style={{width: '210mm', minHeight: '297mm', fontFamily: 'sans-serif', position: 'relative'}}>
             <header className="flex justify-between items-start pb-4 mb-8">
                 <div className="flex items-center gap-4">
-                    {data.logoUrl && <img src={data.logoUrl} alt="Logo da Empresa" style={{width: '50px', height: '50px'}} />}
+                    {data.logoUrl && <Image src={data.logoUrl} alt="Logo da Empresa" width={60} height={60} />}
                      <div>
                         <h2 className="text-xl font-bold text-neutral-900">{data.companyName}</h2>
                         <p className="text-xs text-neutral-600">{data.slogan}</p>
@@ -478,3 +487,5 @@ export default function OrcaFastPage() {
         </main>
     );
 }
+
+    
