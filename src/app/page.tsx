@@ -16,14 +16,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
     Trash2,
     PlusCircle,
-    Download,
-    User,
     FileText,
+    User,
     Settings2,
-    MapPin,
     Send,
     Pencil,
-    Edit3,
     Airplay
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -93,17 +90,6 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
     const [presets, setPresets] = useLocalStorage<Preset[]>('orcafast-presets', initialPresets);
     const [isPresetManagerOpen, setIsPresetManagerOpen] = useState(false);
 
-    const watchedItems = form.watch('items');
-
-    const calculateItemSubtotal = (item: any) => {
-        const total = (item.quantity || 0) * (item.unitPrice || 0);
-        let discountValue = item.discount || 0;
-        if (item.discountType === 'percentage') {
-            discountValue = total * (discountValue / 100);
-        }
-        return total - discountValue;
-    }
-    
     const handleApplyPreset = (index: number, presetId: string) => {
         const preset = presets.find(p => p.id === presetId);
         if (preset) {
@@ -242,16 +228,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             
                             <hr className="border-border" />
                             
-                            {/* Conditions Section */}
-                             <div className="space-y-4">
-                                <h3 className="text-lg font-medium text-primary">Termos e Condições</h3>
-                                <FormField control={form.control} name="commercialConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições Comerciais</FormLabel> <FormControl><Textarea placeholder="Ex: Forma de Pagamento: Transferência bancária, boleto ou PIX." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                                <FormField control={form.control} name="paymentConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições de Pagamento</FormLabel> <FormControl><Textarea placeholder="Ex: 50% do valor será pago antes do início do serviço e o restante, após sua conclusão." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                            </div>
-
-                             <hr className="border-border" />
-
-                            {/* General Discount */}
+                             {/* General Discount */}
                              <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Desconto Geral (Opcional)</h3>
                                 <div className="flex items-center gap-2">
@@ -268,6 +245,16 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                 )} />
                                 </div>
                             </div>
+                            
+                            <hr className="border-border" />
+
+                            {/* Conditions Section */}
+                             <div className="space-y-4">
+                                <h3 className="text-lg font-medium text-primary">Termos e Condições</h3>
+                                <FormField control={form.control} name="commercialConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições Comerciais</FormLabel> <FormControl><Textarea placeholder="Ex: Forma de Pagamento: Transferência bancária, boleto ou PIX." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                                <FormField control={form.control} name="paymentConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições de Pagamento</FormLabel> <FormControl><Textarea placeholder="Ex: 50% do valor será pago antes do início do serviço e o restante, após sua conclusão." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                            </div>
+
                         </CardContent>
                         <CardFooter className="flex-col items-start gap-4">
                              <div className="flex items-center justify-between w-full">
@@ -315,6 +302,7 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
             <section className="my-8 pb-4 border-b border-neutral-700 no-break">
                 <h3 className="text-neutral-500 mb-1">Cliente:</h3>
                 <p className="font-bold text-lg text-white">{data.clientName}</p>
+                {data.clientAddress && <p className="text-neutral-400 text-sm">{data.clientAddress}</p>}
             </section>
             
             {/* Items */}
@@ -332,7 +320,14 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
                     <tbody>
                         {data.items.map((item, index) => (
                             <tr key={index} className="border-b border-neutral-800">
-                                <td className="p-2 align-top">{item.description}</td>
+                                <td className="p-2 align-top">
+                                    {item.description}
+                                    {item.itemDiscountValue > 0 && (
+                                        <p className="text-xs text-green-400">
+                                            (Desconto: {item.discountType === 'percentage' ? `${item.discount}%` : `-${formatCurrency(item.itemDiscountValue)}`})
+                                        </p>
+                                    )}
+                                </td>
                                 <td className="p-2 text-center align-top">{item.quantity} {item.unit}</td>
                                 <td className="p-2 text-right align-top">{formatCurrency(item.unitPrice)}</td>
                                 <td className="p-2 text-right align-top">{formatCurrency(item.itemTotal)}</td>
@@ -349,6 +344,14 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
                         <span className="text-neutral-400">Subtotal:</span>
                         <span>{formatCurrency(data.subtotal)}</span>
                     </div>
+                     {data.generalDiscountValue > 0 && (
+                        <div className="flex justify-between py-1 text-lg text-green-400">
+                            <span>
+                                {data.generalDiscountType === 'percentage' ? `Desconto Geral (${Number(data.generalDiscountPercentage || 0).toFixed(0)}%)` : 'Desconto Geral:'}
+                            </span>
+                            <span>-{formatCurrency(data.generalDiscountValue)}</span>
+                        </div>
+                    )}
                      <hr className="border-neutral-700 my-1"/>
                     <div className="flex justify-between text-3xl font-bold text-white py-1">
                          <span >Total:</span>
@@ -428,6 +431,7 @@ export default function OrcaFastPage() {
                 ...item,
                 itemTotal: total - discountValue,
                 itemDiscountValue: discountValue,
+                discount: item.discount || 0,
             };
         });
 
@@ -485,23 +489,20 @@ export default function OrcaFastPage() {
         try {
             const html2pdf = (await import('html2pdf.js')).default;
             
-            // Create a container for the PDF content that is not visible on screen.
             const previewContainer = document.createElement('div');
             previewContainer.style.position = 'fixed';
-            previewContainer.style.left = '-9999px'; // Move it off-screen.
+            previewContainer.style.left = '-9999px'; 
             previewContainer.style.top = '0';
             document.body.appendChild(previewContainer);
 
             const reactDom = (await import('react-dom'));
             const previewElement = <BudgetPreviewForPdf data={data} />;
             
-            // Use createRoot to render the component into the off-screen container.
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             const root = reactDom.createRoot(previewContainer);
             root.render(previewElement);
             
-            // Give React time to render the component before generating the PDF.
             await new Promise(resolve => setTimeout(resolve, 500)); 
 
             const opt = {
@@ -512,14 +513,12 @@ export default function OrcaFastPage() {
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             
-            // Generate PDF from the first child of the container, which is our rendered component.
             const pdfElement = previewContainer.firstChild;
             if (pdfElement) {
                  await html2pdf().from(pdfElement).set(opt).save();
             }
            
             
-            // Clean up by unmounting the component and removing the container.
             root.unmount();
             document.body.removeChild(previewContainer);
 
@@ -561,13 +560,3 @@ export default function OrcaFastPage() {
         </main>
     );
 }
-
-    
-
-    
-
-    
-
-    
-
-    
