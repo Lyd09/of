@@ -15,7 +15,6 @@ import {
     Trash2,
     PlusCircle,
     Download,
-    Building,
     User,
     FileText,
     Settings2,
@@ -25,6 +24,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from 'next/image';
+import { BudgetPreviewData, BudgetItem as BudgetItemType } from '@/types/budget';
+import { BudgetPreview } from '@/components/BudgetPreview';
 
 const budgetItemSchema = z.object({
     description: z.string().min(1, 'Descrição é obrigatória.'),
@@ -32,16 +33,13 @@ const budgetItemSchema = z.object({
     quantity: z.coerce.number().min(0.01, 'Quantidade deve ser maior que 0.'),
     unitPrice: z.coerce.number().min(0, 'Preço unitário não pode ser negativo.'),
     discount: z.coerce.number().optional(),
+    discountType: z.enum(['percentage', 'fixed']).default('fixed'),
 });
 
 const budgetSchema = z.object({
     companyName: z.string().min(1, 'Nome da sua empresa é obrigatório.'),
-    companyInfo: z.string().optional(),
     logoUrl: z.string().optional(),
-    address: z.string().optional(),
-    email: z.string().optional(),
-    phone: z.string().optional(),
-    cnpj: z.string().optional(),
+    slogan: z.string().optional(),
     clientName: z.string().min(1, 'Nome do cliente é obrigatório.'),
     clientAddress: z.string().optional(),
     budgetNumber: z.coerce.number().min(1, "Número do orçamento é obrigatório."),
@@ -50,18 +48,21 @@ const budgetSchema = z.object({
     commercialConditions: z.string().optional(),
     paymentConditions: z.string().optional(),
     generalDiscount: z.coerce.number().optional(),
+    generalDiscountType: z.enum(['percentage', 'fixed']).default('fixed'),
     observations: z.string().optional(),
+    isDroneFeatureEnabled: z.boolean().default(false),
 });
 
 export type BudgetFormValues = z.infer<typeof budgetSchema>;
 
 export type CompanyInfo = {
-    name: string;
-    logoUrl: string;
-    address: string;
-    email: string;
-    phone: string;
-    cnpj: string;
+  name: string;
+  logoUrl: string;
+  address: string;
+  email: string;
+  phone: string;
+  cnpj: string;
+  slogan: string;
 }
 
 export const companyInfo: CompanyInfo = {
@@ -71,6 +72,7 @@ export const companyInfo: CompanyInfo = {
   email: "fastfilmsoficial@gmail.com",
   phone: "(11) 98765-4321",
   cnpj: "53.525.841/0001-89",
+  slogan: "Cada momento merece um bom take!"
 };
 
 const formatCurrency = (value: number) => {
@@ -89,11 +91,16 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
         control: form.control,
         name: "items",
     });
-
+    
     const watchedItems = form.watch('items');
-    const calculateSubtotal = (item: any) => {
+
+    const calculateItemSubtotal = (item: any) => {
         const total = (item.quantity || 0) * (item.unitPrice || 0);
-        return total - (item.discount || 0);
+        let discountValue = item.discount || 0;
+        if (item.discountType === 'percentage') {
+            discountValue = total * (discountValue / 100);
+        }
+        return total - discountValue;
     }
     
     return (
@@ -107,7 +114,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                 Criar Novo Orçamento
                             </CardTitle>
                              <div className="flex gap-2">
-                                <Button type="button" variant="outline">
+                                <Button type="button" variant="outline" onClick={() => form.setValue('isDroneFeatureEnabled', !form.getValues('isDroneFeatureEnabled'))}>
                                     Ativar/Desativar Drone
                                 </Button>
                                 <Button type="button" variant="outline">
@@ -140,7 +147,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Itens do Orçamento</h3>
                                 <div className="space-y-4">
-                                    <div className="hidden md:grid grid-cols-[1fr,80px,80px,100px,100px,100px,40px] gap-3 items-center font-bold text-muted-foreground text-sm px-2">
+                                    <div className="hidden md:grid grid-cols-[1fr,80px,80px,100px,140px,100px,40px] gap-3 items-center font-bold text-muted-foreground text-sm px-2">
                                         <Label>Descrição</Label>
                                         <Label>Unid.</Label>
                                         <Label>Qtd.</Label>
@@ -149,18 +156,30 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                         <Label>Subtotal</Label>
                                     </div>
                                     {fields.map((field, index) => (
-                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-[1fr,80px,80px,100px,100px,100px,40px] gap-2 items-start pb-4 border-b border-border/50">
+                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-[1fr,80px,80px,100px,140px,100px,40px] gap-2 items-start pb-4 border-b border-border/50">
                                             <FormField control={form.control} name={`items.${index}.description`} render={({ field }) => ( <FormItem> <FormControl><Textarea placeholder="Descrição do item" {...field} className="min-h-[40px] bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                             <FormField control={form.control} name={`items.${index}.unit`} render={({ field }) => ( <FormItem> <FormControl><Input placeholder="Un" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                             <FormField control={form.control} name={`items.${index}.quantity`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="1" placeholder="1" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                             <FormField control={form.control} name={`items.${index}.unitPrice`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="0.01" placeholder="R$ 0,00" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
-                                            <FormField control={form.control} name={`items.${index}.discount`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="0.01" placeholder="R$ 0,00" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
-                                            <div className="flex items-center h-10 text-sm">{formatCurrency(calculateSubtotal(watchedItems[index]))}</div>
+                                            <div className="flex gap-1">
+                                                <FormField control={form.control} name={`items.${index}.discount`} render={({ field }) => ( <FormItem className="flex-grow"> <FormControl><Input type="number" step="0.01" placeholder="0" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
+                                                <FormField control={form.control} name={`items.${index}.discountType`} render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Button type="button" variant="outline" size="icon" onClick={() => field.onChange(field.value === 'fixed' ? 'percentage' : 'fixed')}>
+                                                                {field.value === 'fixed' ? 'R$' : '%'}
+                                                            </Button>
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )} />
+                                            </div>
+                                            <div className="flex items-center h-10 text-sm">{formatCurrency(calculateItemSubtotal(watchedItems[index]))}</div>
                                             <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
                                         </div>
                                     ))}
                                 </div>
-                                <Button type="button" variant="outline" className="mt-4" onClick={() => append({ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0 })}>
+                                <Button type="button" variant="outline" className="mt-4" onClick={() => append({ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed' })}>
                                     <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Item
                                 </Button>
                             </div>
@@ -170,7 +189,6 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             {/* Conditions Section */}
                              <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Termos e Condições</h3>
-                                <FormField control={form.control} name="commercialConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições Comerciais</FormLabel> <FormControl><Input placeholder="Ex: Forma de Pagamento: Transferência bancária, boleto ou PIX." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                                 <FormField control={form.control} name="paymentConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições de Pagamento</FormLabel> <FormControl><Textarea placeholder="Ex: 50% do valor será pago antes do início do serviço e o restante, após sua conclusão." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                             </div>
 
@@ -179,7 +197,19 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             {/* General Discount */}
                              <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Desconto Geral (Opcional)</h3>
-                                <FormField control={form.control} name="generalDiscount" render={({ field }) => ( <FormItem> <FormLabel>Valor do Desconto</FormLabel> <FormControl><Input type="number" step="0.01" placeholder="R$ 0,00" {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                                <div className="flex items-center gap-2">
+                                <FormField control={form.control} name="generalDiscount" render={({ field }) => ( <FormItem className="flex-grow"> <FormLabel>Valor do Desconto</FormLabel> <FormControl><Input type="number" step="0.01" placeholder="0" {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                                 <FormField control={form.control} name={`generalDiscountType`} render={({ field }) => (
+                                    <FormItem className="self-end">
+                                        <FormControl>
+                                            <Button type="button" variant="outline" size="icon" onClick={() => field.onChange(field.value === 'fixed' ? 'percentage' : 'fixed')}>
+                                                {field.value === 'fixed' ? 'R$' : '%'}
+                                            </Button>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                </div>
                             </div>
 
                             <hr className="border-border" />
@@ -207,138 +237,30 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
     );
 }
 
-type BudgetPreviewProps = {
-  data: BudgetFormValues;
-  subtotal: number;
-  total: number;
-};
-
-const BudgetPreview = ({ data, subtotal, total }: BudgetPreviewProps) => {
-    return (
-        <div id="budget-preview" className="bg-[#18191b] text-neutral-300 p-8 rounded-lg shadow-lg" style={{ width: '100%', minHeight: '80vh', fontFamily: 'sans-serif' }}>
-            <header className="flex justify-between items-start pb-4 mb-8">
-                <div className="flex items-center gap-4">
-                    {data.logoUrl && (
-                        <div className="bg-white p-2 rounded-md">
-                            <Image src={data.logoUrl} alt="Logo da Empresa" width={50} height={50} />
-                        </div>
-                    )}
-                    <div>
-                        <h2 className="text-xl font-bold text-neutral-100">{data.companyName}</h2>
-                        <p className="text-xs text-neutral-400">Cada momento merece um bom take!</p>
-                    </div>
-                </div>
-                <div className="text-right">
-                    <h1 className="text-3xl font-bold text-neutral-100">ORÇAMENTO</h1>
-                    <p className="text-neutral-400">Número: <span className="font-bold">{String(data.budgetNumber || 1).padStart(4, '0')}</span></p>
-                    <p className="text-neutral-400">Data: {data.budgetDate}</p>
-                </div>
-            </header>
-
-            <section className="grid grid-cols-2 gap-8 my-8">
-                 <div>
-                    {/* Empty div for layout balance */}
-                </div>
-                <div>
-                    <h3 className="font-bold text-neutral-200 mb-2">Cliente:</h3>
-                    <p className="font-medium text-neutral-100">{data.clientName || 'Nome do Cliente'}</p>
-                    <p className="text-sm text-neutral-400">{data.clientAddress || 'Endereço do cliente'}</p>
-                </div>
-            </section>
-
-             <section className="my-8">
-                <h3 className="font-bold text-neutral-200 mb-4">Itens do Orçamento:</h3>
-                <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr className="text-left text-neutral-400 border-b-2 border-neutral-700">
-                            <th className="p-2 w-1/2 font-medium">Descrição</th>
-                            <th className="p-2 text-center font-medium">Qtd.</th>
-                            <th className="p-2 text-right font-medium">Preço Unit.</th>
-                            <th className="p-2 text-right font-medium">Total Item</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {(data.items && data.items.length > 0 && data.items[0].description) ? data.items.map((item, index) => (
-                            <tr key={index} className="border-b border-neutral-800">
-                                <td className="p-2 align-top">{item.description}</td>
-                                <td className="p-2 text-center align-top">{item.quantity} {item.unit}</td>
-                                <td className="p-2 text-right align-top">{formatCurrency(item.unitPrice)}</td>
-                                <td className="p-2 text-right align-top">{formatCurrency((item.quantity * item.unitPrice) - (item.discount || 0))}</td>
-                            </tr>
-                        )) : (
-                            <tr>
-                               <td colSpan={4} className="p-8 text-center text-neutral-500">Adicione itens ao orçamento.</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </section>
-            
-            <section className="flex flex-col items-end my-8 no-break space-y-2">
-                <div className="text-right w-full max-w-xs">
-                    <div className="flex justify-between py-1">
-                        <span className="text-neutral-400">Subtotal:</span>
-                        <span>{formatCurrency(subtotal)}</span>
-                    </div>
-                    {data.generalDiscount && data.generalDiscount > 0 && (
-                         <div className="flex justify-between py-1">
-                            <span className="text-neutral-400">Desconto Geral:</span>
-                            <span>-{formatCurrency(data.generalDiscount)}</span>
-                        </div>
-                    )}
-                    <div className="border-t border-neutral-700 my-2"></div>
-                    <div className="flex justify-between text-2xl font-bold text-neutral-100 py-1">
-                        <span >Total:</span>
-                        <span>{formatCurrency(total)}</span>
-                    </div>
-                </div>
-            </section>
-
-             <section className="my-8 text-sm no-break space-y-4">
-                { (data.commercialConditions || data.paymentConditions) && <h4 className="font-bold text-neutral-200">Termos e Condições:</h4> }
-                {data.commercialConditions && <p className="text-neutral-400"><span className="font-medium">Comerciais:</span> {data.commercialConditions}</p>}
-                {data.paymentConditions && <p className="text-neutral-400"><span className="font-medium">Pagamento:</span> {data.paymentConditions}</p>}
-            </section>
-             
-            <footer className="absolute bottom-8 left-8 right-8 text-center text-xs text-neutral-500 pt-4">
-                <p>Obrigado pela preferência! — {data.companyName || 'Sua Empresa'}</p>
-            </footer>
-        </div>
-    );
-};
-
-
-const BudgetPreviewForPdf = ({ data, subtotal, total }: BudgetPreviewProps) => {
-    // This component is for PDF generation and should mimic the on-screen preview but with a white theme
+const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
     return (
         <div className="bg-white text-black p-10" style={{width: '210mm', minHeight: '297mm', fontFamily: 'sans-serif', position: 'relative'}}>
             <header className="flex justify-between items-start pb-4 mb-8">
                 <div className="flex items-center gap-4">
-                    {data.logoUrl && (
-                        <div className="bg-black p-2 rounded-md">
-                            <img src={data.logoUrl} alt="Logo da Empresa" style={{width: '50px', height: '50px'}} />
-                        </div>
-                    )}
+                    {data.logoUrl && <img src={data.logoUrl} alt="Logo da Empresa" style={{width: '50px', height: '50px'}} />}
                      <div>
                         <h2 className="text-xl font-bold text-neutral-900">{data.companyName}</h2>
-                        <p className="text-xs text-neutral-600">Cada momento merece um bom take!</p>
+                        <p className="text-xs text-neutral-600">{data.slogan}</p>
                     </div>
                 </div>
                 <div className="text-right">
                     <h1 className="text-3xl font-bold text-neutral-900">ORÇAMENTO</h1>
-                    <p className="text-neutral-600">Número: <span className="font-bold">{String(data.budgetNumber || 1).padStart(4, '0')}</span></p>
+                    <p className="text-neutral-600">Número: <span className="font-bold">{String(data.budgetNumber).padStart(4, '0')}</span></p>
                     <p className="text-neutral-600">Data: {data.budgetDate}</p>
                 </div>
             </header>
 
             <section className="grid grid-cols-2 gap-8 my-8">
-                 <div>
-                    {/* Empty div for layout balance */}
-                </div>
+                 <div></div>
                 <div>
                     <h3 className="font-bold text-neutral-800 mb-2">Cliente:</h3>
-                    <p className="font-medium text-neutral-900">{data.clientName || 'Nome do Cliente'}</p>
-                    <p className="text-sm text-neutral-700">{data.clientAddress || 'Endereço do cliente'}</p>
+                    <p className="font-medium text-neutral-900">{data.clientName}</p>
+                    <p className="text-sm text-neutral-700">{data.clientAddress}</p>
                 </div>
             </section>
 
@@ -354,16 +276,14 @@ const BudgetPreviewForPdf = ({ data, subtotal, total }: BudgetPreviewProps) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {(data.items && data.items.length > 0 && data.items[0].description) ? data.items.map((item, index) => (
+                        {data.items.map((item, index) => (
                             <tr key={index} className="border-b border-neutral-200">
                                 <td className="p-2 align-top">{item.description}</td>
                                 <td className="p-2 text-center align-top">{item.quantity} {item.unit}</td>
                                 <td className="p-2 text-right align-top">{formatCurrency(item.unitPrice)}</td>
-                                <td className="p-2 text-right align-top">{formatCurrency((item.quantity * item.unitPrice) - (item.discount || 0))}</td>
+                                <td className="p-2 text-right align-top">{formatCurrency(item.itemTotal)}</td>
                             </tr>
-                        )) : (
-                             <tr><td colSpan={4} className="p-8 text-center text-neutral-400">Nenhum item adicionado.</td></tr>
-                        )}
+                        ))}
                     </tbody>
                 </table>
             </section>
@@ -372,30 +292,29 @@ const BudgetPreviewForPdf = ({ data, subtotal, total }: BudgetPreviewProps) => {
                  <div className="text-right w-full max-w-xs">
                     <div className="flex justify-between py-1">
                         <span className="text-neutral-600">Subtotal:</span>
-                        <span>{formatCurrency(subtotal)}</span>
+                        <span className={data.generalDiscountValue > 0 ? 'line-through' : ''}>{formatCurrency(data.subtotal)}</span>
                     </div>
-                     {data.generalDiscount && data.generalDiscount > 0 && (
+                     {data.generalDiscountValue > 0 && (
                          <div className="flex justify-between py-1">
-                            <span className="text-neutral-600">Desconto Geral:</span>
-                            <span>-{formatCurrency(data.generalDiscount)}</span>
+                            <span className="text-neutral-600">Desconto Geral ({data.generalDiscountPercentage.toFixed(2)}%):</span>
+                            <span className="text-green-600">-{formatCurrency(data.generalDiscountValue)}</span>
                         </div>
                     )}
                     <div className="border-t border-neutral-300 my-2"></div>
                     <div className="flex justify-between text-2xl font-bold text-neutral-900 py-1">
                          <span >Total:</span>
-                         <span>{formatCurrency(total)}</span>
+                         <span>{formatCurrency(data.totalAmount)}</span>
                     </div>
                 </div>
             </section>
 
              <section className="my-8 text-sm no-break space-y-4">
-                { (data.commercialConditions || data.paymentConditions) && <h4 className="font-bold text-neutral-800">Termos e Condições:</h4> }
-                {data.commercialConditions && <p className="text-neutral-700"><span className="font-medium">Comerciais:</span> {data.commercialConditions}</p>}
+                { data.paymentConditions && <h4 className="font-bold text-neutral-800">Termos e Condições:</h4> }
                 {data.paymentConditions && <p className="text-neutral-700"><span className="font-medium">Pagamento:</span> {data.paymentConditions}</p>}
             </section>
             
             <footer className="absolute bottom-8 left-8 right-8 text-center text-xs text-neutral-500 border-t border-neutral-300 pt-4">
-                <p>Obrigado pela preferência! — {data.companyName || 'Sua Empresa'}</p>
+                <p>Obrigado pela preferência! — {data.companyName}</p>
             </footer>
         </div>
     );
@@ -410,37 +329,83 @@ export default function OrcaFastPage() {
         resolver: zodResolver(budgetSchema),
         defaultValues: {
             companyName: companyInfo.name,
-            companyInfo: '',
             logoUrl: companyInfo.logoUrl,
-            address: companyInfo.address,
-            email: companyInfo.email,
-            phone: companyInfo.phone,
-            cnpj: companyInfo.cnpj,
+            slogan: companyInfo.slogan,
             clientName: '',
             clientAddress: '',
             budgetNumber: 1,
             budgetDate: format(new Date(), 'dd/MM/yyyy'),
             items: [],
-            commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
             paymentConditions: '50% do valor será pago antes do início do serviço e o restante, após sua conclusão.',
             generalDiscount: 0,
+            generalDiscountType: 'fixed',
             observations: '',
+            isDroneFeatureEnabled: false
         },
     });
 
     useEffect(() => {
-        // Generate budget number only on client-side to avoid hydration mismatch
         form.setValue('budgetNumber', Math.floor(Math.random() * 1000) + 1);
     }, [form]);
 
-    const watchedItems = form.watch('items');
-    const generalDiscount = form.watch('generalDiscount') || 0;
+    const watchedForm = form.watch();
 
-    const subtotal = watchedItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.unitPrice || 0) - (item.discount || 0), 0);
-    const total = subtotal - generalDiscount;
+    const getPreviewData = (): BudgetPreviewData | null => {
+        if(!form.formState.isValid && form.formState.isSubmitted) return null;
+
+        const { items, generalDiscount = 0, generalDiscountType, ...rest } = watchedForm;
+
+        const itemsWithTotals: BudgetItemType[] = items.map(item => {
+            const total = (item.quantity || 0) * (item.unitPrice || 0);
+            let discountValue = item.discount || 0;
+            if (item.discountType === 'percentage') {
+                discountValue = total * (discountValue / 100);
+            }
+            return {
+                ...item,
+                itemTotal: total - discountValue,
+                itemDiscountValue: discountValue,
+            };
+        });
+
+        const subtotal = itemsWithTotals.reduce((acc, item) => acc + item.itemTotal, 0);
+        
+        let generalDiscountValue = generalDiscount;
+        let generalDiscountPercentage = 0;
+
+        if(generalDiscountType === 'percentage') {
+            generalDiscountValue = subtotal * (generalDiscount / 100);
+            generalDiscountPercentage = generalDiscount;
+        } else if (subtotal > 0) {
+            generalDiscountPercentage = (generalDiscountValue / subtotal) * 100;
+        }
+        
+        const totalAmount = subtotal - generalDiscountValue;
+
+        return {
+            ...rest,
+            items: itemsWithTotals,
+            subtotal,
+            generalDiscountValue,
+            generalDiscountPercentage,
+            totalAmount,
+            budgetNumber: String(rest.budgetNumber).padStart(4, '0')
+        }
+    }
     
+    const previewData = getPreviewData();
 
-    const onGeneratePdf = async (data: BudgetFormValues) => {
+    const onGeneratePdf = async () => {
+        const data = getPreviewData();
+        if (!data) {
+            toast({
+                title: "Formulário Inválido",
+                description: "Por favor, preencha todos os campos obrigatórios.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         setIsGeneratingPdf(true);
         toast({
             title: "Gerando PDF...",
@@ -455,16 +420,16 @@ export default function OrcaFastPage() {
             document.body.appendChild(previewContainer);
 
             const reactDom = (await import('react-dom'));
-            const previewElement = <BudgetPreviewForPdf data={data} subtotal={subtotal} total={total} />;
+            const previewElement = <BudgetPreviewForPdf data={data} />;
             
             const root = reactDom.createRoot(previewContainer);
             root.render(previewElement);
             
-            await new Promise(resolve => setTimeout(resolve, 500)); // Allow time for images to load
+            await new Promise(resolve => setTimeout(resolve, 500)); 
 
             const opt = {
                 margin: [0, 0, 0, 0],
-                filename: `orcamento_${String(data.budgetNumber).padStart(4, '0')}_${data.clientName.replace(/\s/g, '_')}.pdf`,
+                filename: `orcamento_${data.budgetNumber}_${data.clientName.replace(/\s/g, '_')}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff' },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -492,8 +457,6 @@ export default function OrcaFastPage() {
         }
     };
     
-    const currentFormData = form.watch();
-
     return (
         <main className="container mx-auto p-4 lg:p-8 font-sans">
             <AppHeader />
@@ -503,12 +466,12 @@ export default function OrcaFastPage() {
                     <BudgetForm form={form} onGeneratePdf={onGeneratePdf} isGeneratingPdf={isGeneratingPdf} />
                 </div>
                 <div className="lg:col-span-2">
-                     <div className="sticky top-8 space-y-4">
-                         <Button className="w-full" size="lg" onClick={form.handleSubmit(onGeneratePdf)} disabled={isGeneratingPdf}>
+                    <div className="sticky top-8 space-y-4">
+                        <Button className="w-full" size="lg" onClick={onGeneratePdf} disabled={isGeneratingPdf}>
                             <Download className="mr-2 h-4 w-4" /> 
                             {isGeneratingPdf ? 'Baixando...' : 'Baixar Orçamento'}
                         </Button>
-                       <BudgetPreview data={currentFormData} subtotal={subtotal} total={total} />
+                       <BudgetPreview data={previewData} />
                     </div>
                 </div>
             </div>
