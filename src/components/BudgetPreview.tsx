@@ -69,28 +69,34 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                 {/* Items Table */}
                 <section className="my-6">
                     <h3 className="font-bold text-neutral-200 mb-2">Itens do Orçamento:</h3>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-1/2 text-white">Descrição</TableHead>
-                                <TableHead className="text-center text-white">Qtde.</TableHead>
-                                <TableHead className="text-right text-white">Preço Unit.</TableHead>
-                                <TableHead className="text-right text-white">Total Item</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {items.map((item, index) => (
-                                <TableRow key={index}>
-                                    <TableCell className="align-top">
-                                        {item.description}
-                                    </TableCell>
-                                    <TableCell className="text-center align-top">{item.quantity} {item.unit}</TableCell>
-                                    <TableCell className="text-right align-top">{formatCurrency(item.unitPrice)}</TableCell>
-                                    <TableCell className="text-right align-top">{formatCurrency(item.itemTotal)}</TableCell>
+                    {items && items.length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-1/2 text-white">Descrição</TableHead>
+                                    <TableHead className="text-center text-white">Qtde.</TableHead>
+                                    <TableHead className="text-right text-white">Preço Unit.</TableHead>
+                                    <TableHead className="text-right text-white">Total Item</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {items.map((item, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell className="align-top">
+                                            {item.description}
+                                        </TableCell>
+                                        <TableCell className="text-center align-top">{item.quantity} {item.unit}</TableCell>
+                                        <TableCell className="text-right align-top">{formatCurrency(item.unitPrice)}</TableCell>
+                                        <TableCell className="text-right align-top">{formatCurrency(item.itemTotal)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                        <div className="text-center py-8 text-neutral-400">
+                            <p>Nenhum item adicionado ainda.</p>
+                        </div>
+                    )}
                 </section>
 
                 {/* Totals */}

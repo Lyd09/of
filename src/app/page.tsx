@@ -252,7 +252,7 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
     return (
         <div className="bg-white text-black p-10" style={{width: '210mm', minHeight: '297mm', fontFamily: 'sans-serif', position: 'relative'}}>
             {/* Header */}
-            <header className="flex justify-between items-start pb-4 mb-4 border-b border-neutral-300">
+            <header className="flex justify-between items-start pb-4 mb-4 border-b border-neutral-300 no-break">
                 <div className="flex items-center gap-4">
                     {data.logoUrl && <Image src={data.logoUrl} alt="Logo da Empresa" width={60} height={60} />}
                      <div>
@@ -268,13 +268,13 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
             </header>
 
             {/* Client */}
-            <section className="my-8 pb-4 border-b border-neutral-300">
+            <section className="my-8 pb-4 border-b border-neutral-300 no-break">
                 <h3 className="text-neutral-500 mb-1">Cliente:</h3>
                 <p className="font-bold text-lg text-neutral-900">{data.clientName}</p>
             </section>
             
             {/* Items */}
-            <section className="my-8">
+            <section className="my-8 no-break">
                 <h3 className="font-bold text-neutral-800 mb-4">Itens do Orçamento:</h3>
                 <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
                     <thead>
@@ -305,23 +305,23 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
                         <span className="text-neutral-600">Subtotal:</span>
                         <span>{formatCurrency(data.subtotal)}</span>
                     </div>
-                    <div className="border-t border-neutral-300 my-2"></div>
                     <div className="flex justify-between text-3xl font-bold text-neutral-900 py-1">
                          <span >Total:</span>
                          <span>{formatCurrency(data.totalAmount)}</span>
                     </div>
+                     <div className="border-t border-neutral-300 my-2"></div>
                 </div>
             </section>
 
             {/* Terms */}
             <section className="my-8 text-sm no-break space-y-4">
-                { (data.commercialConditions || data.paymentConditions) && <h4 className="font-bold text-neutral-800 text-xl mb-4">Termos e Condições:</h4> }
+                { (data.commercialConditions || data.paymentConditions) && <h4 className="font-bold text-neutral-800 text-xl mb-4 text-center">Termos e Condições:</h4> }
                 {data.commercialConditions && <p className="text-neutral-700"><span className="font-medium">Condições Comerciais:</span> {data.commercialConditions}</p>}
                 {data.paymentConditions && <p className="text-neutral-700"><span className="font-medium">Condições de Pagamento:</span> {data.paymentConditions}</p>}
             </section>
             
             {/* Footer */}
-            <footer className="absolute bottom-8 left-8 right-8 text-center text-xs text-neutral-500 border-t border-neutral-300 pt-4">
+            <footer className="absolute bottom-8 left-8 right-8 text-center text-xs text-neutral-500 border-t border-neutral-300 pt-4 no-break">
                 <p>Obrigado pela preferência! — {data.companyName}</p>
             </footer>
         </div>
@@ -404,10 +404,10 @@ export default function OrcaFastPage() {
 
     const onGeneratePdf = async () => {
         const result = budgetSchema.safeParse(form.getValues());
-        if (!result.success) {
-            toast({
+        if (!result.success && result.error.flatten().fieldErrors.items) {
+             toast({
                 title: "Formulário Inválido",
-                description: "Por favor, preencha todos os campos obrigatórios.",
+                description: "É preciso adicionar ao menos um item ao orçamento.",
                 variant: "destructive",
             });
             console.log(result.error.flatten().fieldErrors)
