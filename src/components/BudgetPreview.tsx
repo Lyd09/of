@@ -13,7 +13,7 @@ const formatCurrency = (value: number) => {
 };
 
 export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
-    if (!data) {
+    if (!data || !data.clientName) {
         return (
             <Card className="sticky top-8 bg-[#18191b] text-[#e0e0e0] border-border shadow-lg">
                 <CardContent className="p-8 flex flex-col items-center justify-center min-h-[60vh]">
@@ -42,7 +42,7 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
         commercialConditions,
     } = data;
 
-    const originalSubtotal = subtotal + generalDiscountValue;
+    const originalSubtotal = subtotal + (generalDiscountValue || 0);
 
     return (
         <Card className="sticky top-8 bg-[#18191b] text-[#e0e0e0] border-border shadow-lg font-sans">
@@ -114,17 +114,17 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                         
                         <div className="flex justify-between py-1 text-lg">
                            <span className="text-neutral-400">Subtotal:</span>
-                            {generalDiscountValue > 0 ? (
+                            {(generalDiscountValue || 0) > 0 ? (
                                 <span className="line-through text-neutral-500">{formatCurrency(originalSubtotal)}</span>
                             ) : (
                                 <span>{formatCurrency(subtotal)}</span>
                             )}
                         </div>
 
-                        {generalDiscountValue > 0 && (
+                        {(generalDiscountValue || 0) > 0 && (
                             <div className="flex justify-between py-1 text-lg text-green-400">
                                 <span>Desconto Geral ({generalDiscountPercentage.toFixed(2)}%):</span>
-                                <span>-{formatCurrency(generalDiscountValue)}</span>
+                                <span>-{formatCurrency(generalDiscountValue || 0)}</span>
                             </div>
                         )}
                         

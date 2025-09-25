@@ -177,41 +177,44 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Itens do Orçamento</h3>
                                 <div className="space-y-4">
-                                    <div className="hidden md:grid grid-cols-[4fr,150px,80px,80px,100px,140px,100px,40px] gap-3 items-center font-bold text-muted-foreground text-sm px-2">
-                                        <Label>Descrição</Label>
-                                        <Label>Aplicar Preset</Label>
-                                        <Label>Unid.</Label>
-                                        <Label>Qtd.</Label>
-                                        <Label>Preço Unit.</Label>
-                                        <Label>Desconto</Label>
-                                        <Label>Subtotal</Label>
-                                        <Label></Label>
+                                    <div className="hidden md:grid grid-cols-12 gap-2 font-bold text-muted-foreground text-sm px-2">
+                                        <Label className="md:col-span-3">Descrição</Label>
+                                        <Label className="md:col-span-2">Aplicar Preset</Label>
+                                        <Label className="md:col-span-1">Qtd.</Label>
+                                        <Label className="md:col-span-2">Preço Unit.</Label>
+                                        <Label className="md:col-span-3">Desconto</Label>
+                                        <Label className="md:col-span-1"></Label>
                                     </div>
                                     {fields.map((field, index) => (
-                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-[4fr,150px,80px,80px,100px,140px,100px,40px] gap-2 items-start pb-4 border-b border-border/50">
-                                            <FormField control={form.control} name={`items.${index}.description`} render={({ field }) => ( <FormItem> <FormControl><Textarea placeholder="Descrição do item" {...field} className="min-h-[40px] bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
-                                            
-                                            <FormItem>
-                                                <Select onValueChange={(value) => handleApplyPreset(index, value)}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Selecione" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        {presets.map(preset => (
-                                                            <SelectItem key={preset.id} value={preset.id}>
-                                                                {preset.description}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormItem>
-
-                                            <FormField control={form.control} name={`items.${index}.unit`} render={({ field }) => ( <FormItem> <FormControl><Input placeholder="Un" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
-                                            <FormField control={form.control} name={`items.${index}.quantity`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="1" placeholder="1" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
-                                            <FormField control={form.control} name={`items.${index}.unitPrice`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="0.01" placeholder="R$ 0,00" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
-                                            <div className="flex gap-1">
+                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 p-3 border border-border rounded-md mb-3 bg-card/50">
+                                            <div className="md:col-span-3">
+                                                <FormField control={form.control} name={`items.${index}.description`} render={({ field }) => ( <FormItem> <FormControl><Textarea placeholder="Descrição do item" {...field} className="min-h-[40px] bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <FormItem>
+                                                    <Select onValueChange={(value) => handleApplyPreset(index, value)}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Selecione" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {presets.map(preset => (
+                                                                <SelectItem key={preset.id} value={preset.id}>
+                                                                    {preset.description}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormItem>
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <FormField control={form.control} name={`items.${index}.quantity`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="1" placeholder="1" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <FormField control={form.control} name={`items.${index}.unitPrice`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="0.01" placeholder="R$ 0,00" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
+                                            </div>
+                                            <div className="md:col-span-3 flex gap-2">
                                                 <FormField control={form.control} name={`items.${index}.discount`} render={({ field }) => ( <FormItem className="flex-grow"> <FormControl><Input type="number" step="0.01" placeholder="0" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                                 <FormField control={form.control} name={`items.${index}.discountType`} render={({ field }) => (
                                                     <FormItem>
@@ -224,8 +227,11 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                                     </FormItem>
                                                 )} />
                                             </div>
-                                            <div className="flex items-center h-10 text-sm">{formatCurrency(calculateItemSubtotal(watchedItems[index]))}</div>
-                                            <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
+                                            <div className="md:col-span-1 flex items-center justify-end md:justify-center">
+                                                {fields.length > 1 && (
+                                                    <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -240,7 +246,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                              <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Termos e Condições</h3>
                                 <FormField control={form.control} name="commercialConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições Comerciais</FormLabel> <FormControl><Textarea placeholder="Ex: Forma de Pagamento: Transferência bancária, boleto ou PIX." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                                <FormField control={form.control} name="paymentConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições de Pagamento</FormLabel> <FormControl><Textarea placeholder="Ex: 1º Item - Pagamento único | 2º Item - Pagamento Mensal | 3º Item - Pagamento Mensal" {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                                <FormField control={form.control} name="paymentConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições de Pagamento</FormLabel> <FormControl><Textarea placeholder="Ex: 50% do valor será pago antes do início do serviço e o restante, após sua conclusão." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                             </div>
 
                              <hr className="border-border" />
@@ -405,6 +411,9 @@ export default function OrcaFastPage() {
         if (typeof window !== 'undefined' && form.getValues('budgetNumber') === 0) {
             form.setValue('budgetNumber', Math.floor(Math.random() * 1000) + 1);
         }
+        if (form.getValues('items').length === 0) {
+            form.setValue('items', [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed' }]);
+        }
     }, [form]);
 
     const watchedForm = form.watch();
@@ -412,9 +421,11 @@ export default function OrcaFastPage() {
     const getPreviewData = (): BudgetPreviewData | null => {
         const { items, generalDiscount = 0, generalDiscountType, budgetNumber, clientName, ...rest } = watchedForm;
 
-        if (!clientName) return null;
+        // if (!clientName) return null;
 
-        const itemsWithTotals: BudgetItemType[] = items.map(item => {
+        const validItems = items.filter(item => item.description || item.quantity > 0 || item.unitPrice > 0);
+
+        const itemsWithTotals: BudgetItemType[] = validItems.map(item => {
             const total = (item.quantity || 0) * (item.unitPrice || 0);
             let discountValue = item.discount || 0;
             if (item.discountType === 'percentage') {
@@ -556,5 +567,3 @@ export default function OrcaFastPage() {
         </main>
     );
 }
-
-    
