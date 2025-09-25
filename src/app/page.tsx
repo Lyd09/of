@@ -281,7 +281,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                         </CardContent>
                         <CardFooter className="flex-col items-start gap-4">
                              <div className="flex items-center justify-between w-full">
-                                <Button type="button" variant="ghost" onClick={fillWithTestData}>
+                                <Button type="button" variant="outline" onClick={fillWithTestData}>
                                     <Pencil className="mr-2 h-4 w-4" /> Preencher Teste
                                 </Button>
                                 <Button type="submit" size="lg" disabled={isGeneratingPdf} className="font-sans">
@@ -572,6 +572,8 @@ export default function OrcaFastPage() {
         </main>
     );
 }
+
+    
 
     
 
