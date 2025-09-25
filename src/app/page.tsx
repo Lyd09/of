@@ -64,12 +64,20 @@ export type CompanyInfo = {
   name: string;
   logoUrl: string;
   slogan: string;
+  address: string;
+  email: string;
+  phone: string;
+  cnpj: string;
 }
 
 export const companyInfo: CompanyInfo = {
   name: "FastFilms",
   logoUrl: "https://raw.githubusercontent.com/Lyd09/FF/587b5eb4cf0fc07885618620dc1f18e8d6e0aef4/LOGO%20SVG.svg",
-  slogan: "cada momento merece um bom take!"
+  slogan: "cada momento merece um bom take!",
+  address: "Rua Bartolomeu Bueno de Gusmao, 594 - Aeronautas, Lagoa Santa - MG, 33.236- 454",
+  email: "fastfilmsoficial@gmail.com",
+  phone: "(11) 98765-4321",
+  cnpj: "53.525.841/0001-89",
 };
 
 const formatCurrency = (value: number) => {
@@ -177,7 +185,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Itens do Orçamento</h3>
                                 <div className="space-y-4">
-                                    <div className="hidden md:grid grid-cols-[1fr,150px,80px,80px,100px,140px,100px,40px] gap-3 items-center font-bold text-muted-foreground text-sm px-2">
+                                    <div className="hidden md:grid grid-cols-[2fr,150px,80px,80px,100px,140px,100px,40px] gap-3 items-center font-bold text-muted-foreground text-sm px-2">
                                         <Label>Descrição</Label>
                                         <Label>Aplicar Preset</Label>
                                         <Label>Unid.</Label>
@@ -188,7 +196,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                         <Label></Label>
                                     </div>
                                     {fields.map((field, index) => (
-                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-[1fr,150px,80px,80px,100px,140px,100px,40px] gap-2 items-start pb-4 border-b border-border/50">
+                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-[2fr,150px,80px,80px,100px,140px,100px,40px] gap-2 items-start pb-4 border-b border-border/50">
                                             <FormField control={form.control} name={`items.${index}.description`} render={({ field }) => ( <FormItem> <FormControl><Textarea placeholder="Descrição do item" {...field} className="min-h-[40px] bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                             
                                             <FormItem>
@@ -402,15 +410,15 @@ export default function OrcaFastPage() {
 
     useEffect(() => {
         // Only run on client
-        form.setValue('budgetNumber', Math.floor(Math.random() * 1000) + 1);
+        if (form.getValues('budgetNumber') === 0) {
+            form.setValue('budgetNumber', Math.floor(Math.random() * 1000) + 1);
+        }
     }, [form]);
 
     const watchedForm = form.watch();
 
     const getPreviewData = (): BudgetPreviewData | null => {
         const { items, generalDiscount = 0, generalDiscountType, budgetNumber, ...rest } = watchedForm;
-
-        if (!rest.clientName) return null;
 
         const itemsWithTotals: BudgetItemType[] = items.map(item => {
             const total = (item.quantity || 0) * (item.unitPrice || 0);
@@ -430,10 +438,10 @@ export default function OrcaFastPage() {
         let generalDiscountValue = generalDiscount;
         let generalDiscountPercentage = 0;
 
-        if(generalDiscountType === 'percentage') {
+        if(generalDiscountType === 'percentage' && generalDiscount > 0) {
             generalDiscountValue = subtotal * (generalDiscount / 100);
             generalDiscountPercentage = generalDiscount;
-        } else if (subtotal > 0) {
+        } else if (subtotal > 0 && generalDiscount > 0) {
             generalDiscountPercentage = (generalDiscountValue / subtotal) * 100;
         }
         

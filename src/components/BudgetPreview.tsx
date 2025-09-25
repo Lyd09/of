@@ -13,7 +13,7 @@ const formatCurrency = (value: number) => {
 };
 
 export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
-    if (!data || !data.clientName) {
+    if (!data) {
         return (
             <Card className="sticky top-8 bg-[#18191b] text-[#e0e0e0] border-border shadow-lg">
                 <CardContent className="p-8 flex flex-col items-center justify-center min-h-[60vh]">
@@ -59,7 +59,7 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                     <div className="text-right">
                         <h1 className="text-3xl font-bold text-white">ORÇAMENTO</h1>
                         {isDroneFeatureEnabled && <p className="text-sm text-drone-active">(com Drone)</p>}
-                        <p className="text-neutral-400">Nº: <span className="font-semibold">{budgetNumber === "0000" ? 'PREVIEW' : budgetNumber}</span></p>
+                        <p className="text-neutral-400">Nº: <span className="font-semibold">{clientName ? budgetNumber : 'PREVIEW'}</span></p>
                         <p className="text-neutral-400">Data: {budgetDate}</p>
                     </div>
                 </header>
@@ -67,7 +67,7 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                 {/* Client Info */}
                 <section className="mb-6 pb-4 border-b border-border/50">
                      <h3 className="text-neutral-400 mb-1">Cliente:</h3>
-                     <p className="font-bold text-lg text-white">{clientName}</p>
+                     <p className="font-bold text-lg text-white">{clientName || "Nome do Cliente"}</p>
                 </section>
 
                 {/* Items Table */}
