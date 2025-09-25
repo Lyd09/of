@@ -225,7 +225,7 @@ const BudgetPreview = ({ data, subtotal, total }: BudgetPreviewProps) => {
                     )}
                     <div>
                         <h2 className="text-xl font-bold text-neutral-100">{data.companyName}</h2>
-                        <p className="text-xs text-neutral-400">{data.cnpj}</p>
+                        <p className="text-xs text-neutral-400">Cada momento merece um bom take!</p>
                     </div>
                 </div>
                 <div className="text-right">
@@ -237,10 +237,7 @@ const BudgetPreview = ({ data, subtotal, total }: BudgetPreviewProps) => {
 
             <section className="grid grid-cols-2 gap-8 my-8">
                  <div>
-                    <h3 className="font-bold text-neutral-200 mb-2">Empresa:</h3>
-                    <p className="text-sm text-neutral-400">{data.address}</p>
-                    <p className="text-sm text-neutral-400">{data.email}</p>
-                    <p className="text-sm text-neutral-400">{data.phone}</p>
+                    {/* Empty div for layout balance */}
                 </div>
                 <div>
                     <h3 className="font-bold text-neutral-200 mb-2">Cliente:</h3>
@@ -324,7 +321,7 @@ const BudgetPreviewForPdf = ({ data, subtotal, total }: BudgetPreviewProps) => {
                     )}
                      <div>
                         <h2 className="text-xl font-bold text-neutral-900">{data.companyName}</h2>
-                        <p className="text-xs text-neutral-600">{data.cnpj}</p>
+                        <p className="text-xs text-neutral-600">Cada momento merece um bom take!</p>
                     </div>
                 </div>
                 <div className="text-right">
@@ -336,10 +333,7 @@ const BudgetPreviewForPdf = ({ data, subtotal, total }: BudgetPreviewProps) => {
 
             <section className="grid grid-cols-2 gap-8 my-8">
                  <div>
-                    <h3 className="font-bold text-neutral-800 mb-2">Empresa:</h3>
-                    <p className="text-sm text-neutral-700">{data.address}</p>
-                    <p className="text-sm text-neutral-700">{data.email}</p>
-                    <p className="text-sm text-neutral-700">{data.phone}</p>
+                    {/* Empty div for layout balance */}
                 </div>
                 <div>
                     <h3 className="font-bold text-neutral-800 mb-2">Cliente:</h3>
