@@ -56,7 +56,6 @@ const budgetSchema = z.object({
     paymentConditions: z.string().optional(),
     generalDiscount: z.coerce.number().optional(),
     generalDiscountType: z.enum(['percentage', 'fixed']).default('fixed'),
-    observations: z.string().optional(),
     isDroneFeatureEnabled: z.boolean().default(false),
 });
 
@@ -131,7 +130,6 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
             commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
             generalDiscount: 0,
             generalDiscountType: 'fixed',
-            observations: 'Orçamento válido por 15 dias. Prazos de entrega a combinar.'
         });
     }
 
@@ -270,14 +268,6 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                 )} />
                                 </div>
                             </div>
-
-                            <hr className="border-border" />
-
-                            {/* Observations */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-medium text-primary">Observações</h3>
-                                <FormField control={form.control} name="observations" render={({ field }) => ( <FormItem> <FormControl><Textarea placeholder="Qualquer outra informação relevante..." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                            </div>
                         </CardContent>
                         <CardFooter className="flex-col items-start gap-4">
                              <div className="flex items-center justify-between w-full">
@@ -403,7 +393,6 @@ export default function OrcaFastPage() {
             paymentConditions: '50% do valor será pago antes do início do serviço e o restante, após sua conclusão.',
             generalDiscount: 0,
             generalDiscountType: 'fixed',
-            observations: '',
             isDroneFeatureEnabled: false
         },
     });
@@ -572,6 +561,8 @@ export default function OrcaFastPage() {
         </main>
     );
 }
+
+    
 
     
 
