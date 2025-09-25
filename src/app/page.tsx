@@ -23,7 +23,8 @@ import {
     MapPin,
     Send,
     Pencil,
-    Edit3
+    Edit3,
+    Airplay
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from 'next/image';
@@ -145,8 +146,8 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                 Criar Novo Orçamento
                             </CardTitle>
                              <div className="flex gap-2">
-                                <Button type="button" variant="outline" onClick={() => form.setValue('isDroneFeatureEnabled', !form.getValues('isDroneFeatureEnabled'))}>
-                                    Ativar/Desativar Drone
+                                <Button type="button" variant="outline" size="icon" onClick={() => form.setValue('isDroneFeatureEnabled', !form.getValues('isDroneFeatureEnabled'))}>
+                                    <Airplay className="h-4 w-4" />
                                 </Button>
                                 <Button type="button" variant="outline" onClick={() => setIsPresetManagerOpen(true)}>
                                     <Settings2 size={16} /> Gerenciar Presets
@@ -462,7 +463,7 @@ export default function OrcaFastPage() {
             subtotal,
             generalDiscountType,
             generalDiscountValue,
-            generalDiscountPercentage,
+            generalDiscountPercentage: Number(generalDiscountPercentage || 0),
             totalAmount,
             budgetNumber: String(budgetNumber).padStart(4, '0')
         }
@@ -571,5 +572,7 @@ export default function OrcaFastPage() {
         </main>
     );
 }
+
+    
 
     
