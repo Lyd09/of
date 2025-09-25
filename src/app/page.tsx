@@ -160,8 +160,13 @@ export default function OrcaFastPage() {
     );
 }
 
+type BudgetPreviewProps = BudgetFormValues & {
+  total: number,
+  totalInWords: string
+};
+
 // Using a separate component for the preview helps with organization
-const BudgetPreview = (props: BudgetFormValues &amp; {total: number, totalInWords: string}) => {
+const BudgetPreview = (props: BudgetPreviewProps) => {
     return (
         <div id="budget-preview" className="bg-white text-black p-8" style={{width: '210mm', minHeight: '297mm', fontFamily: 'serif', position: 'relative'}}>
             <header className="flex justify-between items-start pb-4 border-b-2 border-neutral-700">
@@ -220,9 +225,9 @@ const BudgetPreview = (props: BudgetFormValues &amp; {total: number, totalInWord
             </section>
 
             <section className="my-8 text-sm no-break">
-                {props.paymentConditions &amp;&amp; <div><h4 className="font-bold">Condições de Pagamento:</h4><p className="text-neutral-700">{props.paymentConditions}</p></div>}
-                {props.validity &amp;&amp; <div className="mt-2"><h4 className="font-bold">Validade da Proposta:</h4><p className="text-neutral-700">{props.validity}</p></div>}
-                {props.observations &amp;&amp; <div className="mt-4"><h4 className="font-bold">Observações:</h4><pre className="text-neutral-700 whitespace-pre-wrap bg-neutral-50 p-2 border rounded font-sans">{props.observations}</pre></div>}
+                {props.paymentConditions && <div><h4 className="font-bold">Condições de Pagamento:</h4><p className="text-neutral-700">{props.paymentConditions}</p></div>}
+                {props.validity && <div className="mt-2"><h4 className="font-bold">Validade da Proposta:</h4><p className="text-neutral-700">{props.validity}</p></div>}
+                {props.observations && <div className="mt-4"><h4 className="font-bold">Observações:</h4><pre className="text-neutral-700 whitespace-pre-wrap bg-neutral-50 p-2 border rounded font-sans">{props.observations}</pre></div>}
             </section>
             
             <footer className="absolute bottom-8 left-8 right-8 text-center text-xs text-neutral-500 border-t pt-4">
