@@ -177,7 +177,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Itens do Orçamento</h3>
                                 <div className="space-y-4">
-                                    <div className="hidden md:grid grid-cols-[3fr,150px,80px,80px,100px,140px,100px,40px] gap-3 items-center font-bold text-muted-foreground text-sm px-2">
+                                    <div className="hidden md:grid grid-cols-[4fr,150px,80px,80px,100px,140px,100px,40px] gap-3 items-center font-bold text-muted-foreground text-sm px-2">
                                         <Label>Descrição</Label>
                                         <Label>Aplicar Preset</Label>
                                         <Label>Unid.</Label>
@@ -188,7 +188,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                         <Label></Label>
                                     </div>
                                     {fields.map((field, index) => (
-                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-[3fr,150px,80px,80px,100px,140px,100px,40px] gap-2 items-start pb-4 border-b border-border/50">
+                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-[4fr,150px,80px,80px,100px,140px,100px,40px] gap-2 items-start pb-4 border-b border-border/50">
                                             <FormField control={form.control} name={`items.${index}.description`} render={({ field }) => ( <FormItem> <FormControl><Textarea placeholder="Descrição do item" {...field} className="min-h-[40px] bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                             
                                             <FormItem>
