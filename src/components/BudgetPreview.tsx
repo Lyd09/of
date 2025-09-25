@@ -106,7 +106,7 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                             <span className="text-neutral-400">Subtotal:</span>
                             <span>{formatCurrency(subtotal)}</span>
                         </div>
-                        <Separator className="my-2 bg-border" />
+                        <Separator className="my-1 bg-border/50" />
                         <div className="flex justify-between text-3xl font-bold text-white py-1">
                             <span>Total:</span>
                             <span>{formatCurrency(totalAmount)}</span>

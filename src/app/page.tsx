@@ -105,7 +105,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                 { description: 'Gestão de Redes Sociais', unit: 'Un', quantity: 1, unitPrice: 3500, discount: 0, discountType: 'fixed' },
                 { description: 'Produção de Conteúdo', unit: 'Un', quantity: 1, unitPrice: 3700, discount: 0, discountType: 'fixed' },
             ],
-            paymentConditions: '1º Item - Pagamento único | 2º Item - Pagamento Mensal | 3º Item - Pagamento Mensal',
+            paymentConditions: '50% do valor será pago antes do início do serviço e o restante, após sua conclusão.',
             commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
             generalDiscount: 0,
             generalDiscountType: 'fixed',
@@ -250,7 +250,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
 
 const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
     return (
-        <div className="bg-[#18191b] text-[#e0e0e0] p-10 font-sans" style={{width: '210mm', minHeight: '297mm', position: 'relative'}}>
+        <div className="bg-[#18191b] text-[#e0e0e0] p-10 font-sans no-break" style={{width: '210mm', minHeight: '297mm', position: 'relative'}}>
             {/* Header */}
             <header className="flex justify-between items-start pb-4 mb-4 border-b border-neutral-700 no-break">
                 <div className="flex items-center gap-4">
@@ -305,6 +305,7 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
                         <span className="text-neutral-400">Subtotal:</span>
                         <span>{formatCurrency(data.subtotal)}</span>
                     </div>
+                     <hr className="border-neutral-700 my-1"/>
                     <div className="flex justify-between text-3xl font-bold text-white py-1">
                          <span >Total:</span>
                          <span>{formatCurrency(data.totalAmount)}</span>
@@ -346,7 +347,7 @@ export default function OrcaFastPage() {
             budgetDate: format(new Date(), 'dd/MM/yyyy'),
             items: [],
             commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
-            paymentConditions: '1º Item - Pagamento único | 2º Item - Pagamento Mensal | 3º Item - Pagamento Mensal',
+            paymentConditions: '50% do valor será pago antes do início do serviço e o restante, após sua conclusão.',
             generalDiscount: 0,
             generalDiscountType: 'fixed',
             observations: '',
@@ -496,4 +497,3 @@ export default function OrcaFastPage() {
 }
 
     
-
