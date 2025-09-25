@@ -561,9 +561,9 @@ export default function OrcaFastPage() {
                 </div>
                 <div className="lg:col-span-2">
                     <div className="sticky top-8 space-y-4">
-                        <Button className="w-full" size="lg" onClick={onGeneratePdf} disabled={isGeneratingPdf}>
-                            <Download className="mr-2 h-4 w-4" /> 
-                            {isGeneratingPdf ? 'Baixando...' : 'Baixar Orçamento'}
+                        <Button className="w-full" size="lg" onClick={() => { /* Placeholder for future contract functionality */ }}>
+                            <FileText className="mr-2 h-4 w-4" /> 
+                            Gerar Contrato
                         </Button>
                        <BudgetPreview data={previewData} />
                     </div>
@@ -572,6 +572,8 @@ export default function OrcaFastPage() {
         </main>
     );
 }
+
+    
 
     
 
