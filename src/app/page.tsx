@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
     Trash2,
     PlusCircle,
@@ -20,12 +21,16 @@ import {
     Settings2,
     MapPin,
     Send,
-    Pencil
+    Pencil,
+    Edit3
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from 'next/image';
 import { BudgetPreviewData, BudgetItem as BudgetItemType } from '@/types/budget';
 import { BudgetPreview } from '@/components/BudgetPreview';
+import { Preset, PresetManagerDialog } from '@/components/PresetManagerDialog';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import initialPresets from '@/data/presets.json';
 
 const budgetItemSchema = z.object({
     description: z.string().min(1, 'Descrição é obrigatória.'),
@@ -79,11 +84,14 @@ const AppHeader = () => (
 );
 
 const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGeneratePdf: (data: BudgetFormValues) => void, isGeneratingPdf: boolean }) => {
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, update } = useFieldArray({
         control: form.control,
         name: "items",
     });
     
+    const [presets, setPresets] = useLocalStorage<Preset[]>('orcafast-presets', initialPresets);
+    const [isPresetManagerOpen, setIsPresetManagerOpen] = useState(false);
+
     const watchedItems = form.watch('items');
 
     const calculateItemSubtotal = (item: any) => {
@@ -94,6 +102,18 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
         }
         return total - discountValue;
     }
+    
+    const handleApplyPreset = (index: number, presetId: string) => {
+        const preset = presets.find(p => p.id === presetId);
+        if (preset) {
+            const currentItem = form.getValues(`items.${index}`);
+            update(index, {
+                ...currentItem,
+                description: preset.description,
+                unitPrice: preset.unitPrice,
+            });
+        }
+    };
     
     const fillWithTestData = () => {
         form.reset({
@@ -127,7 +147,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                 <Button type="button" variant="outline" onClick={() => form.setValue('isDroneFeatureEnabled', !form.getValues('isDroneFeatureEnabled'))}>
                                     Ativar/Desativar Drone
                                 </Button>
-                                <Button type="button" variant="outline">
+                                <Button type="button" variant="outline" onClick={() => setIsPresetManagerOpen(true)}>
                                     <Settings2 size={16} /> Gerenciar Presets
                                 </Button>
                             </div>
@@ -157,17 +177,37 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Itens do Orçamento</h3>
                                 <div className="space-y-4">
-                                    <div className="hidden md:grid grid-cols-[1fr,80px,80px,100px,140px,100px,40px] gap-3 items-center font-bold text-muted-foreground text-sm px-2">
+                                    <div className="hidden md:grid grid-cols-[1fr,150px,80px,80px,100px,140px,100px,40px] gap-3 items-center font-bold text-muted-foreground text-sm px-2">
                                         <Label>Descrição</Label>
+                                        <Label>Aplicar Preset</Label>
                                         <Label>Unid.</Label>
                                         <Label>Qtd.</Label>
                                         <Label>Preço Unit.</Label>
                                         <Label>Desconto</Label>
                                         <Label>Subtotal</Label>
+                                        <Label></Label>
                                     </div>
                                     {fields.map((field, index) => (
-                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-[1fr,80px,80px,100px,140px,100px,40px] gap-2 items-start pb-4 border-b border-border/50">
+                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-[1fr,150px,80px,80px,100px,140px,100px,40px] gap-2 items-start pb-4 border-b border-border/50">
                                             <FormField control={form.control} name={`items.${index}.description`} render={({ field }) => ( <FormItem> <FormControl><Textarea placeholder="Descrição do item" {...field} className="min-h-[40px] bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
+                                            
+                                            <FormItem>
+                                                <Select onValueChange={(value) => handleApplyPreset(index, value)}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Selecione" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {presets.map(preset => (
+                                                            <SelectItem key={preset.id} value={preset.id}>
+                                                                {preset.description}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormItem>
+
                                             <FormField control={form.control} name={`items.${index}.unit`} render={({ field }) => ( <FormItem> <FormControl><Input placeholder="Un" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                             <FormField control={form.control} name={`items.${index}.quantity`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="1" placeholder="1" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                             <FormField control={form.control} name={`items.${index}.unitPrice`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="0.01" placeholder="R$ 0,00" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
@@ -244,6 +284,12 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                     </Card>
                 </form>
             </Form>
+             <PresetManagerDialog 
+                isOpen={isPresetManagerOpen}
+                onOpenChange={setIsPresetManagerOpen}
+                presets={presets}
+                setPresets={setPresets}
+            />
         </FormProvider>
     );
 }
@@ -314,10 +360,9 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
             </section>
             
              <hr className="border-neutral-700 my-8"/>
-
             {/* Terms */}
             <section className="my-8 text-sm no-break space-y-4">
-                { (data.commercialConditions || data.paymentConditions) && <h4 className="font-bold text-white text-xl mb-4 text-center">Termos e Condições:</h4> }
+                 <h4 className="font-bold text-white text-xl mb-4 text-center">Termos e Condições:</h4>
                 {data.commercialConditions && <p className="text-neutral-300"><span className="font-medium">Condições Comerciais:</span> {data.commercialConditions}</p>}
                 {data.paymentConditions && <p className="text-neutral-300"><span className="font-medium">Condições de Pagamento:</span> {data.paymentConditions}</p>}
             </section>
@@ -356,6 +401,7 @@ export default function OrcaFastPage() {
     });
 
     useEffect(() => {
+        // Only run on client
         form.setValue('budgetNumber', Math.floor(Math.random() * 1000) + 1);
     }, [form]);
 
@@ -408,10 +454,11 @@ export default function OrcaFastPage() {
 
     const onGeneratePdf = async () => {
         const result = budgetSchema.safeParse(form.getValues());
-        if (!result.success && result.error.flatten().fieldErrors.items) {
+        if (!result.success) {
+            const errorKeys = Object.keys(result.error.flatten().fieldErrors);
              toast({
                 title: "Formulário Inválido",
-                description: "É preciso adicionar ao menos um item ao orçamento.",
+                description: `Por favor, corrija os campos inválidos. (${errorKeys.join(', ')})`,
                 variant: "destructive",
             });
             console.log(result.error.flatten().fieldErrors)
@@ -429,19 +476,24 @@ export default function OrcaFastPage() {
 
         try {
             const html2pdf = (await import('html2pdf.js')).default;
+            
+            // Create a container for the PDF content that is not visible on screen.
             const previewContainer = document.createElement('div');
             previewContainer.style.position = 'fixed';
-            previewContainer.style.left = '-9999px';
+            previewContainer.style.left = '-9999px'; // Move it off-screen.
+            previewContainer.style.top = '0';
             document.body.appendChild(previewContainer);
 
             const reactDom = (await import('react-dom'));
             const previewElement = <BudgetPreviewForPdf data={data} />;
             
+            // Use createRoot to render the component into the off-screen container.
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             const root = reactDom.createRoot(previewContainer);
             root.render(previewElement);
             
+            // Give React time to render the component before generating the PDF.
             await new Promise(resolve => setTimeout(resolve, 500)); 
 
             const opt = {
@@ -451,9 +503,15 @@ export default function OrcaFastPage() {
                 html2canvas: { scale: 3, useCORS: true, backgroundColor: '#18191b' },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-
-            await html2pdf().from(previewContainer.firstChild).set(opt).save();
             
+            // Generate PDF from the first child of the container, which is our rendered component.
+            const pdfElement = previewContainer.firstChild;
+            if (pdfElement) {
+                 await html2pdf().from(pdfElement).set(opt).save();
+            }
+           
+            
+            // Clean up by unmounting the component and removing the container.
             root.unmount();
             document.body.removeChild(previewContainer);
 
@@ -495,5 +553,3 @@ export default function OrcaFastPage() {
         </main>
     );
 }
-
-    

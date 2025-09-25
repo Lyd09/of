@@ -1,0 +1,8 @@
+[
+  { "id": "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed", "description": "Produção de Vídeo", "unitPrice": 250.00 },
+  { "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479", "description": "Animação de logomarca", "unitPrice": 300.00 },
+  { "id": "6ec0bd7f-11c0-43da-975e-2a8ad9ebae0b", "description": "Fotos Profissionais", "unitPrice": 150.00 },
+  { "id": "9c8d71a2-8b4f-4c8b-8f47-5f8a2c1d7b0e", "description": "Edição de Vídeo", "unitPrice": 100.00 },
+  { "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef", "description": "Gravação (p/h)", "unitPrice": 150.00 },
+  { "id": "a7c8e2f0-1d9b-4f8e-b4c2-3d5a6b7c8d9e", "description": "Deslocamento", "unitPrice": 100.00 }
+]

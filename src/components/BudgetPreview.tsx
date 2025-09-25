@@ -35,10 +35,14 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
         clientName,
         items,
         subtotal,
+        generalDiscountValue,
+        generalDiscountPercentage,
         totalAmount,
         paymentConditions,
         commercialConditions,
     } = data;
+
+    const originalSubtotal = subtotal + generalDiscountValue;
 
     return (
         <Card className="sticky top-8 bg-[#18191b] text-[#e0e0e0] border-border shadow-lg font-sans">
@@ -84,6 +88,11 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                                     <TableRow key={index}>
                                         <TableCell className="align-top">
                                             {item.description}
+                                            {item.itemDiscountValue > 0 && (
+                                                <p className="text-xs text-green-400">
+                                                    (Desconto: {formatCurrency(item.itemDiscountValue)})
+                                                </p>
+                                            )}
                                         </TableCell>
                                         <TableCell className="text-center align-top">{item.quantity} {item.unit}</TableCell>
                                         <TableCell className="text-right align-top">{formatCurrency(item.unitPrice)}</TableCell>
@@ -98,15 +107,29 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                         </div>
                     )}
                 </section>
-
-                {/* Totals */}
+                
+                 {/* Totals */}
                 <section className="flex flex-col items-end my-6 space-y-2">
                     <div className="text-right w-full max-w-sm">
+                        
                         <div className="flex justify-between py-1 text-lg">
-                            <span className="text-neutral-400">Subtotal:</span>
-                            <span>{formatCurrency(subtotal)}</span>
+                           <span className="text-neutral-400">Subtotal:</span>
+                            {generalDiscountValue > 0 ? (
+                                <span className="line-through text-neutral-500">{formatCurrency(originalSubtotal)}</span>
+                            ) : (
+                                <span>{formatCurrency(subtotal)}</span>
+                            )}
                         </div>
+
+                        {generalDiscountValue > 0 && (
+                            <div className="flex justify-between py-1 text-lg text-green-400">
+                                <span>Desconto Geral ({generalDiscountPercentage.toFixed(2)}%):</span>
+                                <span>-{formatCurrency(generalDiscountValue)}</span>
+                            </div>
+                        )}
+                        
                         <Separator className="my-1 bg-border/50" />
+
                         <div className="flex justify-between text-3xl font-bold text-white py-1">
                             <span>Total:</span>
                             <span>{formatCurrency(totalAmount)}</span>
