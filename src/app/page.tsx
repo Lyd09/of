@@ -362,7 +362,7 @@ export default function OrcaFastPage() {
             companyInfo: 'cada momento merece um bom take!',
             clientName: '',
             clientAddress: '',
-            budgetNumber: Math.floor(Math.random() * 1000) + 1,
+            budgetNumber: 1,
             budgetDate: format(new Date(), 'dd/MM/yyyy'),
             items: [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0 }],
             commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
@@ -371,6 +371,10 @@ export default function OrcaFastPage() {
             observations: '',
         },
     });
+
+    useEffect(() => {
+        form.setValue('budgetNumber', Math.floor(Math.random() * 1000) + 1);
+    }, [form]);
 
     const watchedItems = form.watch('items');
     const generalDiscount = form.watch('generalDiscount') || 0;
