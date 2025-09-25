@@ -38,6 +38,10 @@ const budgetSchema = z.object({
     companyName: z.string().min(1, 'Nome da sua empresa é obrigatório.'),
     companyInfo: z.string().optional(),
     logoUrl: z.string().optional(),
+    address: z.string().optional(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    cnpj: z.string().optional(),
     clientName: z.string().min(1, 'Nome do cliente é obrigatório.'),
     clientAddress: z.string().optional(),
     budgetNumber: z.coerce.number().min(1, "Número do orçamento é obrigatório."),
@@ -53,14 +57,20 @@ export type BudgetFormValues = z.infer<typeof budgetSchema>;
 
 export type CompanyInfo = {
     name: string;
-    info: string;
     logoUrl: string;
+    address: string;
+    email: string;
+    phone: string;
+    cnpj: string;
 }
 
 export const companyInfo: CompanyInfo = {
   name: "FastFilms",
-  info: "cada momento merece um bom take!",
   logoUrl: "https://raw.githubusercontent.com/Lyd09/FF/587b5eb4cf0fc07885618620dc1f18e8d6e0aef4/LOGO%20SVG.svg",
+  address: "Rua Bartolomeu Bueno de Gusmao, 594 - Aeronautas, Lagoa Santa - MG, 33.236- 454",
+  email: "fastfilmsoficial@gmail.com",
+  phone: "(11) 98765-4321",
+  cnpj: "53.525.841/0001-89",
 };
 
 const formatCurrency = (value: number) => {
@@ -96,30 +106,17 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                 <FileText size={22} className="text-primary" />
                                 Criar Novo Orçamento
                             </CardTitle>
-                             <Button type="button" variant="outline">
-                                <Settings2 size={16} /> Gerenciar Presets
-                            </Button>
+                             <div className="flex gap-2">
+                                <Button type="button" variant="outline">
+                                    Ativar/Desativar Drone
+                                </Button>
+                                <Button type="button" variant="outline">
+                                    <Settings2 size={16} /> Gerenciar Presets
+                                </Button>
+                            </div>
                         </CardHeader>
                         <CardContent className="space-y-6 pt-6">
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                     <h3 className="text-lg font-medium text-primary flex items-center gap-2"><Building size={20}/> Dados da Sua Empresa</h3>
-                                     <FormField control={form.control} name="companyName" render={({ field }) => ( 
-                                        <FormItem> 
-                                            <FormLabel>Nome da Empresa</FormLabel> 
-                                            <FormControl><Input placeholder="Ex: Sua Empresa LTDA" {...field} /></FormControl> 
-                                            <FormMessage /> 
-                                        </FormItem> 
-                                    )} />
-                                     <FormField control={form.control} name="companyInfo" render={({ field }) => ( 
-                                        <FormItem> 
-                                            <FormLabel>Informações Adicionais (opcional)</FormLabel> 
-                                            <FormControl><Textarea placeholder="Ex: Slogan, Endereço, CNPJ" {...field} /></FormControl>
-                                            <FormMessage /> 
-                                        </FormItem> 
-                                    )} />
-                                </div>
-                                <div className="space-y-4">
+                           <div className="space-y-4">
                                      <h3 className="text-lg font-medium text-primary flex items-center gap-2"><User size={20}/>Dados do Cliente</h3>
                                     <FormField control={form.control} name="clientName" render={({ field }) => ( 
                                         <FormItem> 
@@ -136,7 +133,6 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                         </FormItem> 
                                     )} />
                                 </div>
-                            </div>
                             
                             <hr className="border-border" />
 
@@ -229,7 +225,7 @@ const BudgetPreview = ({ data, subtotal, total }: BudgetPreviewProps) => {
                     )}
                     <div>
                         <h2 className="text-xl font-bold text-neutral-100">{data.companyName}</h2>
-                        <p className="text-xs text-neutral-400">{data.companyInfo}</p>
+                        <p className="text-xs text-neutral-400">{data.cnpj}</p>
                     </div>
                 </div>
                 <div className="text-right">
@@ -239,10 +235,18 @@ const BudgetPreview = ({ data, subtotal, total }: BudgetPreviewProps) => {
                 </div>
             </header>
 
-            <section className="my-8">
-                <h3 className="font-bold text-neutral-200 mb-2">Cliente:</h3>
-                <p className="font-medium text-neutral-100">{data.clientName || 'Nome do Cliente'}</p>
-                <p className="text-sm text-neutral-400">{data.clientAddress || 'Endereço do cliente'}</p>
+            <section className="grid grid-cols-2 gap-8 my-8">
+                 <div>
+                    <h3 className="font-bold text-neutral-200 mb-2">Empresa:</h3>
+                    <p className="text-sm text-neutral-400">{data.address}</p>
+                    <p className="text-sm text-neutral-400">{data.email}</p>
+                    <p className="text-sm text-neutral-400">{data.phone}</p>
+                </div>
+                <div>
+                    <h3 className="font-bold text-neutral-200 mb-2">Cliente:</h3>
+                    <p className="font-medium text-neutral-100">{data.clientName || 'Nome do Cliente'}</p>
+                    <p className="text-sm text-neutral-400">{data.clientAddress || 'Endereço do cliente'}</p>
+                </div>
             </section>
 
              <section className="my-8">
@@ -320,7 +324,7 @@ const BudgetPreviewForPdf = ({ data, subtotal, total }: BudgetPreviewProps) => {
                     )}
                      <div>
                         <h2 className="text-xl font-bold text-neutral-900">{data.companyName}</h2>
-                        <p className="text-xs text-neutral-600">{data.companyInfo}</p>
+                        <p className="text-xs text-neutral-600">{data.cnpj}</p>
                     </div>
                 </div>
                 <div className="text-right">
@@ -330,10 +334,18 @@ const BudgetPreviewForPdf = ({ data, subtotal, total }: BudgetPreviewProps) => {
                 </div>
             </header>
 
-            <section className="my-8">
-                <h3 className="font-bold text-neutral-800 mb-2">Cliente:</h3>
-                <p className="font-medium text-neutral-900">{data.clientName || 'Nome do Cliente'}</p>
-                <p className="text-sm text-neutral-700">{data.clientAddress || 'Endereço do cliente'}</p>
+            <section className="grid grid-cols-2 gap-8 my-8">
+                 <div>
+                    <h3 className="font-bold text-neutral-800 mb-2">Empresa:</h3>
+                    <p className="text-sm text-neutral-700">{data.address}</p>
+                    <p className="text-sm text-neutral-700">{data.email}</p>
+                    <p className="text-sm text-neutral-700">{data.phone}</p>
+                </div>
+                <div>
+                    <h3 className="font-bold text-neutral-800 mb-2">Cliente:</h3>
+                    <p className="font-medium text-neutral-900">{data.clientName || 'Nome do Cliente'}</p>
+                    <p className="text-sm text-neutral-700">{data.clientAddress || 'Endereço do cliente'}</p>
+                </div>
             </section>
 
              <section className="my-8">
@@ -404,8 +416,12 @@ export default function OrcaFastPage() {
         resolver: zodResolver(budgetSchema),
         defaultValues: {
             companyName: companyInfo.name,
-            companyInfo: companyInfo.info,
+            companyInfo: '',
             logoUrl: companyInfo.logoUrl,
+            address: companyInfo.address,
+            email: companyInfo.email,
+            phone: companyInfo.phone,
+            cnpj: companyInfo.cnpj,
             clientName: '',
             clientAddress: '',
             budgetNumber: 1,
