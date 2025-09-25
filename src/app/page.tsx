@@ -69,7 +69,7 @@ export type CompanyInfo = {
 export const companyInfo: CompanyInfo = {
   name: "FastFilms",
   logoUrl: "https://raw.githubusercontent.com/Lyd09/FF/587b5eb4cf0fc07885618620dc1f18e8d6e0aef4/LOGO%20SVG.svg",
-  slogan: "cada momento merece um bom take!",
+  slogan: "Cada momento merece um bom take!",
 };
 
 const formatCurrency = (value: number) => {
@@ -421,14 +421,12 @@ export default function OrcaFastPage() {
     const getPreviewData = (): BudgetPreviewData | null => {
         const { items, generalDiscount = 0, generalDiscountType, budgetNumber, clientName, ...rest } = watchedForm;
 
-        // if (!clientName) return null;
-
         const validItems = items.filter(item => item.description || item.quantity > 0 || item.unitPrice > 0);
 
         const itemsWithTotals: BudgetItemType[] = validItems.map(item => {
             const total = (item.quantity || 0) * (item.unitPrice || 0);
             let discountValue = item.discount || 0;
-            if (item.discountType === 'percentage') {
+            if (item.discountType === 'percentage' && discountValue > 0) {
                 discountValue = total * (discountValue / 100);
             }
             return {

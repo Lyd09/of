@@ -13,7 +13,7 @@ const formatCurrency = (value: number) => {
 };
 
 export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
-    if (!data || !data.clientName) {
+    if (!data) {
         return (
             <Card className="sticky top-8 bg-[#18191b] text-[#e0e0e0] border-border shadow-lg">
                 <CardContent className="p-8 flex flex-col items-center justify-center min-h-[60vh]">
@@ -35,14 +35,28 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
         clientName,
         items,
         subtotal,
-        generalDiscountValue,
-        generalDiscountPercentage,
+        generalDiscountValue = 0,
+        generalDiscountPercentage = 0,
         totalAmount,
         paymentConditions,
         commercialConditions,
     } = data;
 
-    const originalSubtotal = subtotal + (generalDiscountValue || 0);
+    const hasItems = items && items.some(item => item.description);
+
+    if (!clientName && !hasItems) {
+        return (
+            <Card className="sticky top-8 bg-[#18191b] text-[#e0e0e0] border-border shadow-lg">
+                <CardContent className="p-8 flex flex-col items-center justify-center min-h-[60vh]">
+                    <FileText className="w-16 h-16 text-muted-foreground mb-4" />
+                    <h3 className="text-xl font-bold text-foreground">Orçamento</h3>
+                    <p className="text-muted-foreground text-center">Preencha o formulário para ver a pré-visualização.</p>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    const displaySubtotal = subtotal;
 
     return (
         <Card className="sticky top-8 bg-[#18191b] text-[#e0e0e0] border-border shadow-lg font-sans">
@@ -73,7 +87,7 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                 {/* Items Table */}
                 <section className="my-6">
                     <h3 className="font-bold text-neutral-200 mb-2">Itens do Orçamento:</h3>
-                    {items && items.length > 0 ? (
+                    {items && items.length > 0 && items.some(i => i.description) ? (
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -84,7 +98,7 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {items.map((item, index) => (
+                                {items.map((item, index) => item.description && (
                                     <TableRow key={index}>
                                         <TableCell className="align-top">
                                             {item.description}
@@ -114,17 +128,17 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                         
                         <div className="flex justify-between py-1 text-lg">
                            <span className="text-neutral-400">Subtotal:</span>
-                            {(generalDiscountValue || 0) > 0 ? (
-                                <span className="line-through text-neutral-500">{formatCurrency(originalSubtotal)}</span>
+                            {generalDiscountValue > 0 ? (
+                                <span className="line-through text-neutral-500">{formatCurrency(subtotal + generalDiscountValue)}</span>
                             ) : (
-                                <span>{formatCurrency(subtotal)}</span>
+                                <span>{formatCurrency(displaySubtotal)}</span>
                             )}
                         </div>
 
-                        {(generalDiscountValue || 0) > 0 && (
+                        {generalDiscountValue > 0 && (
                             <div className="flex justify-between py-1 text-lg text-green-400">
                                 <span>Desconto Geral ({generalDiscountPercentage.toFixed(2)}%):</span>
-                                <span>-{formatCurrency(generalDiscountValue || 0)}</span>
+                                <span>-{formatCurrency(generalDiscountValue)}</span>
                             </div>
                         )}
                         
