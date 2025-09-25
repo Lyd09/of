@@ -36,6 +36,7 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
         clientName,
         items,
         subtotal,
+        generalDiscountType,
         generalDiscountValue = 0,
         generalDiscountPercentage = 0,
         totalAmount,
@@ -105,7 +106,7 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                                             {item.description}
                                             {item.itemDiscountValue > 0 && (
                                                 <p className="text-xs text-green-400">
-                                                    (Desconto {item.discountType === 'percentage' ? `${item.discount}%` : ''}: -{formatCurrency(item.itemDiscountValue)})
+                                                    (Desconto: {item.discountType === 'percentage' ? `${item.discount}%` : `-${formatCurrency(item.itemDiscountValue)}`})
                                                 </p>
                                             )}
                                         </TableCell>
@@ -134,7 +135,10 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
 
                         {generalDiscountValue > 0 && (
                             <div className="flex justify-between py-1 text-lg text-green-400">
-                                <span>Desconto Geral ({Number(generalDiscountPercentage || 0).toFixed(0)}%):</span>
+                                <span>
+                                    Desconto Geral
+                                    {generalDiscountType === 'percentage' && ` (${Number(generalDiscountPercentage || 0).toFixed(0)}%)`}:
+                                </span>
                                 <span>-{formatCurrency(generalDiscountValue)}</span>
                             </div>
                         )}

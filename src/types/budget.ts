@@ -20,6 +20,7 @@ export interface BudgetPreviewData {
   clientAddress?: string;
   items: BudgetItem[];
   subtotal: number;
+  generalDiscountType: 'percentage' | 'fixed';
   generalDiscountValue: number;
   generalDiscountPercentage: number;
   totalAmount: number;

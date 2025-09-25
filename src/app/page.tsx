@@ -422,6 +422,10 @@ export default function OrcaFastPage() {
     const getPreviewData = (): BudgetPreviewData | null => {
         const { items, generalDiscount = 0, generalDiscountType, budgetNumber, clientName, ...rest } = watchedForm;
 
+        if (!clientName && (!items || items.length === 0 || !items.some(item => item.description))) {
+            return null;
+        }
+
         const validItems = items.filter(item => item.description || item.quantity > 0 || item.unitPrice > 0);
 
         const itemsWithTotals: BudgetItemType[] = validItems.map(item => {
@@ -443,8 +447,8 @@ export default function OrcaFastPage() {
         let generalDiscountPercentage = 0;
 
         if(generalDiscountType === 'percentage' && generalDiscountValue > 0) {
-            generalDiscountValue = subtotal * (generalDiscountValue / 100);
             generalDiscountPercentage = generalDiscount || 0;
+            generalDiscountValue = subtotal * (generalDiscountValue / 100);
         } else if (subtotal > 0 && generalDiscountValue > 0) {
             generalDiscountPercentage = (generalDiscountValue / subtotal) * 100;
         }
@@ -456,6 +460,7 @@ export default function OrcaFastPage() {
             clientName,
             items: itemsWithTotals,
             subtotal,
+            generalDiscountType,
             generalDiscountValue,
             generalDiscountPercentage,
             totalAmount,
