@@ -64,7 +64,7 @@ export type CompanyInfo = {
 export const companyInfo: CompanyInfo = {
   name: "FastFilms",
   logoUrl: "https://raw.githubusercontent.com/Lyd09/FF/587b5eb4cf0fc07885618620dc1f18e8d6e0aef4/LOGO%20SVG.svg",
-  slogan: "Cada momento merece um bom take!"
+  slogan: "cada momento merece um bom take!"
 };
 
 const formatCurrency = (value: number) => {
@@ -73,7 +73,7 @@ const formatCurrency = (value: number) => {
 
 const AppHeader = () => (
     <header className="mb-10 text-center">
-        <h1 className="text-5xl font-bold font-sans text-primary">OrçaFAST</h1>
+        <h1 className="text-5xl font-bold text-primary">OrçaFAST</h1>
         <p className="text-muted-foreground mt-2">Crie orçamentos profissionais de forma rápida e fácil.</p>
     </header>
 );
@@ -98,15 +98,16 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
     const fillWithTestData = () => {
         form.reset({
             ...form.getValues(),
-            clientName: "Cliente de Exemplo",
+            clientName: "Paula (SaborInclusão)",
             clientAddress: "Rua Fictícia, 123, Bairro dos Sonhos, Cidade Imaginária - IS",
             items: [
-                { description: 'Gravação de vídeo institucional com equipe completa e edição profissional.', unit: 'Serviço', quantity: 1, unitPrice: 5500, discount: 500, discountType: 'fixed' },
-                { description: 'Fotografia de produto para e-commerce (50 produtos).', unit: 'Pacote', quantity: 1, unitPrice: 3000, discount: 10, discountType: 'percentage' },
-                { description: 'Aluguel de equipamento de iluminação (diária).', unit: 'Diária', quantity: 3, unitPrice: 250, discount: 0, discountType: 'fixed' },
+                { description: 'Fundação da Marca', unit: 'Un', quantity: 1, unitPrice: 1800, discount: 0, discountType: 'fixed' },
+                { description: 'Gestão de Redes Sociais', unit: 'Un', quantity: 1, unitPrice: 3500, discount: 0, discountType: 'fixed' },
+                { description: 'Produção de Conteúdo', unit: 'Un', quantity: 1, unitPrice: 3700, discount: 0, discountType: 'fixed' },
             ],
-            paymentConditions: 'Sinal de 50% na aprovação do orçamento. Restante na entrega do material final.',
-            generalDiscount: 150,
+            paymentConditions: '1º Item - Pagamento único | 2º Item - Pagamento Mensal | 3º Item - Pagamento Mensal',
+            commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
+            generalDiscount: 0,
             generalDiscountType: 'fixed',
             observations: 'Orçamento válido por 15 dias. Prazos de entrega a combinar.'
         });
@@ -137,7 +138,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                     <FormField control={form.control} name="clientName" render={({ field }) => ( 
                                         <FormItem> 
                                             <FormLabel>Nome do Cliente</FormLabel> 
-                                            <FormControl><Input placeholder="Ex: João Silva" {...field} /></FormControl> 
+                                            <FormControl><Input placeholder="Ex: Paula (SaborInclusão)" {...field} /></FormControl> 
                                             <FormMessage /> 
                                         </FormItem> 
                                     )} />
@@ -198,7 +199,8 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             {/* Conditions Section */}
                              <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Termos e Condições</h3>
-                                <FormField control={form.control} name="paymentConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições de Pagamento</FormLabel> <FormControl><Textarea placeholder="Ex: 50% do valor será pago antes do início do serviço e o restante, após sua conclusão." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                                <FormField control={form.control} name="commercialConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições Comerciais</FormLabel> <FormControl><Textarea placeholder="Ex: Forma de Pagamento: Transferência bancária, boleto ou PIX." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                                <FormField control={form.control} name="paymentConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições de Pagamento</FormLabel> <FormControl><Textarea placeholder="Ex: 1º Item - Pagamento único | 2º Item - Pagamento Mensal | 3º Item - Pagamento Mensal" {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                             </div>
 
                              <hr className="border-border" />
@@ -249,37 +251,36 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
 const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
     return (
         <div className="bg-white text-black p-10" style={{width: '210mm', minHeight: '297mm', fontFamily: 'sans-serif', position: 'relative'}}>
-            <header className="flex justify-between items-start pb-4 mb-8">
+            {/* Header */}
+            <header className="flex justify-between items-start pb-4 mb-4 border-b border-neutral-300">
                 <div className="flex items-center gap-4">
                     {data.logoUrl && <Image src={data.logoUrl} alt="Logo da Empresa" width={60} height={60} />}
                      <div>
-                        <h2 className="text-xl font-bold text-neutral-900">{data.companyName}</h2>
-                        <p className="text-xs text-neutral-600">{data.slogan}</p>
+                        <h2 className="text-2xl font-bold text-neutral-900">{data.companyName}</h2>
+                        <p className="text-sm text-neutral-600">{data.slogan}</p>
                     </div>
                 </div>
                 <div className="text-right">
                     <h1 className="text-3xl font-bold text-neutral-900">ORÇAMENTO</h1>
-                    <p className="text-neutral-600">Número: <span className="font-bold">{String(data.budgetNumber).padStart(4, '0')}</span></p>
+                    <p className="text-neutral-600">Número: {data.budgetNumber === "0000" ? 'PREVIEW' : data.budgetNumber}</p>
                     <p className="text-neutral-600">Data: {data.budgetDate}</p>
                 </div>
             </header>
 
-            <section className="grid grid-cols-2 gap-8 my-8">
-                 <div></div>
-                <div>
-                    <h3 className="font-bold text-neutral-800 mb-2">Cliente:</h3>
-                    <p className="font-medium text-neutral-900">{data.clientName}</p>
-                    <p className="text-sm text-neutral-700">{data.clientAddress}</p>
-                </div>
+            {/* Client */}
+            <section className="my-8 pb-4 border-b border-neutral-300">
+                <h3 className="text-neutral-500 mb-1">Cliente:</h3>
+                <p className="font-bold text-lg text-neutral-900">{data.clientName}</p>
             </section>
-
-             <section className="my-8">
+            
+            {/* Items */}
+            <section className="my-8">
                 <h3 className="font-bold text-neutral-800 mb-4">Itens do Orçamento:</h3>
                 <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
                     <thead>
                         <tr className="text-left text-neutral-500 border-b-2 border-neutral-300">
                             <th className="p-2 w-1/2 font-bold">Descrição</th>
-                            <th className="p-2 text-center font-bold">Qtd.</th>
+                            <th className="p-2 text-center font-bold">Qtde.</th>
                             <th className="p-2 text-right font-bold">Preço Unit.</th>
                             <th className="p-2 text-right font-bold">Total Item</th>
                         </tr>
@@ -297,31 +298,29 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
                 </table>
             </section>
             
-             <section className="flex flex-col items-end my-8 no-break space-y-2">
+            {/* Totals */}
+            <section className="flex flex-col items-end my-8 no-break space-y-2">
                  <div className="text-right w-full max-w-xs">
-                    <div className="flex justify-between py-1">
+                    <div className="flex justify-between py-1 text-lg">
                         <span className="text-neutral-600">Subtotal:</span>
-                        <span className={data.generalDiscountValue > 0 ? 'line-through' : ''}>{formatCurrency(data.subtotal)}</span>
+                        <span>{formatCurrency(data.subtotal)}</span>
                     </div>
-                     {data.generalDiscountValue > 0 && (
-                         <div className="flex justify-between py-1">
-                            <span className="text-neutral-600">Desconto Geral ({data.generalDiscountPercentage.toFixed(2)}%):</span>
-                            <span className="text-green-600">-{formatCurrency(data.generalDiscountValue)}</span>
-                        </div>
-                    )}
                     <div className="border-t border-neutral-300 my-2"></div>
-                    <div className="flex justify-between text-2xl font-bold text-neutral-900 py-1">
+                    <div className="flex justify-between text-3xl font-bold text-neutral-900 py-1">
                          <span >Total:</span>
                          <span>{formatCurrency(data.totalAmount)}</span>
                     </div>
                 </div>
             </section>
 
-             <section className="my-8 text-sm no-break space-y-4">
-                { data.paymentConditions && <h4 className="font-bold text-neutral-800">Termos e Condições:</h4> }
-                {data.paymentConditions && <p className="text-neutral-700"><span className="font-medium">Pagamento:</span> {data.paymentConditions}</p>}
+            {/* Terms */}
+            <section className="my-8 text-sm no-break space-y-4">
+                { (data.commercialConditions || data.paymentConditions) && <h4 className="font-bold text-neutral-800 text-xl mb-4">Termos e Condições:</h4> }
+                {data.commercialConditions && <p className="text-neutral-700"><span className="font-medium">Condições Comerciais:</span> {data.commercialConditions}</p>}
+                {data.paymentConditions && <p className="text-neutral-700"><span className="font-medium">Condições de Pagamento:</span> {data.paymentConditions}</p>}
             </section>
             
+            {/* Footer */}
             <footer className="absolute bottom-8 left-8 right-8 text-center text-xs text-neutral-500 border-t border-neutral-300 pt-4">
                 <p>Obrigado pela preferência! — {data.companyName}</p>
             </footer>
@@ -342,10 +341,11 @@ export default function OrcaFastPage() {
             slogan: companyInfo.slogan,
             clientName: '',
             clientAddress: '',
-            budgetNumber: 1,
+            budgetNumber: 0,
             budgetDate: format(new Date(), 'dd/MM/yyyy'),
             items: [],
-            paymentConditions: '50% do valor será pago antes do início do serviço e o restante, após sua conclusão.',
+            commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
+            paymentConditions: '1º Item - Pagamento único | 2º Item - Pagamento Mensal | 3º Item - Pagamento Mensal',
             generalDiscount: 0,
             generalDiscountType: 'fixed',
             observations: '',
@@ -360,9 +360,7 @@ export default function OrcaFastPage() {
     const watchedForm = form.watch();
 
     const getPreviewData = (): BudgetPreviewData | null => {
-        if(!form.formState.isValid && form.formState.isSubmitted) return null;
-
-        const { items, generalDiscount = 0, generalDiscountType, ...rest } = watchedForm;
+        const { items, generalDiscount = 0, generalDiscountType, budgetNumber, ...rest } = watchedForm;
 
         const itemsWithTotals: BudgetItemType[] = items.map(item => {
             const total = (item.quantity || 0) * (item.unitPrice || 0);
@@ -398,22 +396,26 @@ export default function OrcaFastPage() {
             generalDiscountValue,
             generalDiscountPercentage,
             totalAmount,
-            budgetNumber: String(rest.budgetNumber).padStart(4, '0')
+            budgetNumber: String(budgetNumber).padStart(4, '0')
         }
     }
     
     const previewData = getPreviewData();
 
     const onGeneratePdf = async () => {
-        const data = getPreviewData();
-        if (!data) {
+        const result = budgetSchema.safeParse(form.getValues());
+        if (!result.success) {
             toast({
                 title: "Formulário Inválido",
                 description: "Por favor, preencha todos os campos obrigatórios.",
                 variant: "destructive",
             });
+            console.log(result.error.flatten().fieldErrors)
             return;
         }
+
+        const data = getPreviewData();
+        if (!data) return;
 
         setIsGeneratingPdf(true);
         toast({
@@ -431,6 +433,8 @@ export default function OrcaFastPage() {
             const reactDom = (await import('react-dom'));
             const previewElement = <BudgetPreviewForPdf data={data} />;
             
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             const root = reactDom.createRoot(previewContainer);
             root.render(previewElement);
             

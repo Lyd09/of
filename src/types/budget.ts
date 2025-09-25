@@ -23,6 +23,7 @@ export interface BudgetPreviewData {
   generalDiscountValue: number;
   generalDiscountPercentage: number;
   totalAmount: number;
+  commercialConditions?: string;
   paymentConditions?: string;
   observations?: string;
 }
