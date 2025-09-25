@@ -128,16 +128,12 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                         
                         <div className="flex justify-between py-1 text-lg">
                            <span className="text-neutral-400">Subtotal:</span>
-                            {generalDiscountValue > 0 ? (
-                                <span className="line-through text-neutral-500">{formatCurrency(subtotal + generalDiscountValue)}</span>
-                            ) : (
-                                <span>{formatCurrency(displaySubtotal)}</span>
-                            )}
+                            <span>{formatCurrency(displaySubtotal)}</span>
                         </div>
 
                         {generalDiscountValue > 0 && (
                             <div className="flex justify-between py-1 text-lg text-green-400">
-                                <span>Desconto Geral ({generalDiscountPercentage.toFixed(2)}%):</span>
+                                <span>Desconto Geral ({(generalDiscountPercentage || 0).toFixed(2)}%):</span>
                                 <span>-{formatCurrency(generalDiscountValue)}</span>
                             </div>
                         )}
