@@ -5,7 +5,6 @@ import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
-import porExtenso from "numero-por-extenso";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,12 +18,10 @@ import {
     Building,
     User,
     FileText,
-    Banknote,
-    Info,
-    Pencil,
-    Send,
     Settings2,
-    MapPin
+    MapPin,
+    Send,
+    Pencil
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from 'next/image';
@@ -40,6 +37,7 @@ const budgetItemSchema = z.object({
 const budgetSchema = z.object({
     companyName: z.string().min(1, 'Nome da sua empresa é obrigatório.'),
     companyInfo: z.string().optional(),
+    logoUrl: z.string().optional(),
     clientName: z.string().min(1, 'Nome do cliente é obrigatório.'),
     clientAddress: z.string().optional(),
     budgetNumber: z.coerce.number().min(1, "Número do orçamento é obrigatório."),
@@ -52,6 +50,18 @@ const budgetSchema = z.object({
 });
 
 export type BudgetFormValues = z.infer<typeof budgetSchema>;
+
+export type CompanyInfo = {
+    name: string;
+    info: string;
+    logoUrl: string;
+}
+
+export const companyInfo: CompanyInfo = {
+  name: "FastFilms",
+  info: "cada momento merece um bom take!",
+  logoUrl: "https://raw.githubusercontent.com/Lyd09/FF/587b5eb4cf0fc07885618620dc1f18e8d6e0aef4/LOGO%20SVG.svg",
+};
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -91,27 +101,43 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             </Button>
                         </CardHeader>
                         <CardContent className="space-y-6 pt-6">
-                            {/* Company Section is removed from form and will be part of presets/settings in the future */}
-                            
-                            {/* Client Section */}
-                            <div className="space-y-4">
-                                 <h3 className="text-lg font-medium text-primary">Dados do Cliente</h3>
-                                <FormField control={form.control} name="clientName" render={({ field }) => ( 
-                                    <FormItem> 
-                                        <FormLabel className="flex items-center gap-2"><User size={16}/>Nome do Cliente</FormLabel> 
-                                        <FormControl><Input placeholder="Ex: João Silva" {...field} /></FormControl> 
-                                        <FormMessage /> 
-                                    </FormItem> 
-                                )} />
-                                <FormField control={form.control} name="clientAddress" render={({ field }) => ( 
-                                    <FormItem> 
-                                        <FormLabel className="flex items-center gap-2"><MapPin size={16}/>Endereço (Opcional)</FormLabel> 
-                                        <FormControl><Textarea placeholder="Ex: Rua das Palmeiras, 123, Bairro, Cidade - UF" {...field} /></FormControl>
-                                        <FormMessage /> 
-                                    </FormItem> 
-                                )} />
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                     <h3 className="text-lg font-medium text-primary flex items-center gap-2"><Building size={20}/> Dados da Sua Empresa</h3>
+                                     <FormField control={form.control} name="companyName" render={({ field }) => ( 
+                                        <FormItem> 
+                                            <FormLabel>Nome da Empresa</FormLabel> 
+                                            <FormControl><Input placeholder="Ex: Sua Empresa LTDA" {...field} /></FormControl> 
+                                            <FormMessage /> 
+                                        </FormItem> 
+                                    )} />
+                                     <FormField control={form.control} name="companyInfo" render={({ field }) => ( 
+                                        <FormItem> 
+                                            <FormLabel>Informações Adicionais (opcional)</FormLabel> 
+                                            <FormControl><Textarea placeholder="Ex: Slogan, Endereço, CNPJ" {...field} /></FormControl>
+                                            <FormMessage /> 
+                                        </FormItem> 
+                                    )} />
+                                </div>
+                                <div className="space-y-4">
+                                     <h3 className="text-lg font-medium text-primary flex items-center gap-2"><User size={20}/>Dados do Cliente</h3>
+                                    <FormField control={form.control} name="clientName" render={({ field }) => ( 
+                                        <FormItem> 
+                                            <FormLabel>Nome do Cliente</FormLabel> 
+                                            <FormControl><Input placeholder="Ex: João Silva" {...field} /></FormControl> 
+                                            <FormMessage /> 
+                                        </FormItem> 
+                                    )} />
+                                    <FormField control={form.control} name="clientAddress" render={({ field }) => ( 
+                                        <FormItem> 
+                                            <FormLabel>Endereço (Opcional)</FormLabel> 
+                                            <FormControl><Textarea placeholder="Ex: Rua das Palmeiras, 123, Bairro, Cidade - UF" {...field} /></FormControl>
+                                            <FormMessage /> 
+                                        </FormItem> 
+                                    )} />
+                                </div>
                             </div>
-
+                            
                             <hr className="border-border" />
 
                             {/* Items Section */}
@@ -193,15 +219,17 @@ type BudgetPreviewProps = {
 
 const BudgetPreview = ({ data, subtotal, total }: BudgetPreviewProps) => {
     return (
-        <div id="budget-preview" className="bg-[#1e1e20] text-neutral-300 p-8 rounded-lg shadow-lg" style={{ width: '100%', minHeight: '80vh', fontFamily: 'sans-serif' }}>
+        <div id="budget-preview" className="bg-[#18191b] text-neutral-300 p-8 rounded-lg shadow-lg" style={{ width: '100%', minHeight: '80vh', fontFamily: 'sans-serif' }}>
             <header className="flex justify-between items-start pb-4 mb-8">
                 <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded">
-                        <Image src="/logo-fastfilms.svg" alt="FastFilms Logo" width={40} height={40} data-ai-hint="film reel" />
-                    </div>
+                    {data.logoUrl && (
+                        <div className="bg-white p-2 rounded-md">
+                            <Image src={data.logoUrl} alt="Logo da Empresa" width={50} height={50} />
+                        </div>
+                    )}
                     <div>
-                        <h2 className="text-xl font-bold text-neutral-100">{data.companyName || 'FastFilms'}</h2>
-                        <p className="text-xs text-neutral-400">cada momento merece um bom take!</p>
+                        <h2 className="text-xl font-bold text-neutral-100">{data.companyName}</h2>
+                        <p className="text-xs text-neutral-400">{data.companyInfo}</p>
                     </div>
                 </div>
                 <div className="text-right">
@@ -218,10 +246,10 @@ const BudgetPreview = ({ data, subtotal, total }: BudgetPreviewProps) => {
             </section>
 
              <section className="my-8">
-                <h3 className="font-bold text-neutral-200 mb-2">Itens do Orçamento:</h3>
+                <h3 className="font-bold text-neutral-200 mb-4">Itens do Orçamento:</h3>
                 <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
                     <thead>
-                        <tr className="text-left text-neutral-400 border-b border-neutral-700">
+                        <tr className="text-left text-neutral-400 border-b-2 border-neutral-700">
                             <th className="p-2 w-1/2 font-medium">Descrição</th>
                             <th className="p-2 text-center font-medium">Qtd.</th>
                             <th className="p-2 text-right font-medium">Preço Unit.</th>
@@ -246,21 +274,29 @@ const BudgetPreview = ({ data, subtotal, total }: BudgetPreviewProps) => {
             </section>
             
             <section className="flex flex-col items-end my-8 no-break space-y-2">
-                <div className="text-right">
-                    <p className="text-neutral-400">Subtotal: {formatCurrency(subtotal)}</p>
+                <div className="text-right w-full max-w-xs">
+                    <div className="flex justify-between py-1">
+                        <span className="text-neutral-400">Subtotal:</span>
+                        <span>{formatCurrency(subtotal)}</span>
+                    </div>
                     {data.generalDiscount && data.generalDiscount > 0 && (
-                         <p className="text-neutral-400">Desconto Geral: -{formatCurrency(data.generalDiscount)}</p>
+                         <div className="flex justify-between py-1">
+                            <span className="text-neutral-400">Desconto Geral:</span>
+                            <span>-{formatCurrency(data.generalDiscount)}</span>
+                        </div>
                     )}
-                </div>
-                 <div className="w-full max-w-xs text-right">
-                    <p className="text-3xl font-bold text-neutral-100">Total: {formatCurrency(total)}</p>
+                    <div className="border-t border-neutral-700 my-2"></div>
+                    <div className="flex justify-between text-2xl font-bold text-neutral-100 py-1">
+                        <span >Total:</span>
+                        <span>{formatCurrency(total)}</span>
+                    </div>
                 </div>
             </section>
 
              <section className="my-8 text-sm no-break space-y-4">
-                <h4 className="font-bold text-neutral-200">Termos e Condições:</h4>
-                {data.commercialConditions && <p className="text-neutral-400">{data.commercialConditions}</p>}
-                {data.paymentConditions && <p className="text-neutral-400">{data.paymentConditions}</p>}
+                { (data.commercialConditions || data.paymentConditions) && <h4 className="font-bold text-neutral-200">Termos e Condições:</h4> }
+                {data.commercialConditions && <p className="text-neutral-400"><span className="font-medium">Comerciais:</span> {data.commercialConditions}</p>}
+                {data.paymentConditions && <p className="text-neutral-400"><span className="font-medium">Pagamento:</span> {data.paymentConditions}</p>}
             </section>
              
             <footer className="absolute bottom-8 left-8 right-8 text-center text-xs text-neutral-500 pt-4">
@@ -277,13 +313,14 @@ const BudgetPreviewForPdf = ({ data, subtotal, total }: BudgetPreviewProps) => {
         <div className="bg-white text-black p-10" style={{width: '210mm', minHeight: '297mm', fontFamily: 'sans-serif', position: 'relative'}}>
             <header className="flex justify-between items-start pb-4 mb-8">
                 <div className="flex items-center gap-4">
-                    {/* Public assets need to be referenced by absolute URL in PDF generation */}
-                    <div className="bg-black p-2 rounded">
-                        <img src="/logo-fastfilms.svg" alt="FastFilms Logo" style={{width: '40px', height: '40px'}} />
-                    </div>
+                    {data.logoUrl && (
+                        <div className="bg-black p-2 rounded-md">
+                            <img src={data.logoUrl} alt="Logo da Empresa" style={{width: '50px', height: '50px'}} />
+                        </div>
+                    )}
                      <div>
-                        <h2 className="text-xl font-bold text-neutral-900">{data.companyName || 'FastFilms'}</h2>
-                        <p className="text-xs text-neutral-600">cada momento merece um bom take!</p>
+                        <h2 className="text-xl font-bold text-neutral-900">{data.companyName}</h2>
+                        <p className="text-xs text-neutral-600">{data.companyInfo}</p>
                     </div>
                 </div>
                 <div className="text-right">
@@ -300,7 +337,7 @@ const BudgetPreviewForPdf = ({ data, subtotal, total }: BudgetPreviewProps) => {
             </section>
 
              <section className="my-8">
-                <h3 className="font-bold text-neutral-800 mb-2">Itens do Orçamento:</h3>
+                <h3 className="font-bold text-neutral-800 mb-4">Itens do Orçamento:</h3>
                 <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
                     <thead>
                         <tr className="text-left text-neutral-500 border-b-2 border-neutral-300">
@@ -311,7 +348,7 @@ const BudgetPreviewForPdf = ({ data, subtotal, total }: BudgetPreviewProps) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {(data.items && data.items.length > 0) ? data.items.map((item, index) => (
+                        {(data.items && data.items.length > 0 && data.items[0].description) ? data.items.map((item, index) => (
                             <tr key={index} className="border-b border-neutral-200">
                                 <td className="p-2 align-top">{item.description}</td>
                                 <td className="p-2 text-center align-top">{item.quantity} {item.unit}</td>
@@ -325,22 +362,30 @@ const BudgetPreviewForPdf = ({ data, subtotal, total }: BudgetPreviewProps) => {
                 </table>
             </section>
             
-            <section className="flex flex-col items-end my-8 no-break space-y-2">
-                 <div className="text-right">
-                    <p className="text-neutral-600">Subtotal: {formatCurrency(subtotal)}</p>
+             <section className="flex flex-col items-end my-8 no-break space-y-2">
+                 <div className="text-right w-full max-w-xs">
+                    <div className="flex justify-between py-1">
+                        <span className="text-neutral-600">Subtotal:</span>
+                        <span>{formatCurrency(subtotal)}</span>
+                    </div>
                      {data.generalDiscount && data.generalDiscount > 0 && (
-                         <p className="text-neutral-600">Desconto Geral: -{formatCurrency(data.generalDiscount)}</p>
+                         <div className="flex justify-between py-1">
+                            <span className="text-neutral-600">Desconto Geral:</span>
+                            <span>-{formatCurrency(data.generalDiscount)}</span>
+                        </div>
                     )}
-                </div>
-                <div className="w-full max-w-xs text-right">
-                     <p className="text-3xl font-bold text-neutral-900">Total: {formatCurrency(total)}</p>
+                    <div className="border-t border-neutral-300 my-2"></div>
+                    <div className="flex justify-between text-2xl font-bold text-neutral-900 py-1">
+                         <span >Total:</span>
+                         <span>{formatCurrency(total)}</span>
+                    </div>
                 </div>
             </section>
 
              <section className="my-8 text-sm no-break space-y-4">
-                <h4 className="font-bold text-neutral-800">Termos e Condições:</h4>
-                {data.commercialConditions && <p className="text-neutral-700">{data.commercialConditions}</p>}
-                {data.paymentConditions && <p className="text-neutral-700">{data.paymentConditions}</p>}
+                { (data.commercialConditions || data.paymentConditions) && <h4 className="font-bold text-neutral-800">Termos e Condições:</h4> }
+                {data.commercialConditions && <p className="text-neutral-700"><span className="font-medium">Comerciais:</span> {data.commercialConditions}</p>}
+                {data.paymentConditions && <p className="text-neutral-700"><span className="font-medium">Pagamento:</span> {data.paymentConditions}</p>}
             </section>
             
             <footer className="absolute bottom-8 left-8 right-8 text-center text-xs text-neutral-500 border-t border-neutral-300 pt-4">
@@ -358,13 +403,14 @@ export default function OrcaFastPage() {
     const form = useForm<BudgetFormValues>({
         resolver: zodResolver(budgetSchema),
         defaultValues: {
-            companyName: 'FastFilms',
-            companyInfo: 'cada momento merece um bom take!',
+            companyName: companyInfo.name,
+            companyInfo: companyInfo.info,
+            logoUrl: companyInfo.logoUrl,
             clientName: '',
             clientAddress: '',
             budgetNumber: 1,
             budgetDate: format(new Date(), 'dd/MM/yyyy'),
-            items: [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0 }],
+            items: [],
             commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
             paymentConditions: '50% do valor será pago antes do início do serviço e o restante, após sua conclusão.',
             generalDiscount: 0,
@@ -373,6 +419,7 @@ export default function OrcaFastPage() {
     });
 
     useEffect(() => {
+        // Generate budget number only on client-side to avoid hydration mismatch
         form.setValue('budgetNumber', Math.floor(Math.random() * 1000) + 1);
     }, [form]);
 
@@ -403,7 +450,7 @@ export default function OrcaFastPage() {
             const root = reactDom.createRoot(previewContainer);
             root.render(previewElement);
             
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise(resolve => setTimeout(resolve, 500)); // Allow time for images to load
 
             const opt = {
                 margin: [0, 0, 0, 0],
@@ -438,7 +485,7 @@ export default function OrcaFastPage() {
     const currentFormData = form.watch();
 
     return (
-        <main className="container mx-auto p-4 lg:p-8">
+        <main className="container mx-auto p-4 lg:p-8 font-sans">
             <AppHeader />
             
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
