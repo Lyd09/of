@@ -250,35 +250,35 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
 
 const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
     return (
-        <div className="bg-white text-black p-10" style={{width: '210mm', minHeight: '297mm', fontFamily: 'sans-serif', position: 'relative'}}>
+        <div className="bg-[#18191b] text-[#e0e0e0] p-10 font-sans" style={{width: '210mm', minHeight: '297mm', position: 'relative'}}>
             {/* Header */}
-            <header className="flex justify-between items-start pb-4 mb-4 border-b border-neutral-300 no-break">
+            <header className="flex justify-between items-start pb-4 mb-4 border-b border-neutral-700 no-break">
                 <div className="flex items-center gap-4">
                     {data.logoUrl && <Image src={data.logoUrl} alt="Logo da Empresa" width={60} height={60} />}
                      <div>
-                        <h2 className="text-2xl font-bold text-neutral-900">{data.companyName}</h2>
-                        <p className="text-sm text-neutral-600">{data.slogan}</p>
+                        <h2 className="text-2xl font-bold text-white">{data.companyName}</h2>
+                        <p className="text-sm text-neutral-400">{data.slogan}</p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <h1 className="text-3xl font-bold text-neutral-900">ORÇAMENTO</h1>
-                    <p className="text-neutral-600">Número: {data.budgetNumber === "0000" ? 'PREVIEW' : data.budgetNumber}</p>
-                    <p className="text-neutral-600">Data: {data.budgetDate}</p>
+                    <h1 className="text-3xl font-bold text-white">ORÇAMENTO</h1>
+                    <p className="text-neutral-400">Número: {data.budgetNumber === "0000" ? 'PREVIEW' : data.budgetNumber}</p>
+                    <p className="text-neutral-400">Data: {data.budgetDate}</p>
                 </div>
             </header>
 
             {/* Client */}
-            <section className="my-8 pb-4 border-b border-neutral-300 no-break">
+            <section className="my-8 pb-4 border-b border-neutral-700 no-break">
                 <h3 className="text-neutral-500 mb-1">Cliente:</h3>
-                <p className="font-bold text-lg text-neutral-900">{data.clientName}</p>
+                <p className="font-bold text-lg text-white">{data.clientName}</p>
             </section>
             
             {/* Items */}
             <section className="my-8 no-break">
-                <h3 className="font-bold text-neutral-800 mb-4">Itens do Orçamento:</h3>
+                <h3 className="font-bold text-neutral-200 mb-4">Itens do Orçamento:</h3>
                 <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
                     <thead>
-                        <tr className="text-left text-neutral-500 border-b-2 border-neutral-300">
+                        <tr className="text-left text-neutral-400 border-b-2 border-neutral-700">
                             <th className="p-2 w-1/2 font-bold">Descrição</th>
                             <th className="p-2 text-center font-bold">Qtde.</th>
                             <th className="p-2 text-right font-bold">Preço Unit.</th>
@@ -287,7 +287,7 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
                     </thead>
                     <tbody>
                         {data.items.map((item, index) => (
-                            <tr key={index} className="border-b border-neutral-200">
+                            <tr key={index} className="border-b border-neutral-800">
                                 <td className="p-2 align-top">{item.description}</td>
                                 <td className="p-2 text-center align-top">{item.quantity} {item.unit}</td>
                                 <td className="p-2 text-right align-top">{formatCurrency(item.unitPrice)}</td>
@@ -302,26 +302,27 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
             <section className="flex flex-col items-end my-8 no-break space-y-2">
                  <div className="text-right w-full max-w-xs">
                     <div className="flex justify-between py-1 text-lg">
-                        <span className="text-neutral-600">Subtotal:</span>
+                        <span className="text-neutral-400">Subtotal:</span>
                         <span>{formatCurrency(data.subtotal)}</span>
                     </div>
-                    <div className="flex justify-between text-3xl font-bold text-neutral-900 py-1">
+                    <div className="flex justify-between text-3xl font-bold text-white py-1">
                          <span >Total:</span>
                          <span>{formatCurrency(data.totalAmount)}</span>
                     </div>
-                     <div className="border-t border-neutral-300 my-2"></div>
                 </div>
             </section>
+            
+             <hr className="border-neutral-700 my-8"/>
 
             {/* Terms */}
             <section className="my-8 text-sm no-break space-y-4">
-                { (data.commercialConditions || data.paymentConditions) && <h4 className="font-bold text-neutral-800 text-xl mb-4 text-center">Termos e Condições:</h4> }
-                {data.commercialConditions && <p className="text-neutral-700"><span className="font-medium">Condições Comerciais:</span> {data.commercialConditions}</p>}
-                {data.paymentConditions && <p className="text-neutral-700"><span className="font-medium">Condições de Pagamento:</span> {data.paymentConditions}</p>}
+                { (data.commercialConditions || data.paymentConditions) && <h4 className="font-bold text-white text-xl mb-4 text-center">Termos e Condições:</h4> }
+                {data.commercialConditions && <p className="text-neutral-300"><span className="font-medium">Condições Comerciais:</span> {data.commercialConditions}</p>}
+                {data.paymentConditions && <p className="text-neutral-300"><span className="font-medium">Condições de Pagamento:</span> {data.paymentConditions}</p>}
             </section>
             
             {/* Footer */}
-            <footer className="absolute bottom-8 left-8 right-8 text-center text-xs text-neutral-500 border-t border-neutral-300 pt-4 no-break">
+            <footer className="absolute bottom-8 left-8 right-8 text-center text-xs text-neutral-500 border-t border-neutral-700 pt-4 no-break">
                 <p>Obrigado pela preferência! — {data.companyName}</p>
             </footer>
         </div>
@@ -361,6 +362,8 @@ export default function OrcaFastPage() {
 
     const getPreviewData = (): BudgetPreviewData | null => {
         const { items, generalDiscount = 0, generalDiscountType, budgetNumber, ...rest } = watchedForm;
+
+        if (!rest.clientName) return null;
 
         const itemsWithTotals: BudgetItemType[] = items.map(item => {
             const total = (item.quantity || 0) * (item.unitPrice || 0);
@@ -444,7 +447,7 @@ export default function OrcaFastPage() {
                 margin: [0, 0, 0, 0],
                 filename: `orcamento_${data.budgetNumber}_${data.clientName.replace(/\s/g, '_')}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff' },
+                html2canvas: { scale: 3, useCORS: true, backgroundColor: '#18191b' },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
@@ -493,3 +496,4 @@ export default function OrcaFastPage() {
 }
 
     
+
