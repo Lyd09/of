@@ -70,7 +70,7 @@ export type CompanyInfo = {
 
 export const companyInfo: CompanyInfo = {
   name: "OrçaFAST",
-  logoUrl: "/LOGO-ORCAFAST.png",
+  logoUrl: "/LOGO-OF.png",
   slogan: "Orçamentos rápidos, resultados imediatos.",
 };
 
@@ -81,7 +81,7 @@ const formatCurrency = (value: number) => {
 const AppHeader = () => (
     <header className="mb-10 text-center">
         <Image 
-            src="/LOGO-ORCAFAST.png" 
+            src="/LOGO-OF.png" 
             alt="OrçaFAST Logo" 
             width={400} 
             height={100} 
@@ -596,3 +596,6 @@ export default function OrcaFastPage() {
 
     
 
+
+
+    
