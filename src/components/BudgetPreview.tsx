@@ -68,7 +68,7 @@ export const BudgetPreview = ({ data, onGeneratePdf }: { data: BudgetPreviewData
                 {/* Header */}
                 <header className="flex justify-between items-start pb-4 mb-4 border-b border-border/50">
                     <div className="flex items-center gap-4">
-                        {logoUrl && <Image src={logoUrl} alt="Logo da Empresa" width={100} height={40} unoptimized data-ai-hint="logo" />}
+                        {logoUrl && <Image src={logoUrl} alt="Logo da Empresa" width={150} height={50} unoptimized data-ai-hint="logo" />}
                         <div>
                             <h2 className="text-2xl font-bold text-white">{companyName}</h2>
                             {slogan && <p className="text-sm text-neutral-400">{slogan}</p>}
@@ -168,5 +168,7 @@ export const BudgetPreview = ({ data, onGeneratePdf }: { data: BudgetPreviewData
         </Card>
     );
 };
+
+    
 
     

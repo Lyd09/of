@@ -70,7 +70,7 @@ export type CompanyInfo = {
 
 export const companyInfo: CompanyInfo = {
   name: "OrçaFAST",
-  logoUrl: "https://picsum.photos/seed/orcafastlogo/250/80",
+  logoUrl: "/LOGO-ORCAFAST.png",
   slogan: "Orçamentos rápidos, resultados imediatos.",
 };
 
@@ -582,6 +582,8 @@ export default function OrcaFastPage() {
         </>
     );
 }
+
+    
 
     
 
