@@ -9,7 +9,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FileText, Users } from 'lucide-react';
+import { FileText, Users, X } from 'lucide-react';
+import { DialogClose } from '@radix-ui/react-dialog';
 
 interface ContractDialogProps {
   isOpen: boolean;
