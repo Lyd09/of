@@ -80,7 +80,14 @@ const formatCurrency = (value: number) => {
 
 const AppHeader = () => (
     <header className="mb-10 text-center">
-        <h1 className="text-5xl font-bold text-primary">OrçaFAST</h1>
+        <Image 
+            src="/LOGO-ORCAFAST.png" 
+            alt="OrçaFAST Logo" 
+            width={400} 
+            height={100} 
+            className="mx-auto"
+            priority 
+        />
         <p className="text-muted-foreground mt-2">Crie orçamentos profissionais de forma rápida e fácil.</p>
     </header>
 );
@@ -588,3 +595,4 @@ export default function OrcaFastPage() {
     
 
     
+
