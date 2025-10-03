@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 export const metadata: Metadata = {
   title: 'OrçaFAST - Criador de Orçamentos',
   description: 'Crie orçamentos profissionais de forma rápida e fácil.',
+  icons: {
+    icon: '/ICONE ORCAFAST.png',
+  },
 };
 
 export default function RootLayout({
