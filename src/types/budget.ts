@@ -27,6 +27,7 @@ export interface BudgetPreviewData {
   totalAmount: number;
   commercialConditions?: string;
   paymentConditions?: string;
+  observations?: string;
 }
 
     

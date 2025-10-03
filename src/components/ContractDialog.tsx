@@ -1,0 +1,64 @@
+
+"use client";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { FileText, Users } from 'lucide-react';
+
+interface ContractDialogProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
+  const handleSelection = (type: 'services' | 'hiring') => {
+    // Placeholder for future functionality
+    console.log(`Selected contract type: ${type}`);
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Gerar Novo Contrato</DialogTitle>
+          <DialogDescription>
+            Escolha o tipo de contrato que você deseja gerar com base neste orçamento.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+          <Button
+            variant="outline"
+            className="h-24 flex flex-col gap-2"
+            onClick={() => handleSelection('services')}
+          >
+            <FileText className="w-8 h-8 text-primary" />
+            <span className="text-base">Serviços</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-24 flex flex-col gap-2"
+            onClick={() => handleSelection('hiring')}
+          >
+            <Users className="w-8 h-8 text-primary" />
+            <span className="text-base">Contratações</span>
+          </Button>
+        </div>
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

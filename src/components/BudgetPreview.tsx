@@ -7,13 +7,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BudgetPreviewData } from '@/types/budget';
-import { FileText } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
+import { Button } from './ui/button';
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 };
 
-export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
+export const BudgetPreview = ({ data, onGeneratePdf }: { data: BudgetPreviewData | null, onGeneratePdf: () => void }) => {
     if (!data) {
         return (
             <Card className="sticky top-8 bg-[#18191b] text-[#e0e0e0] border-border shadow-lg">
@@ -42,6 +43,7 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
         totalAmount,
         paymentConditions,
         commercialConditions,
+        observations
     } = data;
 
     const hasItems = items && items.some(item => item.description);
@@ -157,6 +159,7 @@ export const BudgetPreview = ({ data }: { data: BudgetPreviewData | null }) => {
                      {(commercialConditions || paymentConditions) && <h4 className="font-bold text-neutral-200 text-xl mb-4">Termos e Condições:</h4>}
                      {commercialConditions && <p className="text-neutral-400"><span className="font-medium">Condições Comerciais:</span> {commercialConditions}</p>}
                      {paymentConditions && <p className="text-neutral-400"><span className="font-medium">Condições de Pagamento:</span> {paymentConditions}</p>}
+                     {observations && <p className="text-neutral-400"><span className="font-medium">Observações:</span> {observations}</p>}
                      <div className="text-center text-xs text-neutral-500 pt-8">
                         <p>Obrigado pela preferência! — {companyName}</p>
                     </div>

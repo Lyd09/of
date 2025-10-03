@@ -21,7 +21,8 @@ import {
     Settings2,
     Send,
     Pencil,
-    Airplay
+    Airplay,
+    Download
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from 'next/image';
@@ -30,6 +31,8 @@ import { BudgetPreview } from '@/components/BudgetPreview';
 import { Preset, PresetManagerDialog } from '@/components/PresetManagerDialog';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import initialPresets from '@/data/presets.json';
+import { ContractDialog } from '@/components/ContractDialog';
+
 
 const budgetItemSchema = z.object({
     description: z.string().min(1, 'Descrição é obrigatória.'),
@@ -54,6 +57,7 @@ const budgetSchema = z.object({
     generalDiscount: z.coerce.number().optional(),
     generalDiscountType: z.enum(['percentage', 'fixed']).default('fixed'),
     isDroneFeatureEnabled: z.boolean().default(false),
+    observations: z.string().optional(),
 });
 
 export type BudgetFormValues = z.infer<typeof budgetSchema>;
@@ -116,6 +120,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
             commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
             generalDiscount: 0,
             generalDiscountType: 'fixed',
+            observations: 'Este orçamento tem validade de 15 dias a contar da data de emissão.',
         });
     }
 
@@ -248,6 +253,14 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             
                             <hr className="border-border" />
 
+                             {/* Observations Section */}
+                             <div className="space-y-4">
+                                <h3 className="text-lg font-medium text-primary">Observações (Opcional)</h3>
+                                <FormField control={form.control} name="observations" render={({ field }) => ( <FormItem> <FormLabel>Adicione qualquer observação ao orçamento</FormLabel> <FormControl><Textarea placeholder="Ex: Orçamento válido por 15 dias..." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                            </div>
+
+                            <hr className="border-border" />
+
                             {/* Conditions Section */}
                              <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Termos e Condições</h3>
@@ -281,7 +294,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
 
 const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
     return (
-        <div className="bg-[#18191b] text-[#e0e0e0] p-10 font-sans no-break" style={{width: '210mm', minHeight: '297mm', position: 'relative'}}>
+        <div className="bg-[#18191b] text-[#e0e0e0] p-10 font-sans" style={{width: '210mm', minHeight: '297mm', position: 'relative'}}>
             {/* Header */}
             <header className="flex justify-between items-start pb-4 mb-4 border-b border-neutral-700 no-break">
                 <div className="flex items-center gap-4">
@@ -366,6 +379,7 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
                  <h4 className="font-bold text-white text-xl mb-4 text-center">Termos e Condições:</h4>
                 {data.commercialConditions && <p className="text-neutral-300"><span className="font-medium">Condições Comerciais:</span> {data.commercialConditions}</p>}
                 {data.paymentConditions && <p className="text-neutral-300"><span className="font-medium">Condições de Pagamento:</span> {data.paymentConditions}</p>}
+                {data.observations && <p className="text-neutral-300"><span className="font-medium">Observações:</span> {data.observations}</p>}
             </section>
             
             {/* Footer */}
@@ -380,6 +394,7 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
 export default function OrcaFastPage() {
     const { toast } = useToast();
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+    const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
     
     const form = useForm<BudgetFormValues>({
         resolver: zodResolver(budgetSchema),
@@ -396,7 +411,8 @@ export default function OrcaFastPage() {
             paymentConditions: '50% do valor será pago antes do início do serviço e o restante, após sua conclusão.',
             generalDiscount: 0,
             generalDiscountType: 'fixed',
-            isDroneFeatureEnabled: false
+            isDroneFeatureEnabled: false,
+            observations: ''
         },
     });
 
@@ -540,23 +556,29 @@ export default function OrcaFastPage() {
     };
     
     return (
-        <main className="container mx-auto p-4 lg:p-8 font-sans">
-            <AppHeader />
-            
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                <div className="lg:col-span-3">
-                    <BudgetForm form={form} onGeneratePdf={onGeneratePdf} isGeneratingPdf={isGeneratingPdf} />
-                </div>
-                <div className="lg:col-span-2">
-                    <div className="sticky top-8 space-y-4">
-                        <Button className="w-full" size="lg" onClick={() => { /* Placeholder for future contract functionality */ }}>
-                            <FileText className="mr-2 h-4 w-4" /> 
-                            Gerar Contrato
-                        </Button>
-                       <BudgetPreview data={previewData} />
+        <>
+            <main className="container mx-auto p-4 lg:p-8 font-sans">
+                <AppHeader />
+                
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    <div className="lg:col-span-3">
+                        <BudgetForm form={form} onGeneratePdf={onGeneratePdf} isGeneratingPdf={isGeneratingPdf} />
+                    </div>
+                    <div className="lg:col-span-2">
+                        <div className="sticky top-8 space-y-4">
+                            <Button className="w-full" size="lg" onClick={() => setIsContractDialogOpen(true)}>
+                                <FileText className="mr-2 h-4 w-4" /> 
+                                Gerar Contrato
+                            </Button>
+                           <BudgetPreview data={previewData} onGeneratePdf={onGeneratePdf} />
+                        </div>
                     </div>
                 </div>
-            </div>
-        </main>
+            </main>
+            <ContractDialog
+                isOpen={isContractDialogOpen}
+                onOpenChange={setIsContractDialogOpen}
+            />
+        </>
     );
 }
