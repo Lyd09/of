@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -54,7 +53,7 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
         </DialogFooter>
