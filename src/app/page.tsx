@@ -69,9 +69,9 @@ export type CompanyInfo = {
 }
 
 export const companyInfo: CompanyInfo = {
-  name: "FastFilms",
-  logoUrl: "https://raw.githubusercontent.com/Lyd09/FF/587b5eb4cf0fc07885618620dc1f18e8d6e0aef4/LOGO%20SVG.svg",
-  slogan: "Cada momento merece um bom take!",
+  name: "OrçaFAST",
+  logoUrl: "https://picsum.photos/seed/orcafastlogo/250/80",
+  slogan: "Orçamentos rápidos, resultados imediatos.",
 };
 
 const formatCurrency = (value: number) => {
@@ -298,7 +298,7 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
             {/* Header */}
             <header className="flex justify-between items-start pb-4 mb-4 border-b border-neutral-700 no-break">
                 <div className="flex items-center gap-4">
-                    {data.logoUrl && <Image src={data.logoUrl} alt="Logo da Empresa" width={60} height={60} />}
+                    {data.logoUrl && <Image src={data.logoUrl} alt="Logo da Empresa" width={100} height={40} data-ai-hint="logo" />}
                      <div>
                         <h2 className="text-2xl font-bold text-white">{data.companyName}</h2>
                         <p className="text-sm text-neutral-400">{data.slogan}</p>
@@ -582,3 +582,5 @@ export default function OrcaFastPage() {
         </>
     );
 }
+
+    
