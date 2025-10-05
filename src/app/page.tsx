@@ -69,9 +69,9 @@ export type CompanyInfo = {
 }
 
 export const companyInfo: CompanyInfo = {
-  name: "OrçaFAST",
-  logoUrl: "/LOGO-OF.png",
-  slogan: "Orçamentos rápidos, resultados imediatos.",
+  name: "FastFilms",
+  logoUrl: "/FastFilms.png",
+  slogan: "Produzindo Emoções em Alta Definição.",
 };
 
 const formatCurrency = (value: number) => {
@@ -600,3 +600,6 @@ export default function OrcaFastPage() {
 
     
 
+
+
+    
