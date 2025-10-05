@@ -305,7 +305,7 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
             {/* Header */}
             <header className="flex justify-between items-start pb-4 mb-4 border-b border-neutral-700 no-break">
                 <div className="flex items-center gap-4">
-                    {data.logoUrl && <Image src={data.logoUrl} alt="Logo da Empresa" width={100} height={40} data-ai-hint="logo" />}
+                    {data.logoUrl && <Image src={data.logoUrl} alt="Logo da Empresa" width={80} height={80} data-ai-hint="logo" />}
                      <div>
                         <h2 className="text-2xl font-bold text-white">{data.companyName}</h2>
                         <p className="text-sm text-neutral-400">{data.slogan}</p>
@@ -601,6 +601,8 @@ export default function OrcaFastPage() {
     
 
 
+
+    
 
     
 
