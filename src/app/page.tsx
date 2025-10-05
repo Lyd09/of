@@ -70,8 +70,8 @@ export type CompanyInfo = {
 
 export const companyInfo: CompanyInfo = {
   name: "FastFilms",
-  logoUrl: "/FastFilms.png",
-  slogan: "Produzindo Emoções em Alta Definição.",
+  logoUrl: "https://raw.githubusercontent.com/Lyd09/FF/587b5eb4cf0fc07885618620dc1f18e8d6e0aef4/LOGO%20SVG.svg",
+  slogan: "Cada momento merece um bom take!",
 };
 
 const formatCurrency = (value: number) => {
@@ -601,5 +601,7 @@ export default function OrcaFastPage() {
     
 
 
+
+    
 
     
