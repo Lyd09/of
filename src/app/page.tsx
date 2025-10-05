@@ -101,6 +101,23 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
     const [presets, setPresets] = useLocalStorage<Preset[]>('orcafast-presets', initialPresets);
     const [isPresetManagerOpen, setIsPresetManagerOpen] = useState(false);
 
+    const watchedDroneFeature = form.watch('isDroneFeatureEnabled');
+    
+    useEffect(() => {
+        if (watchedDroneFeature) {
+            const droneText = 'Se a gravação com drone for **realizada no mesmo dia e local de outro serviço contratado**, você garante a inclusão do equipamento aéreo pagando apenas o **valor único**, aproveitando o máximo do nosso deslocamento e estrutura.';
+            form.setValue('observations', droneText.replace(/\*\*(.*?)\*\*/g, '$1')); 
+        } else {
+            // Clear observations only if it contains the drone text
+            const currentObs = form.getValues('observations');
+            const droneTextTemplate = 'Se a gravação com drone for';
+            if (currentObs && currentObs.startsWith(droneTextTemplate)) {
+                form.setValue('observations', '');
+            }
+        }
+    }, [watchedDroneFeature, form]);
+    
+
     const handleApplyPreset = (index: number, presetId: string) => {
         const preset = presets.find(p => p.id === presetId);
         if (preset) {
@@ -184,7 +201,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                         <Label className="md:col-span-1"></Label>
                                     </div>
                                     {fields.map((field, index) => (
-                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 p-3 border border-border rounded-md mb-3 bg-card/50">
+                                        <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 p-3 border border-border rounded-md mb-3 bg-card/50 items-center">
                                             <div className="md:col-span-3">
                                                 <FormField control={form.control} name={`items.${index}.description`} render={({ field }) => ( <FormItem> <FormControl><Textarea placeholder="Descrição do item" {...field} className="min-h-[40px] bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                             </div>
@@ -227,7 +244,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                             </div>
                                             <div className="md:col-span-1 flex items-center justify-end md:justify-center">
                                                 {fields.length > 1 && (
-                                                    <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-primary-foreground" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
+                                                     <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-primary-foreground" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
                                                 )}
                                             </div>
                                         </div>
@@ -260,14 +277,6 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                             
                             <hr className="border-border" />
 
-                             {/* Observations Section */}
-                             <div className="space-y-4">
-                                <h3 className="text-lg font-medium text-primary">Observações (Opcional)</h3>
-                                <FormField control={form.control} name="observations" render={({ field }) => ( <FormItem> <FormLabel>Adicione qualquer observação ao orçamento</FormLabel> <FormControl><Textarea placeholder="Ex: Orçamento válido por 15 dias..." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                            </div>
-
-                            <hr className="border-border" />
-
                             {/* Conditions Section */}
                              <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary">Termos e Condições</h3>
@@ -275,6 +284,18 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                 <FormField control={form.control} name="paymentConditions" render={({ field }) => ( <FormItem> <FormLabel>Condições de Pagamento</FormLabel> <FormControl><Textarea placeholder="Ex: 50% do valor será pago antes do início do serviço e o restante, após sua conclusão." {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                             </div>
 
+                            <hr className="border-border" />
+
+                            {/* Observations Section */}
+                             <div className="space-y-4">
+                                 <FormField control={form.control} name="observations" render={({ field }) => ( 
+                                    <FormItem> 
+                                        <FormLabel className="text-lg font-medium text-primary">Observações (Opcional)</FormLabel>
+                                        <FormControl><Textarea placeholder="Ex: Orçamento válido por 15 dias..." {...field} /></FormControl> 
+                                        <FormMessage /> 
+                                    </FormItem> 
+                                )} />
+                            </div>
                         </CardContent>
                         <CardFooter className="flex-col items-start gap-4">
                              <div className="flex items-center justify-between w-full">
@@ -300,6 +321,18 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
 }
 
 const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
+    const renderObservationText = (text?: string) => {
+        if (!text) return null;
+        const parts = text.split(/(\*.*?\*)/g);
+        return parts.map((part, index) =>
+            part.startsWith('*') && part.endsWith('*') ? (
+                <strong key={index}>{part.slice(1, -1)}</strong>
+            ) : (
+                part
+            )
+        );
+    };
+
     return (
         <div className="bg-[#18191b] text-[#e0e0e0] p-10 font-sans" style={{width: '210mm', minHeight: '297mm', position: 'relative'}}>
             {/* Header */}
@@ -386,7 +419,12 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
                  <h4 className="font-bold text-white text-xl mb-4 text-center">Termos e Condições:</h4>
                 {data.commercialConditions && <p className="text-neutral-300"><span className="font-medium">Condições Comerciais:</span> {data.commercialConditions}</p>}
                 {data.paymentConditions && <p className="text-neutral-300"><span className="font-medium">Condições de Pagamento:</span> {data.paymentConditions}</p>}
-                {data.observations && <p className="text-neutral-300"><span className="font-medium">Observações:</span> {data.observations}</p>}
+                 {data.observations && (
+                    <div>
+                        <p className="text-neutral-300 font-medium">Observações:</p>
+                        <p className="text-neutral-300">{renderObservationText(data.observations)}</p>
+                    </div>
+                )}
             </section>
             
             {/* Footer */}
@@ -472,6 +510,10 @@ export default function OrcaFastPage() {
         
         const totalAmount = subtotal - generalDiscountValue;
 
+        const observationsWithFormatting = rest.isDroneFeatureEnabled
+            ? 'Se a gravação com drone for *realizada no mesmo dia e local de outro serviço contratado*, você garante a inclusão do equipamento aéreo pagando apenas o *valor único*, aproveitando o máximo do nosso deslocamento e estrutura.'
+            : rest.observations;
+
         return {
             ...rest,
             clientName,
@@ -481,7 +523,8 @@ export default function OrcaFastPage() {
             generalDiscountValue,
             generalDiscountPercentage: Number(generalDiscountPercentage || 0),
             totalAmount,
-            budgetNumber: String(budgetNumber).padStart(4, '0')
+            budgetNumber: String(budgetNumber).padStart(4, '0'),
+            observations: observationsWithFormatting
         }
     }
     

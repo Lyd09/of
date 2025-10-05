@@ -15,6 +15,19 @@ const formatCurrency = (value: number) => {
 };
 
 export const BudgetPreview = ({ data, onGeneratePdf }: { data: BudgetPreviewData | null, onGeneratePdf: () => void }) => {
+    
+    const renderObservationText = (text?: string) => {
+        if (!text) return null;
+        const parts = text.split(/(\*.*?\*)/g);
+        return parts.map((part, index) =>
+            part.startsWith('*') && part.endsWith('*') ? (
+                <strong key={index}>{part.slice(1, -1)}</strong>
+            ) : (
+                part
+            )
+        );
+    };
+
     if (!data) {
         return (
             <Card className="sticky top-8 bg-[#18191b] text-[#e0e0e0] border-border shadow-lg">
@@ -159,7 +172,12 @@ export const BudgetPreview = ({ data, onGeneratePdf }: { data: BudgetPreviewData
                      {(commercialConditions || paymentConditions) && <h4 className="font-bold text-neutral-200 text-xl mb-4">Termos e Condições:</h4>}
                      {commercialConditions && <p className="text-neutral-400"><span className="font-medium">Condições Comerciais:</span> {commercialConditions}</p>}
                      {paymentConditions && <p className="text-neutral-400"><span className="font-medium">Condições de Pagamento:</span> {paymentConditions}</p>}
-                     {observations && <p className="text-neutral-400"><span className="font-medium">Observações:</span> {observations}</p>}
+                     {observations && (
+                        <div>
+                            <p className="text-neutral-400 font-medium">Observações:</p>
+                            <p className="text-neutral-400">{renderObservationText(observations)}</p>
+                        </div>
+                    )}
                      <div className="text-center text-xs text-neutral-500 pt-8">
                         <p>Obrigado pela preferência! — {companyName}</p>
                     </div>
