@@ -155,7 +155,7 @@ export function PresetManagerDialog({ isOpen, onOpenChange, presets, setPresets 
                     </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                            <Button variant="ghost" size="icon" className="text-primary hover:text-primary-foreground">
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </AlertDialogTrigger>
