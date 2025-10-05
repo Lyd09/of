@@ -227,7 +227,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                             </div>
                                             <div className="md:col-span-1 flex items-center justify-end md:justify-center">
                                                 {fields.length > 1 && (
-                                                    <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
+                                                    <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-primary-foreground" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
                                                 )}
                                             </div>
                                         </div>
