@@ -10,12 +10,11 @@ interface ContractPreviewProps {
 }
 
 const termsToBold = ["CONTRATANTE", "CONTRATANTES", "CONTRATADA", "OBJETO DO CONTRATO", "VALOR E FORMA DE PAGAMENTO", "PRAZO DE ENTREGA", "RESPONSABILIDADES", "DIREITOS AUTORAIS", "RESCISÃO", "FORO"];
-const clauseTitles = ["OBJETO DO CONTRATO", "VALOR E FORMA DE PAGAMENTO", "PRAZO DE ENTREGA", "RESPONSABILIDADES", "DIREITOS AUTORAIS", "RESCISÃO", "FORO"];
 
 const Clause: React.FC<{ title: string; number: number; children: React.ReactNode }> = ({ title, number, children }) => (
   <div className="mb-4">
-    <p className="font-bold">
-      {boldenContractTerms(`Cláusula ${number} – ${title.toUpperCase()}`, termsToBold)}
+    <p>
+      <strong>{`Cláusula ${number} – ${title.toUpperCase()}`}</strong>
     </p>
     <p className="text-justify">{children}</p>
   </div>
@@ -67,7 +66,9 @@ export function ContractPreview({ data }: ContractPreviewProps) {
       <div className="mb-6 space-y-4">
         <div>
             <p><strong className="font-bold">CONTRATADA:</strong></p>
-            <p className="text-justify"><strong>NOME:</strong> {companyData.name}, pessoa jurídica de direito privado, inscrita no <strong>CNPJ</strong> sob o nº {companyData.cnpj}, com sede em <strong>ENDEREÇO:</strong> {companyData.address}, e <strong>E-MAIL:</strong> {companyData.email}.</p>
+            <p className="text-justify">
+                <strong>NOME:</strong> {companyData.name}, pessoa jurídica de direito privado, inscrita no <strong>CNPJ</strong> sob o nº {companyData.cnpj}, com sede em <strong>ENDEREÇO:</strong> {companyData.address}, e <strong>E-MAIL:</strong> {companyData.email}.
+            </p>
         </div>
         
         <p className="font-bold text-justify">e de outro lado:</p>
