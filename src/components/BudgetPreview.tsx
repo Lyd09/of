@@ -188,10 +188,3 @@ export const BudgetPreview = ({ data, onGeneratePdf }: { data: BudgetPreviewData
         </Card>
     );
 };
-
-    
-
-    
-
-    
-

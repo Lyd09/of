@@ -104,14 +104,14 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
     const watchedDroneFeature = form.watch('isDroneFeatureEnabled');
     
     useEffect(() => {
+        const droneText = 'Se a gravação com drone for *realizada no mesmo dia e local de outro serviço contratado*, você garante a inclusão do equipamento aéreo pagando apenas o *valor único*, aproveitando o máximo do nosso deslocamento e estrutura.';
+        const currentObs = form.getValues('observations');
+
         if (watchedDroneFeature) {
-            const droneText = 'Se a gravação com drone for **realizada no mesmo dia e local de outro serviço contratado**, você garante a inclusão do equipamento aéreo pagando apenas o **valor único**, aproveitando o máximo do nosso deslocamento e estrutura.';
-            form.setValue('observations', droneText.replace(/\*\*(.*?)\*\*/g, '$1')); 
+            form.setValue('observations', droneText); 
         } else {
-            // Clear observations only if it contains the drone text
-            const currentObs = form.getValues('observations');
-            const droneTextTemplate = 'Se a gravação com drone for';
-            if (currentObs && currentObs.startsWith(droneTextTemplate)) {
+            // Clear observations only if it's the default drone text
+            if (currentObs === droneText) {
                 form.setValue('observations', '');
             }
         }
@@ -510,10 +510,6 @@ export default function OrcaFastPage() {
         
         const totalAmount = subtotal - generalDiscountValue;
 
-        const observationsWithFormatting = rest.isDroneFeatureEnabled
-            ? 'Se a gravação com drone for *realizada no mesmo dia e local de outro serviço contratado*, você garante a inclusão do equipamento aéreo pagando apenas o *valor único*, aproveitando o máximo do nosso deslocamento e estrutura.'
-            : rest.observations;
-
         return {
             ...rest,
             clientName,
@@ -524,7 +520,7 @@ export default function OrcaFastPage() {
             generalDiscountPercentage: Number(generalDiscountPercentage || 0),
             totalAmount,
             budgetNumber: String(budgetNumber).padStart(4, '0'),
-            observations: observationsWithFormatting
+            observations: rest.observations
         }
     }
     
@@ -639,11 +635,7 @@ export default function OrcaFastPage() {
 
     
 
-
-
     
-
-
 
     
 
