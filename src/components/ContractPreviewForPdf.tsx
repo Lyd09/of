@@ -17,7 +17,10 @@ const formatCurrency = (value: number) => {
 
 const Clause: React.FC<{ title: string; number: number; children: React.ReactNode }> = ({ title, number, children }) => (
   <div className="mb-4 no-break">
-    <p className="font-bold">{`Cláusula ${number} – ${title.toUpperCase()}`}</p>
+    <p>
+      <strong>{`Cláusula ${number} – `}</strong>
+      <strong>{title.toUpperCase()}</strong>
+    </p>
     <p className="text-justify">{children}</p>
   </div>
 );
@@ -149,11 +152,11 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
           {getForoText()}
        </Clause>
 
-      <div className="mt-16 text-center break-before">
+      <div className="mt-16 text-center no-break">
         <p>{signatureCity || 'Cidade'}, {signatureDate || 'Data'}.</p>
       </div>
 
-       <div className="mt-16 space-y-8">
+       <div className="mt-16 space-y-8 no-break">
         <div className="text-center">
             <p>_________________________________________</p>
             <p>{companyData.name}</p>
