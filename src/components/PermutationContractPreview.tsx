@@ -34,6 +34,7 @@ export function PermutationContractPreview({ data }: PermutationContractPreviewP
     permutedObject,
     conditions,
     propertyTransfer,
+    generalDispositions,
     jurisdiction,
     signatureCity,
     signatureDate,
@@ -87,8 +88,14 @@ export function PermutationContractPreview({ data }: PermutationContractPreviewP
       <Clause title="Da Transferência de Propriedade" number={3}>
         <p>{boldenContractTerms(propertyTransfer || '', termsToBold)}</p>
       </Clause>
+
+      {generalDispositions && (
+        <Clause title="Das Disposições Gerais" number={4}>
+            <p>{boldenContractTerms(generalDispositions, termsToBold)}</p>
+        </Clause>
+      )}
       
-      <Clause title="Do Foro" number={4}>
+      <Clause title="Do Foro" number={generalDispositions ? 5 : 4}>
          <p>{getForoText()}</p>
        </Clause>
 

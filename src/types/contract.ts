@@ -70,6 +70,7 @@ export const permutationContractSchema = z.object({
   permutedObject: z.string().min(1, "Descreva os serviços a serem prestados pelo PERMUTADO."),
   conditions: z.string().min(1, "As condições são obrigatórias."),
   propertyTransfer: z.string().min(1, "A cláusula de transferência é obrigatória."),
+  generalDispositions: z.string().optional(),
   jurisdiction: z.string().min(1, "Foro é obrigatório."),
   signatureCity: z.string().min(1, "Cidade da assinatura é obrigatória."),
   signatureDate: z.string().min(1, "Data da assinatura é obrigatória."),

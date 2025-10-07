@@ -16,6 +16,7 @@ import numero from 'numero-por-extenso';
 
 const initialConditionsText = "Não há prazo limite estipulado para a quitação do valor em serviços. As partes se comprometem a manter comunicação clara e objetiva quanto à realização e entrega dos serviços.";
 const initialPropertyTransferText = "A propriedade do bem/produto permutado será transferida ao PERMUTADO na assinatura deste contrato, sendo este responsável por sua guarda, manutenção e utilização a partir de então. No caso de permuta de serviços, a obrigação de cada parte se encerra após a conclusão da entrega acordada por ambos.";
+const initialGeneralDispositionsText = "O presente contrato é firmado em caráter irrevogável e irretratável, obrigando as partes e seus sucessores. Qualquer alteração neste contrato só terá validade se feita por escrito e assinada por ambas as partes.";
 
 export function PermutationContractForm() {
   const { control, watch, setValue } = useFormContext<PermutationContractData>();
@@ -35,6 +36,7 @@ export function PermutationContractForm() {
         setValue('permutedObject', 'Serviços de produção audiovisual (gravação e edição) a serem prestados pela FastFilms.');
         setValue('conditions', initialConditionsText);
         setValue('propertyTransfer', initialPropertyTransferText);
+        setValue('generalDispositions', initialGeneralDispositionsText);
         setValue('jurisdiction', 'Lagoa Santa/MG');
         setValue('signatureCity', 'Lagoa Santa');
         setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }));
@@ -107,8 +109,16 @@ export function PermutationContractForm() {
                 </FormItem>
             )} />
 
+             <FormField control={control} name="generalDispositions" render={({ field }) => ( 
+                <FormItem>
+                    <FormLabel>Cláusula 4 - Das Disposições Gerais</FormLabel>
+                    <FormControl><Textarea {...field} rows={4} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+            )} />
+
             <div>
-                <FormLabel>Cláusula 4 - Foro</FormLabel>
+                <FormLabel>Cláusula 5 - Foro</FormLabel>
                 <div className="p-4 border rounded-md mt-2">
                     <FormField control={control} name="jurisdiction" render={({ field }) => ( <FormItem><FormLabel>Foro</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
