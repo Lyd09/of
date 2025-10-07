@@ -12,8 +12,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { FileText, Users, Repeat } from 'lucide-react';
 import { ContractGeneratorDialog } from './ContractGeneratorDialog';
+import { AuthorizationTermDialog } from './AuthorizationTermDialog';
 
-type ContractType = 'services' | 'hiring' | 'exchange';
+type ContractType = 'services' | 'hiring' | 'authorization';
 
 interface ContractDialogProps {
   isOpen: boolean;
@@ -37,12 +38,14 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
     }
   };
 
+  const isMainDialogOpen = isOpen && !isGeneratorOpen;
+
   return (
     <>
-      <Dialog open={isOpen && !isGeneratorOpen} onOpenChange={onOpenChange}>
+      <Dialog open={isMainDialogOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Gerar Novo Contrato</DialogTitle>
+            <DialogTitle>Gerar Novo Documento</DialogTitle>
             <DialogDescription>
               Escolha o tipo de documento que você deseja gerar.
             </DialogDescription>
@@ -66,14 +69,13 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
               <Users className="w-10 h-10 text-muted-foreground group-hover:text-white transition-colors" />
               <span className="text-lg text-muted-foreground">Contratações</span>
             </Button>
-            <Button
+             <Button
               variant="outline"
               className="h-32 flex flex-col gap-2 p-6 group"
-              onClick={() => handleSelection('exchange')}
-              disabled
+              onClick={() => handleSelection('authorization')}
             >
-              <Repeat className="w-10 h-10 text-muted-foreground group-hover:text-white transition-colors" />
-              <span className="text-lg text-muted-foreground">Acordos e Trocas</span>
+              <Repeat className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
+              <span className="text-lg">Acordos e Trocas</span>
             </Button>
           </div>
 
@@ -89,6 +91,12 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
         <ContractGeneratorDialog
           isOpen={isGeneratorOpen}
           onOpenChange={handleGeneratorClose}
+        />
+      )}
+      {selectedType === 'authorization' && (
+        <AuthorizationTermDialog
+            isOpen={isGeneratorOpen}
+            onOpenChange={handleGeneratorClose}
         />
       )}
     </>

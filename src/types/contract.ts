@@ -1,4 +1,3 @@
-
 import * as z from 'zod';
 
 export const contractorSchema = z.object({
@@ -44,11 +43,27 @@ export const serviceContractSchema = z.object({
 
 export type ServiceContractData = z.infer<typeof serviceContractSchema>;
 
+export const authorizationTermSchema = z.object({
+  authorizedName: z.string().min(1, "Nome do autorizado é obrigatório."),
+  authorizedCpfCnpj: z.string().min(1, "CPF/CNPJ do autorizado é obrigatório."),
+  authorizedAddress: z.string().min(1, "Endereço do autorizado é obrigatório."),
+  authorizedEmail: z.string().email("E-mail inválido."),
+  projectName: z.string().min(1, "Nome do projeto é obrigatório."),
+  finalClient: z.string().min(1, "Cliente final é obrigatório."),
+  executionDate: z.string().min(1, "Data de execução é obrigatória."),
+  authorizedLinks: z.string().min(1, "Pelo menos um link é obrigatório."),
+  fineValue: z.number().min(0, "O valor da multa não pode ser negativo."),
+  jurisdiction: z.string().min(1, "Foro é obrigatório."),
+  signatureCity: z.string().min(1, "Cidade da assinatura é obrigatória."),
+  signatureDate: z.string().min(1, "Data da assinatura é obrigatória."),
+});
+
+export type AuthorizationTermData = z.infer<typeof authorizationTermSchema>;
+
+
 export const companyData = {
     name: "FastFilms",
     cnpj: "53.525.841/0001-89",
     address: "Rua Bartolomeu Bueno de Gusmao, 594 - Aeronautas, Lagoa Santa - MG, 33.236-454",
     email: "fastfilmsoficial@gmail.com"
 }
-
-    
