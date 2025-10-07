@@ -76,7 +76,7 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
             </div>
              <div>
               <h3 className="mb-4 text-lg font-medium text-foreground">Acordos e Trocas</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                  <Button
                   variant="outline"
                   className="h-32 flex flex-col gap-2 p-6 group"
