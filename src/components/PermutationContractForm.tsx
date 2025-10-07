@@ -24,6 +24,21 @@ const objectTypeOptions: PermutationObjectType[] = [
   'Alimentos',
 ];
 
+const getInitialPermutantObjectText = (type: PermutationObjectType) => {
+    switch (type) {
+        case 'Equipamentos':
+            return 'Um equipamento X, modelo Y, em perfeito estado de funcionamento.';
+        case 'Serviços':
+            return 'Prestação de serviços de [especificar serviço], incluindo [detalhes do serviço].';
+        case 'Espaços':
+            return 'Cessão de uso do espaço [nome do espaço] para a realização de [especificar evento/finalidade].';
+        case 'Alimentos':
+            return 'Fornecimento de [quantidade] de [nome do produto alimentício] para o evento X.';
+        default:
+            return '';
+    }
+};
+
 const getInitialConditionsText = (type: 'Com prazo' | 'Sem prazo', deadline?: string) => {
     if (type === 'Com prazo') {
         return `O PERMUTADO compromete-se a quitar o valor em serviços no prazo de ${deadline || '[definir prazo]'}. As partes se comprometem a manter comunicação clara e objetiva quanto à realização e entrega dos serviços.`;
@@ -69,7 +84,7 @@ export function PermutationContractForm() {
         const initialConditionType: 'Com prazo' | 'Sem prazo' = 'Sem prazo';
 
         setValue('permutantObjectType', initialObjectType);
-        setValue('permutantObject', 'Um equipamento X, modelo Y, em perfeito estado de funcionamento.');
+        setValue('permutantObject', getInitialPermutantObjectText(initialObjectType));
         setValue('permutantObjectValue', 5000);
         setValue('permutedObject', 'Serviços de produção audiovisual (gravação e edição) a serem prestados pela FastFilms.');
         
@@ -88,6 +103,7 @@ export function PermutationContractForm() {
   useEffect(() => {
       if (selectedObjectType) {
           setValue('propertyTransfer', getInitialPropertyTransferText(selectedObjectType));
+          setValue('permutantObject', getInitialPermutantObjectText(selectedObjectType));
       }
   }, [selectedObjectType, setValue]);
 
@@ -233,5 +249,3 @@ export function PermutationContractForm() {
     </div>
   );
 }
-
-    

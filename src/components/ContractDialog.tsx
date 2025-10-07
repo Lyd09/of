@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { FileText, Users, Repeat } from 'lucide-react';
 import { ContractGeneratorDialog } from './ContractGeneratorDialog';
-import { AgreementsContractDialog } from './AgreementsContractDialog'; // Alterado
+import { AgreementsContractDialog } from './AgreementsContractDialog';
 
 type ContractType = 'services' | 'agreements' | 'hiring';
 
@@ -52,7 +52,7 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
           </DialogHeader>
 
           <div className="py-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                  <Button
                   variant="outline"
                   className="h-32 flex flex-col gap-2 p-6 group"
@@ -64,19 +64,19 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
                 <Button
                   variant="outline"
                   className="h-32 flex flex-col gap-2 p-6 group"
-                  onClick={() => handleSelection('agreements')}
-                >
-                  <Repeat className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
-                  <span className="text-center">Acordos e Trocas</span>
-                </Button>
-                 <Button
-                  variant="outline"
-                  className="h-32 flex flex-col gap-2 p-6 group"
                   onClick={() => handleSelection('hiring')}
                   disabled
                 >
                   <Users className="w-10 h-10 text-muted-foreground group-hover:text-white transition-colors" />
                   <span className="text-center text-muted-foreground">Contratações (em breve)</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-32 flex flex-col gap-2 p-6 group"
+                  onClick={() => handleSelection('agreements')}
+                >
+                  <Repeat className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
+                  <span className="text-center">Acordos e Trocas</span>
                 </Button>
               </div>
           </div>
