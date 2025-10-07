@@ -35,6 +35,7 @@ export const serviceContractSchema = z.object({
   rescissionNoticePeriod: z.number(),
   rescissionFine: z.number(),
   generalDispositions: z.string().min(1, "As disposições gerais são obrigatórias."),
+  warranty: z.string().optional(), // Nova cláusula de garantia
   jurisdiction: z.string().min(1, "Foro é obrigatório."),
   signatureCity: z.string().min(1, "Cidade da assinatura é obrigatória."),
   signatureDate: z.string().min(1, "Data da assinatura é obrigatória."),
@@ -48,5 +49,3 @@ export const companyData = {
     address: "Rua Bartolomeu Bueno de Gusmao, 594 - Aeronautas, Lagoa Santa - MG, 33.236-454",
     email: "fastfilmsoficial@gmail.com"
 }
-
-    

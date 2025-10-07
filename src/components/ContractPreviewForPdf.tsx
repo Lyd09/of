@@ -43,6 +43,7 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
     rescissionNoticePeriod,
     rescissionFine,
     generalDispositions,
+    warranty,
     jurisdiction,
     signatureCity,
     signatureDate,
@@ -89,6 +90,7 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
     );
    };
 
+  let clauseNumber = 7;
 
   return (
     <div className="bg-white text-black p-12" style={{ fontFamily: "Arial, Helvetica, sans-serif", fontSize: '12pt', lineHeight: '1.5', width: '210mm', minHeight: '297mm' }}>
@@ -147,15 +149,21 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
          {boldenContractTerms(`O presente contrato poderá ser rescindido por qualquer das partes, mediante aviso prévio por escrito com antecedência mínima de ${rescissionNoticePeriod || 0} dias. Em caso de rescisão imotivada por parte do CONTRATANTE, será devida uma multa correspondente a ${rescissionFine || 0}% do valor total do contrato.`, termsToBold)}
        </Clause>
 
-       <Clause title={serviceType === 'Website' ? 'GARANTIA' : 'DISPOSIÇÕES GERAIS'} number={7}>
+       <Clause title="DISPOSIÇÕES GERAIS" number={clauseNumber++}>
         {boldenContractTerms(generalDispositions || '', termsToBold)}
       </Clause>
       
-       <Clause title="FORO" number={8}>
+      {serviceType === 'Website' && warranty && (
+        <Clause title="GARANTIA" number={clauseNumber++}>
+          {boldenContractTerms(warranty, termsToBold)}
+        </Clause>
+      )}
+
+       <Clause title="FORO" number={clauseNumber++}>
           {getForoText()}
        </Clause>
 
-      <div className="mt-16 text-center no-break">
+       <div className="mt-16 text-center no-break">
         <p>{signatureCity || 'Cidade'}, {signatureDate || 'Data'}.</p>
       </div>
 
@@ -175,5 +183,3 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
     </div>
   );
 }
-
-    

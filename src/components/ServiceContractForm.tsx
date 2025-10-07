@@ -65,6 +65,10 @@ const getInitialWarrantyClause = (service: ServiceType): string => {
     if (service === 'Website') {
         return 'A CONTRATADA oferece uma garantia de 6 (seis) meses para correção de bugs ou problemas técnicos decorrentes do desenvolvimento, contados a partir da data de entrega final do projeto. Esta garantia não cobre novas funcionalidades ou alterações de escopo.';
     }
+    return ''; // Retorna vazio para outros serviços
+}
+
+const getInitialGeneralDispositions = (): string => {
     return 'Qualquer alteração neste contrato só terá validade se feita por escrito e assinada por ambas as partes.';
 }
 
@@ -78,9 +82,6 @@ export function ServiceContractForm() {
   const selectedService = watch('serviceType') as ServiceType;
   const paymentMethod = watch('paymentMethod');
   const totalValue = watch('totalValue');
-  
-  // LOG PARA DEBUG
-  console.log("Serviço Selecionado:", selectedService);
 
   useEffect(() => {
     // Seta os valores iniciais quando o formulário é montado pela primeira vez.
@@ -97,7 +98,8 @@ export function ServiceContractForm() {
     setValue('jurisdiction', 'Lagoa Santa/MG', { shouldDirty: true });
     setValue('signatureCity', 'Lagoa Santa', { shouldDirty: true });
     setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }), { shouldDirty: true });
-    setValue('generalDispositions', getInitialWarrantyClause(initialService), { shouldDirty: true });
+    setValue('generalDispositions', getInitialGeneralDispositions(), { shouldDirty: true });
+    setValue('warranty', getInitialWarrantyClause(initialService), { shouldDirty: true });
 
   }, [setValue]);
 
@@ -107,7 +109,8 @@ export function ServiceContractForm() {
         setValue('object', getInitialObjectText(selectedService));
         setValue('contractorResponsibilities', getInitialContractorResponsibilitiesText(selectedService));
         setValue('clientResponsibilities', getInitialClientResponsibilitiesText(selectedService));
-        setValue('generalDispositions', getInitialWarrantyClause(selectedService));
+        setValue('generalDispositions', getInitialGeneralDispositions());
+        setValue('warranty', getInitialWarrantyClause(selectedService));
     }
   }, [selectedService, setValue]);
 
@@ -133,8 +136,6 @@ export function ServiceContractForm() {
                             "flex flex-col items-center justify-center rounded-md border-2 border-muted p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer text-center",
                              isSelected && "bg-accent text-accent-foreground border-accent-foreground/50"
                         );
-                        // LOG PARA DEBUG
-                        console.log(`Serviço: ${service}, Selecionado: ${isSelected}, Classes: "${labelClassName}"`);
                         return (
                         <FormItem key={service}>
                             <FormControl>
@@ -255,7 +256,10 @@ export function ServiceContractForm() {
                         <FormField control={control} name="rescissionNoticePeriod" render={({ field }) => ( <FormItem><FormLabel>Aviso Prévio (dias)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={control} name="rescissionFine" render={({ field }) => ( <FormItem><FormLabel>Multa de Rescisão (%)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl><FormMessage /></FormItem>)} />
                      </div>
-                     <FormField control={control} name="generalDispositions" render={({ field }) => ( <FormItem><FormLabel>Disposições Gerais / Garantia</FormLabel><FormControl><Textarea {...field} rows={4} /></FormControl><FormMessage /></FormItem>)} />
+                     <FormField control={control} name="generalDispositions" render={({ field }) => ( <FormItem><FormLabel>Disposições Gerais</FormLabel><FormControl><Textarea {...field} rows={4} /></FormControl><FormMessage /></FormItem>)} />
+                     {selectedService === 'Website' && (
+                        <FormField control={control} name="warranty" render={({ field }) => ( <FormItem><FormLabel>Garantia</FormLabel><FormControl><Textarea {...field} rows={4} /></FormControl><FormMessage /></FormItem>)} />
+                     )}
                      <FormField control={control} name="jurisdiction" render={({ field }) => ( <FormItem><FormLabel>Foro</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
             </div>
@@ -275,6 +279,3 @@ export function ServiceContractForm() {
     </div>
   );
 }
-
-    
-    
