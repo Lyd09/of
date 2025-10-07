@@ -111,7 +111,8 @@ export function ServiceContractForm() {
 
   useEffect(() => {
     if(selectedService) {
-        setValue('contractTitle', `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE ${selectedService.toUpperCase()}`);
+        const titleText = selectedService === 'Drone' ? 'DRONE' : selectedService.toUpperCase();
+        setValue('contractTitle', `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE ${titleText}`);
         setValue('object', getInitialObjectText(selectedService));
         setValue('contractorResponsibilities', getInitialContractorResponsibilitiesText(selectedService));
         setValue('clientResponsibilities', getInitialClientResponsibilitiesText(selectedService));
@@ -285,5 +286,7 @@ export function ServiceContractForm() {
     </div>
   );
 }
+
+    
 
     
