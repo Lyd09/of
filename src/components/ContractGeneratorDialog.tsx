@@ -69,7 +69,7 @@ export function ContractGeneratorDialog({ isOpen, onOpenChange }: ContractGenera
 
           const opt = {
               margin: [0, 0, 0, 0],
-              filename: `contrato_${data.contractors[0]?.name.replace(/\s/g, '_') || 'servicos'}.pdf`,
+              filename: `${data.serviceType} - ${data.contractors[0]?.name.replace(/\s/g, '_') || 'Serviços'}.pdf`,
               image: { type: 'jpeg', quality: 0.98 },
               html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff' },
               jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
