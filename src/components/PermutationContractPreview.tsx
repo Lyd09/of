@@ -48,7 +48,7 @@ export function PermutationContractPreview({ data }: PermutationContractPreviewP
       let objectTypeText = 'a permuta';
       switch (permutantObjectType) {
           case 'Equipamentos':
-              objectTypeText = `a permuta de ${permutantObject || '[descreva o bem/serviço do PERMUTANTE]'}`;
+              objectTypeText = `a permuta de ${permutantObject || '[descreva o bem do PERMUTANTE]'}`;
               break;
           case 'Serviços':
               objectTypeText = `a permuta dos serviços de ${permutantObject || '[descreva o serviço do PERMUTANTE]'}`;
@@ -69,6 +69,8 @@ export function PermutationContractPreview({ data }: PermutationContractPreviewP
     const text = `Fica eleito o foro da comarca de ${jurisdiction || 'Cidade/UF'} para dirimir quaisquer controvérsias oriundas do presente contrato.`;
     return boldenContractTerms(text, termsToBold);
    };
+
+  let clauseNumber = 1;
 
   return (
     <div className="bg-white text-black p-12 shadow-lg" style={{ fontFamily: "'Geist Sans', sans-serif" }}>
@@ -95,25 +97,25 @@ export function PermutationContractPreview({ data }: PermutationContractPreviewP
         <p className="text-justify">Resolvem, de comum acordo, celebrar o presente contrato de permuta, que se regerá pelas seguintes cláusulas e condições:</p>
       </div>
       
-      <Clause title="Objeto da Permuta" number={1}>
+      <Clause title="Objeto da Permuta" number={clauseNumber++}>
         <p>{getObjectText()}</p>
       </Clause>
 
-      <Clause title="Das Condições" number={2}>
+      <Clause title="Das Condições" number={clauseNumber++}>
         <p>{boldenContractTerms(conditions || '', termsToBold)}</p>
       </Clause>
       
-      <Clause title="Da Transferência de Propriedade/Uso" number={3}>
+      <Clause title="Da Transferência de Propriedade/Uso" number={clauseNumber++}>
         <p>{boldenContractTerms(propertyTransfer || '', termsToBold)}</p>
       </Clause>
 
       {generalDispositions && (
-        <Clause title="Das Disposições Gerais" number={4}>
+        <Clause title="Das Disposições Gerais" number={clauseNumber++}>
             <p>{boldenContractTerms(generalDispositions, termsToBold)}</p>
         </Clause>
       )}
       
-      <Clause title="Do Foro" number={generalDispositions ? 5 : 4}>
+      <Clause title="Do Foro" number={clauseNumber++}>
          <p>{getForoText()}</p>
        </Clause>
 
@@ -137,5 +139,3 @@ export function PermutationContractPreview({ data }: PermutationContractPreviewP
     </div>
   );
 }
-
-    

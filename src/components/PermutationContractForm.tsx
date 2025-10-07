@@ -41,7 +41,7 @@ const getInitialPropertyTransferText = (objectType: PermutationObjectType) => {
         case 'Espaços':
             return "O direito de uso do espaço será concedido ao PERMUTADO nas datas e horários acordados entre as partes, sendo este responsável por zelar pelo local durante sua utilização.";
         default:
-            return "A propriedade do bem/produto permutado será transferida ao PERMUTADO na assinatura deste contrato, sendo este responsável por sua guarda, manutenção e utilização a partir de então. No caso de permuta de serviços, a obrigação de cada parte se encerra após a conclusão da entrega acordada por ambos.";
+            return "A propriedade do bem/produto permutado será transferida ao PERMUTADO na assinatura deste contrato. No caso de permuta de serviços, a obrigação de cada parte se encerra após a conclusão da entrega acordada por ambos.";
     }
 };
 
