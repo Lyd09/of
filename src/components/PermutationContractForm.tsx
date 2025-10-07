@@ -65,7 +65,7 @@ const getInitialGeneralDispositionsText = (): string => {
 };
 
 export function PermutationContractForm() {
-  const { control, watch, setValue } = useFormContext<PermutationContractData>();
+  const { control, watch, setValue, getValues } = useFormContext<PermutationContractData>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'permutants',
@@ -79,7 +79,7 @@ export function PermutationContractForm() {
   useEffect(() => {
     // Set initial default values if they are not set yet
     if (fields.length === 0) {
-        append({ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' });
+        setValue('permutants', [{ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' }]);
         const initialObjectType: PermutationObjectType = 'Equipamentos';
         const initialConditionType: 'Com prazo' | 'Sem prazo' = 'Sem prazo';
 
@@ -98,7 +98,7 @@ export function PermutationContractForm() {
         setValue('signatureCity', 'Lagoa Santa');
         setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }));
     }
-  }, [append, fields.length, setValue]);
+  }, [fields.length, setValue]);
 
   useEffect(() => {
       if (selectedObjectType) {
