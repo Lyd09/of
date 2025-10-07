@@ -14,6 +14,7 @@ import { ServiceContractData, ServiceType } from '@/types/contract';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import numero from 'numero-por-extenso';
+import { cn } from '@/lib/utils';
 
 const serviceOptions: ServiceType[] = [
   'Produção de Vídeo',
@@ -43,7 +44,7 @@ const getInitialResponsibilitiesText = (service: ServiceType) => {
 }
 
 export function ServiceContractForm() {
-  const { control, watch, setValue } = useFormContext<ServiceContractData>();
+  const { control, watch, setValue, formState: { isSubmitting, isDirty, isValid, isSubmitted } } = useFormContext<ServiceContractData>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'contractors',
@@ -53,21 +54,23 @@ export function ServiceContractForm() {
   const paymentMethod = watch('paymentMethod');
   const totalValue = watch('totalValue');
   
+  // LOG PARA DEBUG
+  console.log("Serviço Selecionado:", selectedService);
+
   useEffect(() => {
     // Seta os valores iniciais quando o formulário é montado pela primeira vez.
-    setValue('serviceType', 'Produção de Vídeo');
-    setValue('contractors', [{ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' }]);
-    setValue('paymentMethod', 'Sinal + Entrega');
-    setValue('paymentSignalPercentage', 50);
-    setValue('deliveryDeadline', '4 dias úteis após a realização da última gravação, salvo acordo diferente entre as partes.');
-    setValue('clientResponsibilities', 'Fornecer todas as informações, logos, e materiais necessários para a execução dos serviços;\nAprovar as etapas do projeto dentro dos prazos solicitados.');
-    setValue('copyright', 'Todos os direitos de propriedade intelectual sobre os materiais criados pertencerão ao CONTRATANTE após a quitação integral do valor acordado. A CONTRATADA reserva-se o direito de utilizar o material em seu portfólio.');
-    setValue('rescissionNoticePeriod', 7);
-    setValue('rescissionFine', 20);
-    setValue('jurisdiction', 'Lagoa Santa/MG');
-    setValue('signatureCity', 'Lagoa Santa');
-    setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }));
-
+    setValue('serviceType', 'Produção de Vídeo', { shouldDirty: true });
+    setValue('contractors', [{ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' }], { shouldDirty: true });
+    setValue('paymentMethod', 'Sinal + Entrega', { shouldDirty: true });
+    setValue('paymentSignalPercentage', 50, { shouldDirty: true });
+    setValue('deliveryDeadline', '4 dias úteis após a realização da última gravação, salvo acordo diferente entre as partes.', { shouldDirty: true });
+    setValue('clientResponsibilities', 'Fornecer todas as informações, logos, e materiais necessários para a execução dos serviços;\nAprovar as etapas do projeto dentro dos prazos solicitados.', { shouldDirty: true });
+    setValue('copyright', 'Todos os direitos de propriedade intelectual sobre os materiais criados pertencerão ao CONTRATANTE após a quitação integral do valor acordado. A CONTRATADA reserva-se o direito de utilizar o material em seu portfólio.', { shouldDirty: true });
+    setValue('rescissionNoticePeriod', 7, { shouldDirty: true });
+    setValue('rescissionFine', 20, { shouldDirty: true });
+    setValue('jurisdiction', 'Lagoa Santa/MG', { shouldDirty: true });
+    setValue('signatureCity', 'Lagoa Santa', { shouldDirty: true });
+    setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }), { shouldDirty: true });
   }, [setValue]);
 
   useEffect(() => {
@@ -94,16 +97,25 @@ export function ServiceContractForm() {
                     defaultValue={field.value}
                     className="grid grid-cols-2 lg:grid-cols-3 gap-4"
                     >
-                    {serviceOptions.map((service) => (
+                    {serviceOptions.map((service) => {
+                        const isSelected = field.value === service;
+                        const labelClassName = cn(
+                            "flex flex-col items-center justify-center rounded-md border-2 border-muted p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer text-center",
+                             isSelected && "bg-accent text-accent-foreground border-accent-foreground/50"
+                        );
+                        // LOG PARA DEBUG
+                        console.log(`Serviço: ${service}, Selecionado: ${isSelected}, Classes: "${labelClassName}"`);
+                        return (
                         <FormItem key={service}>
-                        <FormControl>
-                            <RadioGroupItem value={service} className="sr-only" id={service}/>
-                        </FormControl>
-                        <Label htmlFor={service} className="flex flex-col items-center justify-center rounded-md border-2 border-muted p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:bg-accent [&:has([data-state=checked])]:text-accent-foreground cursor-pointer text-center">
-                            {service}
-                        </Label>
+                            <FormControl>
+                                <RadioGroupItem value={service} className="sr-only" id={service}/>
+                            </FormControl>
+                            <Label htmlFor={service} className={labelClassName}>
+                                {service}
+                            </Label>
                         </FormItem>
-                    ))}
+                        )
+                    })}
                     </RadioGroup>
                     <FormMessage />
                 </FormItem>
@@ -155,7 +167,7 @@ export function ServiceContractForm() {
                     <FormField control={control} name="totalValue" render={({ field }) => ( 
                         <FormItem>
                             <FormLabel>Valor Total (R$)</FormLabel>
-                            <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl>
+                            <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl>
                             {totalValue > 0 && <p className="text-sm text-muted-foreground">{numero.porExtenso(totalValue, numero.estilo.monetario)}.</p>}
                             <FormMessage />
                         </FormItem>
@@ -178,7 +190,7 @@ export function ServiceContractForm() {
                         <FormField control={control} name="paymentSignalPercentage" render={({ field }) => ( 
                             <FormItem>
                                 <FormLabel>Porcentagem do Sinal (%)</FormLabel>
-                                <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl>
+                                <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
@@ -210,8 +222,8 @@ export function ServiceContractForm() {
                 <div className="p-4 border rounded-md mt-2 space-y-4">
                      <FormField control={control} name="copyright" render={({ field }) => ( <FormItem><FormLabel>Direitos Autorais</FormLabel><FormControl><Textarea {...field} rows={4} /></FormControl><FormMessage /></FormItem>)} />
                      <div className="grid grid-cols-2 gap-4">
-                        <FormField control={control} name="rescissionNoticePeriod" render={({ field }) => ( <FormItem><FormLabel>Aviso Prévio (dias)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={control} name="rescissionFine" render={({ field }) => ( <FormItem><FormLabel>Multa de Rescisão (%)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={control} name="rescissionNoticePeriod" render={({ field }) => ( <FormItem><FormLabel>Aviso Prévio (dias)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={control} name="rescissionFine" render={({ field }) => ( <FormItem><FormLabel>Multa de Rescisão (%)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl><FormMessage /></FormItem>)} />
                      </div>
                      <FormField control={control} name="jurisdiction" render={({ field }) => ( <FormItem><FormLabel>Foro</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
