@@ -41,8 +41,8 @@ export const serviceContractSchema = z.object({
 export type ServiceContractData = z.infer<typeof serviceContractSchema>;
 
 export const companyData = {
-    name: "FastFilms Produções Audiovisuais LTDA",
-    cnpj: "12.345.678/0001-99",
-    address: "Rua das Inovações, 100, Tech-City, MG",
-    email: "contato@fastfilms.com"
+    name: "FastFilms",
+    cnpj: "53.525.841/0001-89",
+    address: "Rua Bartolomeu Bueno de Gusmao, 594 - Aeronautas, Lagoa Santa - MG, 33.236-454",
+    email: "fastfilmsoficial@gmail.com"
 }
