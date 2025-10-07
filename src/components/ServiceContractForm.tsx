@@ -38,6 +38,8 @@ const getInitialObjectText = (service: ServiceType) => {
             return 'O presente contrato tem como objeto a captação de imagens aéreas com drone, conforme plano de voo e orientações acordadas com o CONTRATANTE.';
         case 'Desenvolvimento de Software':
             return 'O presente contrato tem como objeto o desenvolvimento e implementação de uma solução de software customizada, conforme especificações técnicas e requisitos detalhados em anexo ou briefing.';
+        case 'Motion Graphics':
+            return 'O presente contrato tem como objeto a criação e produção de animação 2D/3D (motion graphics), incluindo design de elementos gráficos, personagens, cenários e animação, para explicar um conceito, promover um produto ou contar uma história, conforme roteiro e storyboard aprovados.';
         default:
             return '';
     }
@@ -55,6 +57,8 @@ const getInitialContractorResponsibilitiesText = (service: ServiceType) => {
             return 'Operar o drone para capturar as imagens aéreas solicitadas;\nEntregar o material bruto capturado em formato digital;';
         case 'Desenvolvimento de Software':
             return 'Analisar os requisitos e modelar a arquitetura do software;\nCodificar, testar e depurar a aplicação;\nFornecer documentação técnica e de usuário.';
+        case 'Motion Graphics':
+            return 'Criar o storyboard conforme briefing combinado;\nDesenvolver e animar os elementos gráficos, personagens e textos;\nRenderizar e entregar o vídeo final no formato acordado.';
         default:
             return '';
     }
@@ -68,6 +72,8 @@ const getInitialClientResponsibilitiesText = (service: ServiceType) => {
             return 'Garantir que a área de voo esteja segura e desimpedida;\nObter as autorizações necessárias para a filmagem no local, se aplicável;\nEfetuar os pagamentos nas condições previstas;';
         case 'Desenvolvimento de Software':
             return 'Participar ativamente da definição de requisitos e validação das entregas;\nFornecer os dados e acessos necessários para os testes;\nRealizar a homologação do software.';
+        case 'Motion Graphics':
+            return 'Fornecer roteiro e todas as informações necessárias para a animação;\nAprovar o storyboard e as etapas de animação;\nEfetuar os pagamentos nas condições previstas.';
         default:
             return 'Fornecer todas as informações, logos, e materiais necessários para a execução dos serviços;\nAprovar as etapas do projeto dentro dos prazos solicitados.';
     }
@@ -105,23 +111,25 @@ export function ServiceContractForm() {
   useEffect(() => {
     // Seta os valores iniciais quando o formulário é montado pela primeira vez.
     const initialService = 'Produção de Vídeo';
-    setValue('serviceType', initialService, { shouldDirty: true });
-    setValue('contractors', [{ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' }], { shouldDirty: true });
-    setValue('paymentMethod', 'Sinal + Entrega', { shouldDirty: true });
-    setValue('paymentSignalPercentage', 50, { shouldDirty: true });
-    setValue('deliveryDeadline', '4 dias úteis após a realização da última gravação, salvo acordo diferente entre as partes.', { shouldDirty: true });
-    setValue('clientResponsibilities', getInitialClientResponsibilitiesText(initialService), { shouldDirty: true });
-    setValue('copyright', 'Todos os direitos de propriedade intelectual sobre os materiais criados pertencerão ao CONTRATANTE após a quitação integral do valor acordado. A CONTRATADA reserva-se o direito de utilizar o material em seu portfólio.', { shouldDirty: true });
-    setValue('rescissionNoticePeriod', 7, { shouldDirty: true });
-    setValue('rescissionFine', 20, { shouldDirty: true });
-    setValue('jurisdiction', 'Lagoa Santa/MG', { shouldDirty: true });
-    setValue('signatureCity', 'Lagoa Santa', { shouldDirty: true });
-    setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }), { shouldDirty: true });
-    setValue('generalDispositions', getInitialGeneralDispositions(), { shouldDirty: true });
-    setValue('warranty', getInitialWarrantyClause(initialService), { shouldDirty: true });
-    setValue('specifications', getInitialSpecificationsClause(initialService), { shouldDirty: true });
+    if (!watch('serviceType')) {
+        setValue('serviceType', initialService, { shouldDirty: true });
+        setValue('contractors', [{ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' }], { shouldDirty: true });
+        setValue('paymentMethod', 'Sinal + Entrega', { shouldDirty: true });
+        setValue('paymentSignalPercentage', 50, { shouldDirty: true });
+        setValue('deliveryDeadline', '4 dias úteis após a realização da última gravação, salvo acordo diferente entre as partes.', { shouldDirty: true });
+        setValue('clientResponsibilities', getInitialClientResponsibilitiesText(initialService), { shouldDirty: true });
+        setValue('copyright', 'Todos os direitos de propriedade intelectual sobre os materiais criados pertencerão ao CONTRATANTE após a quitação integral do valor acordado. A CONTRATADA reserva-se o direito de utilizar o material em seu portfólio.', { shouldDirty: true });
+        setValue('rescissionNoticePeriod', 7, { shouldDirty: true });
+        setValue('rescissionFine', 20, { shouldDirty: true });
+        setValue('jurisdiction', 'Lagoa Santa/MG', { shouldDirty: true });
+        setValue('signatureCity', 'Lagoa Santa', { shouldDirty: true });
+        setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }), { shouldDirty: true });
+        setValue('generalDispositions', getInitialGeneralDispositions(), { shouldDirty: true });
+        setValue('warranty', getInitialWarrantyClause(initialService), { shouldDirty: true });
+        setValue('specifications', getInitialSpecificationsClause(initialService), { shouldDirty: true });
+    }
 
-  }, [setValue]);
+  }, [setValue, watch]);
 
   useEffect(() => {
     if(selectedService) {
