@@ -59,7 +59,7 @@ export function ServiceContractForm() {
     setValue('contractors', [{ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' }]);
     setValue('paymentMethod', 'Sinal + Entrega');
     setValue('paymentSignalPercentage', 50);
-    setValue('deliveryDeadline', 'A definir');
+    setValue('deliveryDeadline', '4 dias úteis após a realização da última gravação, salvo acordo diferente entre as partes.');
     setValue('clientResponsibilities', 'Fornecer todas as informações, logos, e materiais necessários para a execução dos serviços;\nAprovar as etapas do projeto dentro dos prazos solicitados.');
     setValue('copyright', 'Todos os direitos de propriedade intelectual sobre os materiais criados pertencerão ao CONTRATANTE após a quitação integral do valor acordado. A CONTRATADA reserva-se o direito de utilizar o material em seu portfólio.');
     setValue('rescissionNoticePeriod', 7);
