@@ -36,6 +36,8 @@ const getInitialObjectText = (service: ServiceType) => {
             return 'O presente contrato tem como objeto a criação e desenvolvimento de um website institucional/plataforma online, conforme escopo e funcionalidades detalhadas em anexo ou briefing.';
         case 'Drone':
             return 'O presente contrato tem como objeto a captação de imagens aéreas com drone, conforme plano de voo e orientações acordadas com o CONTRATANTE.';
+        case 'Desenvolvimento de Software':
+            return 'O presente contrato tem como objeto o desenvolvimento e implementação de uma solução de software customizada, conforme especificações técnicas e requisitos detalhados em anexo ou briefing.';
         default:
             return '';
     }
@@ -51,6 +53,8 @@ const getInitialContractorResponsibilitiesText = (service: ServiceType) => {
             return 'Desenvolver o layout e design do site conforme identidade visual do cliente;\nImplementar as funcionalidades acordadas (formulários, galerias, etc.);\nOferecer um período de garantia de 6 meses para correção de bugs.';
         case 'Drone':
             return 'Operar o drone para capturar as imagens aéreas solicitadas;\nEntregar o material bruto capturado em formato digital;';
+        case 'Desenvolvimento de Software':
+            return 'Analisar os requisitos e modelar a arquitetura do software;\nCodificar, testar e depurar a aplicação;\nFornecer documentação técnica e de usuário.';
         default:
             return '';
     }
@@ -62,6 +66,8 @@ const getInitialClientResponsibilitiesText = (service: ServiceType) => {
             return 'Fornecer todo o material de texto, imagens e vídeos para o site;\nFornecer o logotipo e o manual da marca (se houver);\nRealizar as aprovações das etapas de design e desenvolvimento dentro do prazo combinado.';
         case 'Drone':
             return 'Garantir que a área de voo esteja segura e desimpedida;\nObter as autorizações necessárias para a filmagem no local, se aplicável;\nEfetuar os pagamentos nas condições previstas;';
+        case 'Desenvolvimento de Software':
+            return 'Participar ativamente da definição de requisitos e validação das entregas;\nFornecer os dados e acessos necessários para os testes;\nRealizar a homologação do software.';
         default:
             return 'Fornecer todas as informações, logos, e materiais necessários para a execução dos serviços;\nAprovar as etapas do projeto dentro dos prazos solicitados.';
     }
@@ -72,6 +78,13 @@ const getInitialWarrantyClause = (service: ServiceType): string => {
         return 'A CONTRATADA oferece uma garantia de 6 (seis) meses para correção de bugs ou problemas técnicos decorrentes do desenvolvimento, contados a partir da data de entrega final do projeto. Esta garantia não cobre novas funcionalidades ou alterações de escopo.';
     }
     return ''; // Retorna vazio para outros serviços
+}
+
+const getInitialSpecificationsClause = (service: ServiceType): string => {
+    if (service === 'Desenvolvimento de Software') {
+        return 'As especificações técnicas, requisitos funcionais e não funcionais, escopo e tecnologias a serem utilizadas estão detalhadas no documento anexo (Anexo I - Especificação de Requisitos), que é parte integrante e inseparável deste contrato.';
+    }
+    return '';
 }
 
 const getInitialGeneralDispositions = (): string => {
@@ -106,18 +119,23 @@ export function ServiceContractForm() {
     setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }), { shouldDirty: true });
     setValue('generalDispositions', getInitialGeneralDispositions(), { shouldDirty: true });
     setValue('warranty', getInitialWarrantyClause(initialService), { shouldDirty: true });
+    setValue('specifications', getInitialSpecificationsClause(initialService), { shouldDirty: true });
 
   }, [setValue]);
 
   useEffect(() => {
     if(selectedService) {
-        const titleText = selectedService === 'Drone' ? 'DRONE' : selectedService.toUpperCase();
-        setValue('contractTitle', `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE ${titleText}`);
+        let titleText = selectedService.toUpperCase();
+        if (selectedService === 'Drone') {
+            titleText = 'SERVIÇOS DE DRONE';
+        }
+        setValue('contractTitle', `CONTRATO DE PRESTAÇÃO DE ${titleText}`);
         setValue('object', getInitialObjectText(selectedService));
         setValue('contractorResponsibilities', getInitialContractorResponsibilitiesText(selectedService));
         setValue('clientResponsibilities', getInitialClientResponsibilitiesText(selectedService));
         setValue('generalDispositions', getInitialGeneralDispositions());
         setValue('warranty', getInitialWarrantyClause(selectedService));
+        setValue('specifications', getInitialSpecificationsClause(selectedService));
     }
   }, [selectedService, setValue]);
 
@@ -267,6 +285,9 @@ export function ServiceContractForm() {
                      {selectedService === 'Website' && (
                         <FormField control={control} name="warranty" render={({ field }) => ( <FormItem><FormLabel>Garantia</FormLabel><FormControl><Textarea {...field} rows={4} /></FormControl><FormMessage /></FormItem>)} />
                      )}
+                     {selectedService === 'Desenvolvimento de Software' && (
+                        <FormField control={control} name="specifications" render={({ field }) => ( <FormItem><FormLabel>Especificações Técnicas</FormLabel><FormControl><Textarea {...field} rows={4} /></FormControl><FormMessage /></FormItem>)} />
+                     )}
                      <FormField control={control} name="jurisdiction" render={({ field }) => ( <FormItem><FormLabel>Foro</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
             </div>
@@ -286,7 +307,5 @@ export function ServiceContractForm() {
     </div>
   );
 }
-
-    
 
     

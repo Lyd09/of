@@ -35,7 +35,8 @@ export const serviceContractSchema = z.object({
   rescissionNoticePeriod: z.number(),
   rescissionFine: z.number(),
   generalDispositions: z.string().min(1, "As disposições gerais são obrigatórias."),
-  warranty: z.string().optional(), // Nova cláusula de garantia
+  warranty: z.string().optional(),
+  specifications: z.string().optional(),
   jurisdiction: z.string().min(1, "Foro é obrigatório."),
   signatureCity: z.string().min(1, "Cidade da assinatura é obrigatória."),
   signatureDate: z.string().min(1, "Data da assinatura é obrigatória."),

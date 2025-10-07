@@ -10,7 +10,7 @@ interface ContractPreviewProps {
   data: ServiceContractData;
 }
 
-const termsToBold = ["CONTRATANTE", "CONTRATANTES", "CONTRATADA", "OBJETO DO CONTRATO", "VALOR E FORMA DE PAGAMENTO", "PRAZO DE ENTREGA", "RESPONSABILIDADES", "DIREITOS AUTORAIS", "RESCISÃO", "FORO", "DISPOSIÇÕES GERAIS", "GARANTIA"];
+const termsToBold = ["CONTRATANTE", "CONTRATANTES", "CONTRATADA", "OBJETO DO CONTRATO", "VALOR E FORMA DE PAGAMENTO", "PRAZO DE ENTREGA", "RESPONSABILIDADES", "DIREITOS AUTORAIS", "RESCISÃO", "FORO", "DISPOSIÇÕES GERAIS", "GARANTIA", "ESPECIFICAÇÕES TÉCNICAS E REQUISITOS"];
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -44,6 +44,7 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
     rescissionFine,
     generalDispositions,
     warranty,
+    specifications,
     jurisdiction,
     signatureCity,
     signatureDate,
@@ -159,11 +160,17 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
         </Clause>
       )}
 
+      {serviceType === 'Desenvolvimento de Software' && specifications && (
+        <Clause title="ESPECIFICAÇÕES TÉCNICAS E REQUISITOS" number={clauseNumber++}>
+           {boldenContractTerms(specifications, termsToBold)}
+        </Clause>
+      )}
+
        <Clause title="FORO" number={clauseNumber++}>
           {getForoText()}
        </Clause>
 
-       <div className="mt-16 text-center no-break">
+      <div className="mt-16 text-center no-break">
         <p>{signatureCity || 'Cidade'}, {signatureDate || 'Data'}.</p>
       </div>
 
@@ -183,3 +190,5 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
     </div>
   );
 }
+
+    
