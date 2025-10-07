@@ -11,6 +11,10 @@ interface ContractPreviewProps {
 
 const termsToBold = ["CONTRATANTE", "CONTRATANTES", "CONTRATADA", "OBJETO DO CONTRATO", "VALOR E FORMA DE PAGAMENTO", "PRAZO DE ENTREGA", "RESPONSABILIDADES", "DIREITOS AUTORAIS", "RESCISÃO", "FORO"];
 
+const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+};
+
 const Clause: React.FC<{ title: string; number: number; children: React.ReactNode }> = ({ title, number, children }) => (
   <div className="mb-4">
     <p>
@@ -44,14 +48,24 @@ export function ContractPreview({ data }: ContractPreviewProps) {
   const getPaymentDescription = () => {
     if (!totalValue || totalValue <= 0) return 'A definir.';
 
-    const fullValueText = `R$ ${totalValue.toFixed(2)} (${numero.porExtenso(totalValue, numero.estilo.monetario)})`;
+    const fullValueFormatted = formatCurrency(totalValue);
+    const fullValueInWords = numero.porExtenso(totalValue, numero.estilo.monetario);
+    
     switch (paymentMethod) {
       case 'À vista':
-        return `O valor total de ${fullValueText} deverá ser pago à vista na assinatura deste contrato.`;
+        return `O valor total de ${fullValueFormatted} (${fullValueInWords}) deverá ser pago à vista na assinatura deste contrato.`;
       case 'Sinal + Entrega':
-        const signal = totalValue * ((paymentSignalPercentage || 50) / 100);
+        const signalPercentage = paymentSignalPercentage || 50;
+        const signal = totalValue * (signalPercentage / 100);
         const remainder = totalValue - signal;
-        return `O valor total de ${fullValueText} será pago da seguinte forma: um sinal de R$ ${signal.toFixed(2)} na assinatura do contrato, e o valor restante de R$ ${remainder.toFixed(2)} na entrega final dos serviços.`;
+        
+        const signalFormatted = formatCurrency(signal);
+        const signalInWords = numero.porExtenso(signal, numero.estilo.monetario);
+        
+        const remainderFormatted = formatCurrency(remainder);
+        const remainderInWords = numero.porExtenso(remainder, numero.estilo.monetario);
+
+        return `O valor total de ${fullValueFormatted} (${fullValueInWords}) será pago da seguinte forma: um sinal de ${signalFormatted} (${signalInWords}) na assinatura do contrato, e o valor restante de ${remainderFormatted} (${remainderInWords}) na entrega final dos serviços.`;
       case 'Outro':
         return paymentMethodOther || 'Forma de pagamento a ser descrita.';
       default:
