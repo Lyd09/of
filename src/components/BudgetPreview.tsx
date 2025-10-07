@@ -48,6 +48,7 @@ export const BudgetPreview = ({ data, onGeneratePdf }: { data: BudgetPreviewData
         budgetNumber,
         budgetDate,
         clientName,
+        clientAddress,
         items,
         subtotal,
         generalDiscountType,
@@ -99,6 +100,7 @@ export const BudgetPreview = ({ data, onGeneratePdf }: { data: BudgetPreviewData
                 <section className="mb-6 pb-4 border-b border-border/50">
                      <h3 className="text-neutral-400 mb-1">Cliente:</h3>
                      <p className="font-bold text-lg text-white">{clientName || "Nome do Cliente"}</p>
+                     {clientAddress && <p className="text-neutral-400 text-sm mt-1">{clientAddress}</p>}
                 </section>
 
                 {/* Items Table */}
@@ -192,3 +194,4 @@ export const BudgetPreview = ({ data, onGeneratePdf }: { data: BudgetPreviewData
     
 
     
+
