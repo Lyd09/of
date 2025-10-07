@@ -12,10 +12,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { FileText, Users, Repeat } from 'lucide-react';
 import { ContractGeneratorDialog } from './ContractGeneratorDialog';
-import { AuthorizationTermDialog } from './AuthorizationTermDialog';
-import { PermutationContractDialog } from './PermutationContractDialog';
+import { AgreementsContractDialog } from './AgreementsContractDialog'; // Alterado
 
-type ContractType = 'services' | 'hiring' | 'authorization' | 'permutation';
+type ContractType = 'services' | 'agreements' | 'hiring';
 
 interface ContractDialogProps {
   isOpen: boolean;
@@ -81,18 +80,10 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
                  <Button
                   variant="outline"
                   className="h-32 flex flex-col gap-2 p-6 group"
-                  onClick={() => handleSelection('authorization')}
+                  onClick={() => handleSelection('agreements')}
                 >
                   <Repeat className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
-                  <span className="text-center">Autorização de Uso</span>
-                </Button>
-                 <Button
-                  variant="outline"
-                  className="h-32 flex flex-col gap-2 p-6 group"
-                  onClick={() => handleSelection('permutation')}
-                >
-                  <Repeat className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
-                  <span className="text-center">Permuta</span>
+                  <span className="text-center">Acordos e Trocas</span>
                 </Button>
               </div>
             </div>
@@ -112,14 +103,8 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
           onOpenChange={handleGeneratorClose}
         />
       )}
-      {selectedType === 'authorization' && (
-        <AuthorizationTermDialog
-            isOpen={isGeneratorOpen}
-            onOpenChange={handleGeneratorClose}
-        />
-      )}
-      {selectedType === 'permutation' && (
-        <PermutationContractDialog
+      {selectedType === 'agreements' && (
+        <AgreementsContractDialog
             isOpen={isGeneratorOpen}
             onOpenChange={handleGeneratorClose}
         />
