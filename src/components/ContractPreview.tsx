@@ -9,7 +9,7 @@ interface ContractPreviewProps {
   data: ServiceContractData;
 }
 
-const termsToBold = ["CONTRATANTE", "CONTRATANTES", "CONTRATADA", "OBJETO DO CONTRATO", "VALOR E FORMA DE PAGAMENTO", "PRAZO DE ENTREGA", "RESPONSABILIDADES", "DIREITOS AUTORAIS", "RESCISÃO", "FORO"];
+const termsToBold = ["CONTRATANTE", "CONTRATANTES", "CONTRATADA", "OBJETO DO CONTRATO", "VALOR E FORMA DE PAGAMENTO", "PRAZO DE ENTREGA", "RESPONSABILIDADES", "DIREITOS AUTORAIS", "RESCISÃO", "FORO", "DISPOSIÇÕES GERAIS"];
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -72,6 +72,19 @@ export function ContractPreview({ data }: ContractPreviewProps) {
         return 'Forma de pagamento não especificada.';
     }
   };
+  
+   const getForoText = () => {
+    const text = `Fica eleito o foro da comarca de ${jurisdiction || 'Cidade/UF'} para dirimir quaisquer controvérsias oriundas do presente contrato.`;
+    const termToBold = `foro da comarca de ${jurisdiction || 'Cidade/UF'}`;
+    const parts = text.split(termToBold);
+    return (
+      <>
+        {parts[0]}
+        <strong>{termToBold}</strong>
+        {parts[1]}
+      </>
+    );
+   };
 
 
   return (
@@ -130,9 +143,13 @@ export function ContractPreview({ data }: ContractPreviewProps) {
        <Clause title="RESCISÃO" number={6}>
          {boldenContractTerms(`O presente contrato poderá ser rescindido por qualquer das partes, mediante aviso prévio por escrito com antecedência mínima de ${rescissionNoticePeriod || 0} dias. Em caso de rescisão imotivada por parte do CONTRATANTE, será devida uma multa correspondente a ${rescissionFine || 0}% do valor total do contrato.`, termsToBold)}
        </Clause>
+
+       <Clause title="DISPOSIÇÕES GERAIS" number={7}>
+        {boldenContractTerms('Qualquer alteração neste contrato só terá validade se feita por escrito e assinada por ambas as partes.', termsToBold)}
+      </Clause>
       
-       <Clause title="FORO" number={7}>
-          {boldenContractTerms(`Fica eleito o foro da comarca de ${jurisdiction || 'Cidade/UF'} para dirimir quaisquer controvérsias oriundas do presente contrato.`, termsToBold)}
+       <Clause title="FORO" number={8}>
+          {getForoText()}
        </Clause>
 
       <div className="mt-16 text-center">
