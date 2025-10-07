@@ -99,7 +99,7 @@ export function ServiceContractForm() {
                         <FormControl>
                             <RadioGroupItem value={service} className="sr-only" id={service}/>
                         </FormControl>
-                        <Label htmlFor={service} className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer text-center">
+                        <Label htmlFor={service} className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:bg-accent [&:has([data-state=checked])]:text-accent-foreground cursor-pointer text-center">
                             {service}
                         </Label>
                         </FormItem>

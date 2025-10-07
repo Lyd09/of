@@ -14,7 +14,8 @@ const termsToBold = ["CONTRATANTE", "CONTRATANTES", "CONTRATADA", "OBJETO DO CON
 const Clause: React.FC<{ title: string; number: number; children: React.ReactNode }> = ({ title, number, children }) => (
   <div className="mb-4">
     <p>
-      <strong>{`Cláusula ${number} – ${title.toUpperCase()}`}</strong>
+      <strong>{`Cláusula ${number} – `}</strong>
+      <strong>{title.toUpperCase()}</strong>
     </p>
     <p className="text-justify">{children}</p>
   </div>
@@ -127,7 +128,7 @@ export function ContractPreview({ data }: ContractPreviewProps) {
        <div className="mt-16 space-y-8">
         <div className="text-center">
             <p>_________________________________________</p>
-            <p>FastFilms</p>
+            <p>{companyData.name}</p>
         </div>
         {contractors?.map((c, i) => (
             <div key={c.id || i} className="text-center">
