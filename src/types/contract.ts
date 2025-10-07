@@ -15,7 +15,7 @@ export type ServiceType =
   | 'Produção de Vídeo'
   | 'Edição de Vídeo'
   | 'Website'
-  | 'Filmagem com Drone'
+  | 'Drone'
   | 'Desenvolvimento de Software'
   | 'Motion Graphics';
 
@@ -49,3 +49,5 @@ export const companyData = {
     address: "Rua Bartolomeu Bueno de Gusmao, 594 - Aeronautas, Lagoa Santa - MG, 33.236-454",
     email: "fastfilmsoficial@gmail.com"
 }
+
+    

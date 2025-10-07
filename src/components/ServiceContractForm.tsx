@@ -21,7 +21,7 @@ const serviceOptions: ServiceType[] = [
   'Produção de Vídeo',
   'Edição de Vídeo',
   'Website',
-  'Filmagem com Drone',
+  'Drone',
   'Desenvolvimento de Software',
   'Motion Graphics',
 ];
@@ -34,6 +34,8 @@ const getInitialObjectText = (service: ServiceType) => {
             return 'O presente contrato tem como objeto a prestação de serviços de edição de vídeo a partir de material bruto fornecido pelo CONTRATANTE e/ou captado anteriormente pela CONTRATADA.';
         case 'Website':
             return 'O presente contrato tem como objeto a criação e desenvolvimento de um website institucional/plataforma online, conforme escopo e funcionalidades detalhadas em anexo ou briefing.';
+        case 'Drone':
+            return 'O presente contrato tem como objeto a captação de imagens aéreas com drone, conforme plano de voo e orientações acordadas com o CONTRATANTE.';
         default:
             return '';
     }
@@ -47,6 +49,8 @@ const getInitialContractorResponsibilitiesText = (service: ServiceType) => {
             return 'Receber e organizar o material bruto fornecido;\nRealizar a edição, montagem, correção de cor e finalização dos vídeos;\nEntregar os vídeos finalizados nos formatos solicitados.';
         case 'Website':
             return 'Desenvolver o layout e design do site conforme identidade visual do cliente;\nImplementar as funcionalidades acordadas (formulários, galerias, etc.);\nOferecer um período de garantia de 6 meses para correção de bugs.';
+        case 'Drone':
+            return 'Operar o drone para capturar as imagens aéreas solicitadas;\nEntregar o material bruto capturado em formato digital;';
         default:
             return '';
     }
@@ -56,6 +60,8 @@ const getInitialClientResponsibilitiesText = (service: ServiceType) => {
     switch(service) {
         case 'Website':
             return 'Fornecer todo o material de texto, imagens e vídeos para o site;\nFornecer o logotipo e o manual da marca (se houver);\nRealizar as aprovações das etapas de design e desenvolvimento dentro do prazo combinado.';
+        case 'Drone':
+            return 'Garantir que a área de voo esteja segura e desimpedida;\nObter as autorizações necessárias para a filmagem no local, se aplicável;\nEfetuar os pagamentos nas condições previstas;';
         default:
             return 'Fornecer todas as informações, logos, e materiais necessários para a execução dos serviços;\nAprovar as etapas do projeto dentro dos prazos solicitados.';
     }
@@ -279,3 +285,5 @@ export function ServiceContractForm() {
     </div>
   );
 }
+
+    
