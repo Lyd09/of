@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -9,7 +10,7 @@ interface ContractPreviewProps {
   data: ServiceContractData;
 }
 
-const termsToBold = ["CONTRATANTE", "CONTRATANTES", "CONTRATADA", "OBJETO DO CONTRATO", "VALOR E FORMA DE PAGAMENTO", "PRAZO DE ENTREGA", "RESPONSABILIDADES", "DIREITOS AUTORAIS", "RESCISÃO", "FORO", "DISPOSIÇÕES GERAIS"];
+const termsToBold = ["CONTRATANTE", "CONTRATANTES", "CONTRATADA", "OBJETO DO CONTRATO", "VALOR E FORMA DE PAGAMENTO", "PRAZO DE ENTREGA", "RESPONSABILIDADES", "DIREITOS AUTORAIS", "RESCISÃO", "FORO", "DISPOSIÇÕES GERAIS", "GARANTIA"];
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -28,6 +29,7 @@ const Clause: React.FC<{ title: string; number: number; children: React.ReactNod
 export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
   const {
     contractTitle,
+    serviceType,
     contractors,
     object,
     totalValue,
@@ -40,6 +42,7 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
     copyright,
     rescissionNoticePeriod,
     rescissionFine,
+    generalDispositions,
     jurisdiction,
     signatureCity,
     signatureDate,
@@ -144,8 +147,8 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
          {boldenContractTerms(`O presente contrato poderá ser rescindido por qualquer das partes, mediante aviso prévio por escrito com antecedência mínima de ${rescissionNoticePeriod || 0} dias. Em caso de rescisão imotivada por parte do CONTRATANTE, será devida uma multa correspondente a ${rescissionFine || 0}% do valor total do contrato.`, termsToBold)}
        </Clause>
 
-       <Clause title="DISPOSIÇÕES GERAIS" number={7}>
-        {boldenContractTerms('Qualquer alteração neste contrato só terá validade se feita por escrito e assinada por ambas as partes.', termsToBold)}
+       <Clause title={serviceType === 'Website' ? 'GARANTIA' : 'DISPOSIÇÕES GERAIS'} number={7}>
+        {boldenContractTerms(generalDispositions || '', termsToBold)}
       </Clause>
       
        <Clause title="FORO" number={8}>
@@ -172,3 +175,5 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
     </div>
   );
 }
+
+    

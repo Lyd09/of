@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 const serviceOptions: ServiceType[] = [
   'Produção de Vídeo',
   'Edição de Vídeo',
-  'Criação de Site',
+  'Website',
   'Filmagem com Drone',
   'Desenvolvimento de Software',
   'Motion Graphics',
@@ -32,20 +32,40 @@ const getInitialObjectText = (service: ServiceType) => {
             return 'O presente contrato tem como objeto a prestação de serviços de gravação e edição de [NÚMERO] (por extenso) vídeos, conforme briefing e orientações fornecidas pelo CONTRATANTE.';
         case 'Edição de Vídeo':
             return 'O presente contrato tem como objeto a prestação de serviços de edição de vídeo a partir de material bruto fornecido pelo CONTRATANTE e/ou captado anteriormente pela CONTRATADA.';
+        case 'Website':
+            return 'O presente contrato tem como objeto a criação e desenvolvimento de um website institucional/plataforma online, conforme escopo e funcionalidades detalhadas em anexo ou briefing.';
         default:
             return '';
     }
 }
 
-const getInitialResponsibilitiesText = (service: ServiceType) => {
+const getInitialContractorResponsibilitiesText = (service: ServiceType) => {
     switch (service) {
         case 'Produção de Vídeo':
             return 'Gravar os vídeos conforme combinado;\nEditar os vídeos;\nEntregar os vídeos finalizados dentro do prazo estipulado.';
         case 'Edição de Vídeo':
             return 'Receber e organizar o material bruto fornecido;\nRealizar a edição, montagem, correção de cor e finalização dos vídeos;\nEntregar os vídeos finalizados nos formatos solicitados.';
+        case 'Website':
+            return 'Desenvolver o layout e design do site conforme identidade visual do cliente;\nImplementar as funcionalidades acordadas (formulários, galerias, etc.);\nOferecer um período de garantia de 6 meses para correção de bugs.';
         default:
             return '';
     }
+}
+
+const getInitialClientResponsibilitiesText = (service: ServiceType) => {
+    switch(service) {
+        case 'Website':
+            return 'Fornecer todo o material de texto, imagens e vídeos para o site;\nFornecer o logotipo e o manual da marca (se houver);\nRealizar as aprovações das etapas de design e desenvolvimento dentro do prazo combinado.';
+        default:
+            return 'Fornecer todas as informações, logos, e materiais necessários para a execução dos serviços;\nAprovar as etapas do projeto dentro dos prazos solicitados.';
+    }
+}
+
+const getInitialWarrantyClause = (service: ServiceType): string => {
+    if (service === 'Website') {
+        return 'A CONTRATADA oferece uma garantia de 6 (seis) meses para correção de bugs ou problemas técnicos decorrentes do desenvolvimento, contados a partir da data de entrega final do projeto. Esta garantia não cobre novas funcionalidades ou alterações de escopo.';
+    }
+    return 'Qualquer alteração neste contrato só terá validade se feita por escrito e assinada por ambas as partes.';
 }
 
 export function ServiceContractForm() {
@@ -64,25 +84,30 @@ export function ServiceContractForm() {
 
   useEffect(() => {
     // Seta os valores iniciais quando o formulário é montado pela primeira vez.
-    setValue('serviceType', 'Produção de Vídeo', { shouldDirty: true });
+    const initialService = 'Produção de Vídeo';
+    setValue('serviceType', initialService, { shouldDirty: true });
     setValue('contractors', [{ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' }], { shouldDirty: true });
     setValue('paymentMethod', 'Sinal + Entrega', { shouldDirty: true });
     setValue('paymentSignalPercentage', 50, { shouldDirty: true });
     setValue('deliveryDeadline', '4 dias úteis após a realização da última gravação, salvo acordo diferente entre as partes.', { shouldDirty: true });
-    setValue('clientResponsibilities', 'Fornecer todas as informações, logos, e materiais necessários para a execução dos serviços;\nAprovar as etapas do projeto dentro dos prazos solicitados.', { shouldDirty: true });
+    setValue('clientResponsibilities', getInitialClientResponsibilitiesText(initialService), { shouldDirty: true });
     setValue('copyright', 'Todos os direitos de propriedade intelectual sobre os materiais criados pertencerão ao CONTRATANTE após a quitação integral do valor acordado. A CONTRATADA reserva-se o direito de utilizar o material em seu portfólio.', { shouldDirty: true });
     setValue('rescissionNoticePeriod', 7, { shouldDirty: true });
     setValue('rescissionFine', 20, { shouldDirty: true });
     setValue('jurisdiction', 'Lagoa Santa/MG', { shouldDirty: true });
     setValue('signatureCity', 'Lagoa Santa', { shouldDirty: true });
     setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }), { shouldDirty: true });
+    setValue('generalDispositions', getInitialWarrantyClause(initialService), { shouldDirty: true });
+
   }, [setValue]);
 
   useEffect(() => {
     if(selectedService) {
         setValue('contractTitle', `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE ${selectedService.toUpperCase()}`);
         setValue('object', getInitialObjectText(selectedService));
-        setValue('contractorResponsibilities', getInitialResponsibilitiesText(selectedService));
+        setValue('contractorResponsibilities', getInitialContractorResponsibilitiesText(selectedService));
+        setValue('clientResponsibilities', getInitialClientResponsibilitiesText(selectedService));
+        setValue('generalDispositions', getInitialWarrantyClause(selectedService));
     }
   }, [selectedService, setValue]);
 
@@ -230,6 +255,7 @@ export function ServiceContractForm() {
                         <FormField control={control} name="rescissionNoticePeriod" render={({ field }) => ( <FormItem><FormLabel>Aviso Prévio (dias)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={control} name="rescissionFine" render={({ field }) => ( <FormItem><FormLabel>Multa de Rescisão (%)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl><FormMessage /></FormItem>)} />
                      </div>
+                     <FormField control={control} name="generalDispositions" render={({ field }) => ( <FormItem><FormLabel>Disposições Gerais / Garantia</FormLabel><FormControl><Textarea {...field} rows={4} /></FormControl><FormMessage /></FormItem>)} />
                      <FormField control={control} name="jurisdiction" render={({ field }) => ( <FormItem><FormLabel>Foro</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
             </div>
@@ -250,4 +276,5 @@ export function ServiceContractForm() {
   );
 }
 
+    
     

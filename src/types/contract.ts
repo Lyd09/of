@@ -1,3 +1,4 @@
+
 import * as z from 'zod';
 
 export const contractorSchema = z.object({
@@ -13,7 +14,7 @@ export type Contractor = z.infer<typeof contractorSchema>;
 export type ServiceType =
   | 'Produção de Vídeo'
   | 'Edição de Vídeo'
-  | 'Criação de Site'
+  | 'Website'
   | 'Filmagem com Drone'
   | 'Desenvolvimento de Software'
   | 'Motion Graphics';
@@ -33,6 +34,7 @@ export const serviceContractSchema = z.object({
   copyright: z.string().min(1, "Cláusula de direitos autorais é obrigatória."),
   rescissionNoticePeriod: z.number(),
   rescissionFine: z.number(),
+  generalDispositions: z.string().min(1, "As disposições gerais são obrigatórias."),
   jurisdiction: z.string().min(1, "Foro é obrigatório."),
   signatureCity: z.string().min(1, "Cidade da assinatura é obrigatória."),
   signatureDate: z.string().min(1, "Data da assinatura é obrigatória."),
@@ -46,3 +48,5 @@ export const companyData = {
     address: "Rua Bartolomeu Bueno de Gusmao, 594 - Aeronautas, Lagoa Santa - MG, 33.236-454",
     email: "fastfilmsoficial@gmail.com"
 }
+
+    
