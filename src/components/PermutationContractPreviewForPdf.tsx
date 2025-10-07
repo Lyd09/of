@@ -29,6 +29,7 @@ const Clause: React.FC<{ title: string; number: number; children: React.ReactNod
 export function PermutationContractPreviewForPdf({ data }: PermutationContractPreviewProps) {
   const {
     permutants,
+    permutantObjectType,
     permutantObject,
     permutantObjectValue,
     permutedObject,
@@ -43,7 +44,24 @@ export function PermutationContractPreviewForPdf({ data }: PermutationContractPr
   const getObjectText = () => {
       const valueFormatted = formatCurrency(permutantObjectValue || 0);
       const valueInWords = numero.porExtenso(permutantObjectValue || 0, numero.estilo.monetario);
-      const text = `O presente contrato tem como objeto a permuta de ${permutantObject || '[descreva o bem/serviço do PERMUTANTE]'}, de propriedade do(s) PERMUTANTE(S), avaliada em ${valueFormatted} (${valueInWords}), pelo serviço de ${permutedObject || '[descreva o bem/serviço do PERMUTADO]'} a ser prestado pelo PERMUTADO.`;
+      
+      let objectTypeText = 'a permuta';
+      switch (permutantObjectType) {
+          case 'Equipamentos':
+              objectTypeText = `a permuta de ${permutantObject || '[descreva o bem/serviço do PERMUTANTE]'}`;
+              break;
+          case 'Serviços':
+              objectTypeText = `a permuta dos serviços de ${permutantObject || '[descreva o serviço do PERMUTANTE]'}`;
+              break;
+          case 'Espaços':
+              objectTypeText = `a permuta de uso do espaço ${permutantObject || '[descreva o espaço do PERMUTANTE]'}`;
+              break;
+           case 'Alimentos':
+              objectTypeText = `a permuta de ${permutantObject || '[descreva os alimentos do PERMUTANTE]'}`;
+              break;
+      }
+
+      const text = `O presente contrato tem como objeto ${objectTypeText}, de propriedade do(s) PERMUTANTE(S), avaliada em ${valueFormatted} (${valueInWords}), pelo(s) ${permutedObject || '[descreva o bem/serviço do PERMUTADO]'} a ser(em) prestado(s) pelo PERMUTADO.`;
       return boldenContractTerms(text, termsToBold);
   }
 
@@ -77,7 +95,7 @@ export function PermutationContractPreviewForPdf({ data }: PermutationContractPr
         <p className="text-justify">Resolvem, de comum acordo, celebrar o presente contrato de permuta, que se regerá pelas seguintes cláusulas e condições:</p>
       </div>
       
-      <Clause title="Objeto" number={1}>
+      <Clause title="Objeto da Permuta" number={1}>
         <p>{getObjectText()}</p>
       </Clause>
 
@@ -85,7 +103,7 @@ export function PermutationContractPreviewForPdf({ data }: PermutationContractPr
         <p>{boldenContractTerms(conditions || '', termsToBold)}</p>
       </Clause>
       
-      <Clause title="Da Transferência de Propriedade" number={3}>
+      <Clause title="Da Transferência de Propriedade/Uso" number={3}>
         <p>{boldenContractTerms(propertyTransfer || '', termsToBold)}</p>
       </Clause>
 
@@ -119,3 +137,5 @@ export function PermutationContractPreviewForPdf({ data }: PermutationContractPr
     </div>
   );
 }
+
+    

@@ -63,11 +63,17 @@ export const authorizationTermSchema = z.object({
 
 export type AuthorizationTermData = z.infer<typeof authorizationTermSchema>;
 
+export const permutationObjectTypes = ['Equipamentos', 'Serviços', 'Espaços', 'Alimentos'] as const;
+export type PermutationObjectType = (typeof permutationObjectTypes)[number];
+
 export const permutationContractSchema = z.object({
   permutants: z.array(contractorSchema).min(1, "Adicione pelo menos um permutante."),
+  permutantObjectType: z.enum(permutationObjectTypes),
   permutantObject: z.string().min(1, "Descreva o objeto do PERMUTANTE."),
   permutantObjectValue: z.number().positive("O valor avaliado deve ser maior que zero."),
   permutedObject: z.string().min(1, "Descreva os serviços a serem prestados pelo PERMUTADO."),
+  conditionType: z.enum(['Com prazo', 'Sem prazo']),
+  conditionDeadline: z.string().optional(),
   conditions: z.string().min(1, "As condições são obrigatórias."),
   propertyTransfer: z.string().min(1, "A cláusula de transferência é obrigatória."),
   generalDispositions: z.string().optional(),
@@ -85,3 +91,5 @@ export const companyData = {
     address: "Rua Bartolomeu Bueno de Gusmao, 594 - Aeronautas, Lagoa Santa - MG, 33.236-454",
     email: "fastfilmsoficial@gmail.com"
 }
+
+    

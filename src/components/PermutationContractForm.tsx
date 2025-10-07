@@ -9,14 +9,45 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from './ui/f
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { PlusCircle, Trash2 } from 'lucide-react';
-import { PermutationContractData } from '@/types/contract';
+import { PermutationContractData, PermutationObjectType } from '@/types/contract';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import numero from 'numero-por-extenso';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { cn } from '@/lib/utils';
+import { Label } from './ui/label';
 
-const initialConditionsText = "Não há prazo limite estipulado para a quitação do valor em serviços. As partes se comprometem a manter comunicação clara e objetiva quanto à realização e entrega dos serviços.";
-const initialPropertyTransferText = "A propriedade do bem/produto permutado será transferida ao PERMUTADO na assinatura deste contrato, sendo este responsável por sua guarda, manutenção e utilização a partir de então. No caso de permuta de serviços, a obrigação de cada parte se encerra após a conclusão da entrega acordada por ambos.";
-const initialGeneralDispositionsText = "O presente contrato é firmado em caráter irrevogável e irretratável, obrigando as partes e seus sucessores. Qualquer alteração neste contrato só terá validade se feita por escrito e assinada por ambas as partes.";
+const objectTypeOptions: PermutationObjectType[] = [
+  'Equipamentos',
+  'Serviços',
+  'Espaços',
+  'Alimentos',
+];
+
+const getInitialConditionsText = (type: 'Com prazo' | 'Sem prazo', deadline?: string) => {
+    if (type === 'Com prazo') {
+        return `O PERMUTADO compromete-se a quitar o valor em serviços no prazo de ${deadline || '[definir prazo]'}. As partes se comprometem a manter comunicação clara e objetiva quanto à realização e entrega dos serviços.`;
+    }
+    return "Não há prazo limite estipulado para a quitação do valor em serviços. As partes se comprometem a manter comunicação clara e objetiva quanto à realização e entrega dos serviços.";
+};
+
+const getInitialPropertyTransferText = (objectType: PermutationObjectType) => {
+    switch (objectType) {
+        case 'Equipamentos':
+        case 'Alimentos':
+            return "A propriedade do bem/produto permutado será transferida ao PERMUTADO na assinatura deste contrato, sendo este responsável por sua guarda, manutenção e utilização a partir de então.";
+        case 'Serviços':
+            return "A obrigação de cada parte se encerra após a conclusão da entrega dos serviços acordados por ambos.";
+        case 'Espaços':
+            return "O direito de uso do espaço será concedido ao PERMUTADO nas datas e horários acordados entre as partes, sendo este responsável por zelar pelo local durante sua utilização.";
+        default:
+            return "A propriedade do bem/produto permutado será transferida ao PERMUTADO na assinatura deste contrato, sendo este responsável por sua guarda, manutenção e utilização a partir de então. No caso de permuta de serviços, a obrigação de cada parte se encerra após a conclusão da entrega acordada por ambos.";
+    }
+};
+
+const getInitialGeneralDispositionsText = (): string => {
+    return 'O presente contrato é firmado em caráter irrevogável e irretratável, obrigando as partes e seus sucessores. Qualquer alteração neste contrato só terá validade se feita por escrito e assinada por ambas as partes.';
+};
 
 export function PermutationContractForm() {
   const { control, watch, setValue } = useFormContext<PermutationContractData>();
@@ -26,23 +57,45 @@ export function PermutationContractForm() {
   });
 
   const permutantObjectValue = watch('permutantObjectValue');
-
+  const selectedObjectType = watch('permutantObjectType');
+  const selectedConditionType = watch('conditionType');
+  const conditionDeadline = watch('conditionDeadline');
+  
   useEffect(() => {
     // Set initial default values if they are not set yet
     if (fields.length === 0) {
         append({ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' });
+        const initialObjectType: PermutationObjectType = 'Equipamentos';
+        const initialConditionType: 'Com prazo' | 'Sem prazo' = 'Sem prazo';
+
+        setValue('permutantObjectType', initialObjectType);
         setValue('permutantObject', 'Um equipamento X, modelo Y, em perfeito estado de funcionamento.');
         setValue('permutantObjectValue', 5000);
         setValue('permutedObject', 'Serviços de produção audiovisual (gravação e edição) a serem prestados pela FastFilms.');
-        setValue('conditions', initialConditionsText);
-        setValue('propertyTransfer', initialPropertyTransferText);
-        setValue('generalDispositions', initialGeneralDispositionsText);
+        
+        setValue('conditionType', initialConditionType);
+        setValue('conditions', getInitialConditionsText(initialConditionType));
+        setValue('conditionDeadline', '90 dias');
+
+        setValue('propertyTransfer', getInitialPropertyTransferText(initialObjectType));
+        setValue('generalDispositions', getInitialGeneralDispositionsText());
         setValue('jurisdiction', 'Lagoa Santa/MG');
         setValue('signatureCity', 'Lagoa Santa');
         setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }));
     }
-  }, [append, fields.length, setValue, watch]);
+  }, [append, fields.length, setValue]);
 
+  useEffect(() => {
+      if (selectedObjectType) {
+          setValue('propertyTransfer', getInitialPropertyTransferText(selectedObjectType));
+      }
+  }, [selectedObjectType, setValue]);
+
+  useEffect(() => {
+      if (selectedConditionType) {
+          setValue('conditions', getInitialConditionsText(selectedConditionType, conditionDeadline));
+      }
+  }, [selectedConditionType, conditionDeadline, setValue]);
 
   return (
     <div className="space-y-6">
@@ -80,7 +133,29 @@ export function PermutationContractForm() {
             <div>
                 <FormLabel>Cláusula 1 - Objeto da Permuta</FormLabel>
                 <div className="p-4 border rounded-md mt-2 space-y-4">
-                    <FormField control={control} name="permutantObject" render={({ field }) => ( <FormItem><FormLabel>Objeto oferecido pelo PERMUTANTE</FormLabel><FormControl><Textarea {...field} rows={4} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField
+                        control={control}
+                        name="permutantObjectType"
+                        render={({ field }) => (
+                        <FormItem>
+                             <FormLabel>Tipo de Objeto do PERMUTANTE</FormLabel>
+                             <RadioGroup onValueChange={field.onChange} value={field.value} className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                {objectTypeOptions.map((type) => (
+                                    <FormItem key={type}>
+                                        <FormControl>
+                                            <RadioGroupItem value={type} className="sr-only" id={`type-${type}`}/>
+                                        </FormControl>
+                                        <Label htmlFor={`type-${type}`} className={cn("flex items-center justify-center rounded-md border-2 border-muted p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer text-center", field.value === type && "bg-accent text-accent-foreground border-accent-foreground/50")}>
+                                            {type}
+                                        </Label>
+                                    </FormItem>
+                                ))}
+                            </RadioGroup>
+                            <FormMessage />
+                        </FormItem>
+                    )}/>
+
+                    <FormField control={control} name="permutantObject" render={({ field }) => ( <FormItem><FormLabel>Descrição do Objeto oferecido pelo PERMUTANTE</FormLabel><FormControl><Textarea {...field} rows={4} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={control} name="permutantObjectValue" render={({ field }) => ( 
                         <FormItem>
                             <FormLabel>Valor Avaliado do Objeto (R$)</FormLabel>
@@ -93,17 +168,38 @@ export function PermutationContractForm() {
                 </div>
             </div>
             
-            <FormField control={control} name="conditions" render={({ field }) => ( 
-                <FormItem>
-                    <FormLabel>Cláusula 2 - Das Condições</FormLabel>
-                    <FormControl><Textarea {...field} rows={4} /></FormControl>
-                    <FormMessage />
-                </FormItem>
-            )} />
+            <div>
+                <FormLabel>Cláusula 2 - Das Condições</FormLabel>
+                <div className="p-4 border rounded-md mt-2 space-y-4">
+                    <FormField
+                        control={control}
+                        name="conditionType"
+                        render={({ field }) => (
+                        <FormItem>
+                             <FormLabel>Prazo para Quitação</FormLabel>
+                             <RadioGroup onValueChange={field.onChange} value={field.value} className="flex space-x-4">
+                                <FormItem className="flex items-center space-x-2"><FormControl><RadioGroupItem value="Sem prazo" /></FormControl><FormLabel className="font-normal">Sem prazo</FormLabel></FormItem>
+                                <FormItem className="flex items-center space-x-2"><FormControl><RadioGroupItem value="Com prazo" /></FormControl><FormLabel className="font-normal">Com prazo</FormLabel></FormItem>
+                            </RadioGroup>
+                            <FormMessage />
+                        </FormItem>
+                    )}/>
+                    {selectedConditionType === 'Com prazo' && (
+                        <FormField control={control} name="conditionDeadline" render={({ field }) => ( <FormItem><FormLabel>Definir Prazo</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    )}
+                     <FormField control={control} name="conditions" render={({ field }) => ( 
+                        <FormItem>
+                            <FormLabel>Texto da Cláusula</FormLabel>
+                            <FormControl><Textarea {...field} rows={4} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                </div>
+            </div>
 
             <FormField control={control} name="propertyTransfer" render={({ field }) => ( 
                 <FormItem>
-                    <FormLabel>Cláusula 3 - Da Transferência de Propriedade</FormLabel>
+                    <FormLabel>Cláusula 3 - Da Transferência de Propriedade/Uso</FormLabel>
                     <FormControl><Textarea {...field} rows={5} /></FormControl>
                     <FormMessage />
                 </FormItem>
@@ -137,3 +233,5 @@ export function PermutationContractForm() {
     </div>
   );
 }
+
+    
