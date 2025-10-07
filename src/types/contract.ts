@@ -63,6 +63,20 @@ export const authorizationTermSchema = z.object({
 
 export type AuthorizationTermData = z.infer<typeof authorizationTermSchema>;
 
+export const permutationContractSchema = z.object({
+  permutants: z.array(contractorSchema).min(1, "Adicione pelo menos um permutante."),
+  permutantObject: z.string().min(1, "Descreva o objeto do PERMUTANTE."),
+  permutantObjectValue: z.number().positive("O valor avaliado deve ser maior que zero."),
+  permutedObject: z.string().min(1, "Descreva os serviços a serem prestados pelo PERMUTADO."),
+  conditions: z.string().min(1, "As condições são obrigatórias."),
+  propertyTransfer: z.string().min(1, "A cláusula de transferência é obrigatória."),
+  jurisdiction: z.string().min(1, "Foro é obrigatório."),
+  signatureCity: z.string().min(1, "Cidade da assinatura é obrigatória."),
+  signatureDate: z.string().min(1, "Data da assinatura é obrigatória."),
+});
+
+export type PermutationContractData = z.infer<typeof permutationContractSchema>;
+
 
 export const companyData = {
     name: "FastFilms",

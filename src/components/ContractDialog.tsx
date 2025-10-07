@@ -13,8 +13,9 @@ import { Button } from '@/components/ui/button';
 import { FileText, Users, Repeat } from 'lucide-react';
 import { ContractGeneratorDialog } from './ContractGeneratorDialog';
 import { AuthorizationTermDialog } from './AuthorizationTermDialog';
+import { PermutationContractDialog } from './PermutationContractDialog';
 
-type ContractType = 'services' | 'hiring' | 'authorization';
+type ContractType = 'services' | 'hiring' | 'authorization' | 'permutation';
 
 interface ContractDialogProps {
   isOpen: boolean;
@@ -43,7 +44,7 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
   return (
     <>
       <Dialog open={isMainDialogOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="sm:max-w-[650px]">
           <DialogHeader>
             <DialogTitle>Gerar Novo Documento</DialogTitle>
             <DialogDescription>
@@ -51,32 +52,50 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
-            <Button
-              variant="outline"
-              className="h-32 flex flex-col gap-2 p-6 group"
-              onClick={() => handleSelection('services')}
-            >
-              <FileText className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
-              <span className="text-lg">Prestação de Serviços</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-32 flex flex-col gap-2 p-6 group"
-              onClick={() => handleSelection('hiring')}
-              disabled
-            >
-              <Users className="w-10 h-10 text-muted-foreground group-hover:text-white transition-colors" />
-              <span className="text-lg text-muted-foreground">Contratações</span>
-            </Button>
-             <Button
-              variant="outline"
-              className="h-32 flex flex-col gap-2 p-6 group"
-              onClick={() => handleSelection('authorization')}
-            >
-              <Repeat className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
-              <span className="text-lg">Acordos e Trocas</span>
-            </Button>
+          <div className="py-4 space-y-6">
+            <div>
+              <h3 className="mb-4 text-lg font-medium text-foreground">Contratos</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <Button
+                  variant="outline"
+                  className="h-32 flex flex-col gap-2 p-6 group"
+                  onClick={() => handleSelection('services')}
+                >
+                  <FileText className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
+                  <span className="text-center">Prestação de Serviços</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-32 flex flex-col gap-2 p-6 group"
+                  onClick={() => handleSelection('hiring')}
+                  disabled
+                >
+                  <Users className="w-10 h-10 text-muted-foreground group-hover:text-white transition-colors" />
+                  <span className="text-center text-muted-foreground">Contratações (em breve)</span>
+                </Button>
+              </div>
+            </div>
+             <div>
+              <h3 className="mb-4 text-lg font-medium text-foreground">Acordos e Trocas</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <Button
+                  variant="outline"
+                  className="h-32 flex flex-col gap-2 p-6 group"
+                  onClick={() => handleSelection('authorization')}
+                >
+                  <Repeat className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
+                  <span className="text-center">Autorização de Uso</span>
+                </Button>
+                 <Button
+                  variant="outline"
+                  className="h-32 flex flex-col gap-2 p-6 group"
+                  onClick={() => handleSelection('permutation')}
+                >
+                  <Repeat className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
+                  <span className="text-center">Permuta</span>
+                </Button>
+              </div>
+            </div>
           </div>
 
           <DialogFooter>
@@ -95,6 +114,12 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
       )}
       {selectedType === 'authorization' && (
         <AuthorizationTermDialog
+            isOpen={isGeneratorOpen}
+            onOpenChange={handleGeneratorClose}
+        />
+      )}
+      {selectedType === 'permutation' && (
+        <PermutationContractDialog
             isOpen={isGeneratorOpen}
             onOpenChange={handleGeneratorClose}
         />
