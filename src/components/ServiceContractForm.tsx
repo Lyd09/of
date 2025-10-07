@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from 'react';
@@ -29,6 +30,8 @@ const getInitialObjectText = (service: ServiceType) => {
     switch (service) {
         case 'Produção de Vídeo':
             return 'O presente contrato tem como objeto a prestação de serviços de gravação e edição de [NÚMERO] (por extenso) vídeos, conforme briefing e orientações fornecidas pelo CONTRATANTE.';
+        case 'Edição de Vídeo':
+            return 'O presente contrato tem como objeto a prestação de serviços de edição de vídeo a partir de material bruto fornecido pelo CONTRATANTE e/ou captado anteriormente pela CONTRATADA.';
         default:
             return '';
     }
@@ -38,6 +41,8 @@ const getInitialResponsibilitiesText = (service: ServiceType) => {
     switch (service) {
         case 'Produção de Vídeo':
             return 'Gravar os vídeos conforme combinado;\nEditar os vídeos;\nEntregar os vídeos finalizados dentro do prazo estipulado.';
+        case 'Edição de Vídeo':
+            return 'Receber e organizar o material bruto fornecido;\nRealizar a edição, montagem, correção de cor e finalização dos vídeos;\nEntregar os vídeos finalizados nos formatos solicitados.';
         default:
             return '';
     }
@@ -244,3 +249,5 @@ export function ServiceContractForm() {
     </div>
   );
 }
+
+    
