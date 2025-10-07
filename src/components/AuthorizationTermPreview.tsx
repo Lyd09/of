@@ -43,6 +43,21 @@ export function AuthorizationTermPreview({ data }: AuthorizationTermPreviewProps
 
   let clauseNumber = 1;
 
+  const renderTextWithBold = (text?: string) => {
+      if (!text) return null;
+      const termsToBold = ["AUTORIZANTE", "AUTORIZADO\\(A\\)"];
+      const regex = new RegExp(`(${termsToBold.join('|')})`, 'gi');
+      const parts = text.split(regex);
+
+      return parts.map((part, index) => {
+          const isTerm = termsToBold.some(term => new RegExp(`^${term}$`, 'i').test(part.replace('(A)', '(a)')));
+          if (isTerm) {
+              return <strong key={index}>{part}</strong>;
+          }
+          return part;
+      });
+  }
+
   return (
     <div className="bg-white text-black p-12 shadow-lg" style={{ fontFamily: "'Geist Sans', sans-serif" }}>
       <h1 className="text-center font-bold text-lg mb-8">TERMO DE AUTORIZAÇÃO DE USO DE MATERIAL</h1>
@@ -66,7 +81,7 @@ export function AuthorizationTermPreview({ data }: AuthorizationTermPreviewProps
       </div>
       
       <Clause title="Objeto" number={clauseNumber++}>
-        <p>Este termo trata da autorização exclusiva e pontual para o uso de material audiovisual captado pelo AUTORIZADO(A) no projeto abaixo identificado:</p>
+        <p>Este termo trata da autorização exclusiva e pontual para o uso de material audiovisual captado pelo <strong>AUTORIZADO(A)</strong> no projeto abaixo identificado:</p>
         <ul className="list-disc list-inside my-2 ml-4">
             <li><strong>Projeto:</strong> {projectName || 'Nome do Projeto'}</li>
             <li><strong>Cliente final:</strong> {finalClient || 'Cliente Final'}</li>
@@ -76,18 +91,18 @@ export function AuthorizationTermPreview({ data }: AuthorizationTermPreviewProps
       </Clause>
 
       <Clause title="Permissões e Vedações" number={clauseNumber++}>
-        {permissionsAndProhibitions}
+        {renderTextWithBold(permissionsAndProhibitions)}
       </Clause>
 
       <Clause title="Penalidade" number={clauseNumber++}>
          <p>
-            O descumprimento de qualquer uma das condições estabelecidas neste termo, especialmente as vedações da Cláusula 2ª, sujeitará o AUTORIZADO(A) ao pagamento de uma multa no valor de <strong>{formatCurrency(fineValue || 0)} ({numero.porExtenso(fineValue || 0, numero.estilo.monetario)})</strong>, sem prejuízo da imediata remoção do material e de eventuais perdas e danos.
+            O descumprimento de qualquer uma das condições estabelecidas neste termo, especialmente as vedações da Cláusula 2ª, sujeitará o <strong>AUTORIZADO(A)</strong> ao pagamento de uma multa no valor de <strong>{formatCurrency(fineValue || 0)} ({numero.porExtenso(fineValue || 0, numero.estilo.monetario)})</strong>, sem prejuízo da imediata remoção do material e de eventuais perdas e danos.
          </p>
        </Clause>
 
       {generalDispositions && (
         <Clause title="Disposições Gerais" number={clauseNumber++}>
-          {generalDispositions}
+          {renderTextWithBold(generalDispositions)}
         </Clause>
       )}
       
@@ -104,11 +119,11 @@ export function AuthorizationTermPreview({ data }: AuthorizationTermPreviewProps
        <div className="mt-16 space-y-8">
         <div className="text-center">
             <p>_________________________________________</p>
-            <p>{companyData.name} (Autorizante)</p>
+            <p>{companyData.name} (<strong>Autorizante</strong>)</p>
         </div>
         <div className="text-center">
             <p>_________________________________________</p>
-            <p>{authorizedName || 'Nome do Autorizado'} (Autorizado(a))</p>
+            <p>{authorizedName || 'Nome do Autorizado'} (<strong>Autorizado(a)</strong>)</p>
         </div>
       </div>
 
