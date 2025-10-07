@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from 'react';
@@ -10,6 +11,13 @@ import { Textarea } from './ui/textarea';
 import { AuthorizationTermData } from '@/types/contract';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
+const initialPermissionsText = `O AUTORIZADO(A) poderá utilizar o material descrito na Cláusula 1ª exclusivamente para compor seu portfólio pessoal em sites, redes sociais de cunho profissional (como LinkedIn e Vimeo) e apresentações diretas a potenciais clientes.
+É expressamente vedado ao AUTORIZADO(A):
+- Monetizar o material, no todo ou em parte, através de plataformas de vídeo, publicidade ou qualquer outro meio;
+- Utilizar trechos que contenham a imagem de pessoas identificáveis, caso estas não tenham cedido seus direitos de imagem para este fim específico;
+- Realizar edições, cortes ou alterações que distorçam o sentido original da obra, a mensagem do cliente final ou a marca da AUTORIZANTE;
+- Omitir o crédito. É obrigatório que, em toda e qualquer veiculação, o AUTORIZADO(A) atribua o crédito de produção à FastFilms, não podendo, em nenhuma hipótese, sugerir que o projeto foi uma realização integralmente sua.`;
 
 export function AuthorizationTermForm() {
   const { control, watch, setValue } = useFormContext<AuthorizationTermData>();
@@ -25,7 +33,9 @@ export function AuthorizationTermForm() {
         setValue('finalClient', 'Empresa X');
         setValue('executionDate', format(new Date(), "dd/MM/yyyy"));
         setValue('authorizedLinks', 'https://www.youtube.com/watch?v=exemplo');
+        setValue('permissionsAndProhibitions', initialPermissionsText);
         setValue('fineValue', 5000);
+        setValue('generalDispositions', 'O presente termo é firmado em caráter irrevogável e irretratável, obrigando as partes e seus sucessores.');
         setValue('jurisdiction', 'Lagoa Santa/MG');
         setValue('signatureCity', 'Lagoa Santa');
         setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }));
@@ -64,13 +74,13 @@ export function AuthorizationTermForm() {
                 </div>
             </div>
             
-            <div>
-                <FormLabel>Cláusula 2 - Permissões e Vedações</FormLabel>
-                 <div className="p-4 border rounded-md mt-2 space-y-2 text-sm text-muted-foreground">
-                    <p><strong>Permitido:</strong> Uso exclusivo para portfólio pessoal em sites, redes sociais profissionais e apresentações.</p>
-                    <p><strong>Proibido:</strong> Monetizar, usar indevidamente a imagem de terceiros, distorcer o trabalho ou a marca do cliente, e não dar o devido crédito à <strong>FastFilms</strong> como produtora.</p>
-                </div>
-            </div>
+            <FormField control={control} name="permissionsAndProhibitions" render={({ field }) => ( 
+                <FormItem>
+                    <FormLabel>Cláusula 2 - Permissões e Vedações</FormLabel>
+                    <FormControl><Textarea {...field} rows={10} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+            )} />
             
              <div>
                 <FormLabel>Cláusula 3 - Penalidade</FormLabel>
@@ -84,9 +94,17 @@ export function AuthorizationTermForm() {
                     )} />
                 </div>
             </div>
+            
+            <FormField control={control} name="generalDispositions" render={({ field }) => ( 
+                <FormItem>
+                    <FormLabel>Cláusula 4 - Disposições Gerais</FormLabel>
+                    <FormControl><Textarea {...field} rows={3} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+            )} />
 
             <div>
-                <FormLabel>Cláusula 4 - Foro</FormLabel>
+                <FormLabel>Cláusula 5 - Foro</FormLabel>
                 <div className="p-4 border rounded-md mt-2 space-y-4">
                     <FormField control={control} name="jurisdiction" render={({ field }) => ( <FormItem><FormLabel>Foro</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>

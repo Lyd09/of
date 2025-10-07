@@ -1,3 +1,4 @@
+
 import * as z from 'zod';
 
 export const contractorSchema = z.object({
@@ -52,7 +53,9 @@ export const authorizationTermSchema = z.object({
   finalClient: z.string().min(1, "Cliente final é obrigatório."),
   executionDate: z.string().min(1, "Data de execução é obrigatória."),
   authorizedLinks: z.string().min(1, "Pelo menos um link é obrigatório."),
+  permissionsAndProhibitions: z.string().min(1, "A cláusula de permissões é obrigatória."),
   fineValue: z.number().min(0, "O valor da multa não pode ser negativo."),
+  generalDispositions: z.string().optional(),
   jurisdiction: z.string().min(1, "Foro é obrigatório."),
   signatureCity: z.string().min(1, "Cidade da assinatura é obrigatória."),
   signatureDate: z.string().min(1, "Data da assinatura é obrigatória."),
