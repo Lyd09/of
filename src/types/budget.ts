@@ -6,6 +6,7 @@ export interface BudgetItem {
   unitPrice: number;
   discount?: number;
   discountType: 'percentage' | 'fixed';
+  finalPrice?: number;
   itemTotal: number;
   itemDiscountValue: number;
 }

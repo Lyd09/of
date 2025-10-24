@@ -41,6 +41,7 @@ const budgetItemSchema = z.object({
     unitPrice: z.coerce.number().min(0, 'Preço unitário não pode ser negativo.'),
     discount: z.coerce.number().optional(),
     discountType: z.enum(['percentage', 'fixed']).default('fixed'),
+    finalPrice: z.coerce.number().optional(),
 });
 
 const budgetSchema = z.object({
@@ -70,7 +71,7 @@ export type CompanyInfo = {
 
 export const companyInfo: CompanyInfo = {
   name: "FastFilms",
-  logoUrl: "https://raw.githubusercontent.com/Lyd09/FF/587b5eb4cf0fc07885618620dc1f18e8d6e0aef4/LOGO%20SVG.svg",
+  logoUrl: "/LOGO-ORCAFAST-RED.png",
   slogan: "Cada momento merece um bom take!",
 };
 
@@ -100,7 +101,9 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
     
     const [presets, setPresets] = useLocalStorage<Preset[]>('orcafast-presets', initialPresets);
     const [isPresetManagerOpen, setIsPresetManagerOpen] = useState(false);
+    const [lastEditedField, setLastEditedField] = useState<{index: number, field: 'discount' | 'finalPrice'} | null>(null);
 
+    const watchedItems = form.watch('items');
     const watchedDroneFeature = form.watch('isDroneFeatureEnabled');
     
     useEffect(() => {
@@ -117,6 +120,43 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
         }
     }, [watchedDroneFeature, form]);
     
+    useEffect(() => {
+        if (!lastEditedField) return;
+
+        const { index, field } = lastEditedField;
+        const item = watchedItems[index];
+        if (!item) return;
+
+        const { quantity = 0, unitPrice = 0, discountType = 'fixed' } = item;
+        const itemSubtotal = quantity * unitPrice;
+
+        if (field === 'discount') {
+            const discount = item.discount || 0;
+            let newFinalPrice = 0;
+            if (discountType === 'fixed') {
+                newFinalPrice = itemSubtotal - discount;
+            } else { // percentage
+                newFinalPrice = itemSubtotal * (1 - discount / 100);
+            }
+            form.setValue(`items.${index}.finalPrice`, newFinalPrice, { shouldValidate: true });
+        } else if (field === 'finalPrice') {
+            const finalPrice = item.finalPrice ?? itemSubtotal;
+            let newDiscount = 0;
+            if (discountType === 'fixed') {
+                newDiscount = itemSubtotal - finalPrice;
+            } else { // percentage
+                if (itemSubtotal > 0) {
+                    newDiscount = ((itemSubtotal - finalPrice) / itemSubtotal) * 100;
+                }
+            }
+             form.setValue(`items.${index}.discount`, newDiscount > 0 ? newDiscount : 0, { shouldValidate: true });
+        }
+        
+        // Reset after calculation to avoid loops
+        const timer = setTimeout(() => setLastEditedField(null), 50);
+        return () => clearTimeout(timer);
+
+    }, [watchedItems, lastEditedField, form]);
 
     const handleApplyPreset = (index: number, presetId: string) => {
         const preset = presets.find(p => p.id === presetId);
@@ -127,6 +167,8 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                 description: preset.description,
                 unitPrice: preset.unitPrice,
             });
+            // Trigger calculation after preset is applied
+             setLastEditedField({ index, field: 'discount' });
         }
     };
     
@@ -136,9 +178,9 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
             clientName: "Paula (SaborInclusão)",
             clientAddress: "Rua Fictícia, 123, Bairro dos Sonhos, Cidade Imaginária - IS",
             items: [
-                { description: 'Fundação da Marca', unit: 'Un', quantity: 1, unitPrice: 1800, discount: 0, discountType: 'fixed' },
-                { description: 'Gestão de Redes Sociais', unit: 'Un', quantity: 1, unitPrice: 3500, discount: 0, discountType: 'fixed' },
-                { description: 'Produção de Conteúdo', unit: 'Un', quantity: 1, unitPrice: 3700, discount: 0, discountType: 'fixed' },
+                { description: 'Fundação da Marca', unit: 'Un', quantity: 1, unitPrice: 1800, discount: 0, discountType: 'fixed', finalPrice: 1800 },
+                { description: 'Gestão de Redes Sociais', unit: 'Un', quantity: 1, unitPrice: 3500, discount: 0, discountType: 'fixed', finalPrice: 3500 },
+                { description: 'Produção de Conteúdo', unit: 'Un', quantity: 1, unitPrice: 3700, discount: 0, discountType: 'fixed', finalPrice: 3700 },
             ],
             paymentConditions: '50% do valor será pago antes do início do serviço e o restante, após sua conclusão.',
             commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
@@ -196,8 +238,9 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                         <Label className="md:col-span-3">Descrição</Label>
                                         <Label className="md:col-span-2">Aplicar Preset</Label>
                                         <Label className="md:col-span-1">Qtd.</Label>
-                                        <Label className="md:col-span-2">Preço Unit.</Label>
+                                        <Label className="md:col-span-1">Preço Unit.</Label>
                                         <Label className="md:col-span-3">Desconto</Label>
+                                        <Label className="md:col-span-1">Preço Final</Label>
                                         <Label className="md:col-span-1"></Label>
                                     </div>
                                     {fields.map((field, index) => (
@@ -224,23 +267,26 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                                 </FormItem>
                                             </div>
                                             <div className="md:col-span-1">
-                                                <FormField control={form.control} name={`items.${index}.quantity`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="1" placeholder="1" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
+                                                <FormField control={form.control} name={`items.${index}.quantity`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="1" placeholder="1" {...field} onChange={(e) => { field.onChange(e); setLastEditedField({ index, field: 'discount' }); }} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                             </div>
-                                            <div className="md:col-span-2">
-                                                <FormField control={form.control} name={`items.${index}.unitPrice`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="0.01" placeholder="R$ 0,00" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
+                                            <div className="md:col-span-1">
+                                                <FormField control={form.control} name={`items.${index}.unitPrice`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="0.01" placeholder="R$ 0,00" {...field} onChange={(e) => { field.onChange(e); setLastEditedField({ index, field: 'discount' }); }} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                             </div>
                                             <div className="md:col-span-3 flex gap-2">
-                                                <FormField control={form.control} name={`items.${index}.discount`} render={({ field }) => ( <FormItem className="flex-grow"> <FormControl><Input type="number" step="0.01" placeholder="0" {...field} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
+                                                <FormField control={form.control} name={`items.${index}.discount`} render={({ field }) => ( <FormItem className="flex-grow"> <FormControl><Input type="number" step="0.01" placeholder="0" {...field} onChange={(e) => { field.onChange(e); setLastEditedField({ index, field: 'discount' }); }} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                                 <FormField control={form.control} name={`items.${index}.discountType`} render={({ field }) => (
                                                     <FormItem>
                                                         <FormControl>
-                                                            <Button type="button" variant="outline" size="icon" onClick={() => field.onChange(field.value === 'fixed' ? 'percentage' : 'fixed')}>
+                                                            <Button type="button" variant="outline" size="icon" onClick={() => { field.onChange(field.value === 'fixed' ? 'percentage' : 'fixed'); setLastEditedField({ index, field: 'finalPrice' }); }}>
                                                                 {field.value === 'fixed' ? 'R$' : '%'}
                                                             </Button>
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )} />
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <FormField control={form.control} name={`items.${index}.finalPrice`} render={({ field }) => ( <FormItem> <FormControl><Input type="number" step="0.01" placeholder="R$ 0,00" {...field} onChange={(e) => { field.onChange(e); setLastEditedField({ index, field: 'finalPrice' }); }} className="bg-background" /></FormControl> <FormMessage /> </FormItem> )} />
                                             </div>
                                             <div className="md:col-span-1 flex items-center justify-end md:justify-center">
                                                 {fields.length > 1 && (
@@ -250,7 +296,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                         </div>
                                     ))}
                                 </div>
-                                <Button type="button" variant="outline" className="mt-4" onClick={() => append({ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed' })}>
+                                <Button type="button" variant="outline" className="mt-4" onClick={() => append({ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed', finalPrice: 0 })}>
                                     <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Item
                                 </Button>
                             </div>
@@ -467,7 +513,7 @@ export default function OrcaFastPage() {
             form.setValue('budgetNumber', Math.floor(Math.random() * 1000) + 1);
         }
         if (form.getValues('items').length === 0) {
-            form.setValue('items', [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed' }]);
+            form.setValue('items', [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed', finalPrice: 0 }]);
         }
     }, [form]);
 
@@ -482,12 +528,11 @@ export default function OrcaFastPage() {
 
         const validItems = items.filter(item => item.description || item.quantity > 0 || item.unitPrice > 0);
         
-        let subtotal = 0;
+        const subtotal = validItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.unitPrice || 0), 0);
 
         const itemsWithTotals: BudgetItemType[] = validItems.map(item => {
             const itemSubtotal = (item.quantity || 0) * (item.unitPrice || 0);
-            subtotal += itemSubtotal;
-
+            
             let discountValue = item.discount || 0;
             if (item.discountType === 'percentage' && discountValue > 0) {
                 discountValue = itemSubtotal * (discountValue / 100);
@@ -498,6 +543,7 @@ export default function OrcaFastPage() {
                 itemTotal: itemSubtotal - discountValue,
                 itemDiscountValue: discountValue,
                 discount: item.discount || 0,
+                finalPrice: itemSubtotal - discountValue,
             };
         });
 
