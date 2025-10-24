@@ -82,7 +82,7 @@ const formatCurrency = (value: number) => {
 const AppHeader = () => (
     <header className="mb-10 text-center">
         <Image 
-            src="/LOGO-ORCAFAST-RED.png" 
+            src="/LOGO-OF1.png" 
             alt="OrçaFAST Logo" 
             width={400} 
             height={100} 
