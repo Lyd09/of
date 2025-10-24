@@ -146,7 +146,9 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                 newDiscount = itemSubtotal - finalPrice;
             } else { // percentage
                 if (itemSubtotal > 0) {
-                    newDiscount = ((itemSubtotal - finalPrice) / itemSubtotal) * 100;
+                    const discountPercentage = ((itemSubtotal - finalPrice) / itemSubtotal) * 100;
+                    // Arredonda para 2 casas decimais
+                    newDiscount = Math.round(discountPercentage * 100) / 100;
                 }
             }
              form.setValue(`items.${index}.discount`, newDiscount > 0 ? newDiscount : 0, { shouldValidate: true });
@@ -679,6 +681,8 @@ export default function OrcaFastPage() {
         </>
     );
 }
+
+    
 
     
 
