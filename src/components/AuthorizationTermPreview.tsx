@@ -4,6 +4,7 @@
 import React from 'react';
 import { AuthorizationTermData, companyData } from '@/types/contract';
 import numero from 'numero-por-extenso';
+import Image from 'next/image';
 
 interface AuthorizationTermPreviewProps {
   data: AuthorizationTermData;
@@ -60,7 +61,10 @@ export function AuthorizationTermPreview({ data }: AuthorizationTermPreviewProps
 
   return (
     <div className="bg-white text-black p-12 shadow-lg" style={{ fontFamily: "'Geist Sans', sans-serif" }}>
-      <h1 className="text-center font-bold text-lg mb-8">TERMO DE AUTORIZAÇÃO DE USO DE MATERIAL</h1>
+      <header className="flex justify-between items-center mb-8">
+        {companyData.logoUrl && <Image src={companyData.logoUrl} alt="Logo da Empresa" width={100} height={100} />}
+        <h1 className="text-center font-bold text-lg">TERMO DE AUTORIZAÇÃO DE USO DE MATERIAL</h1>
+      </header>
 
       <div className="mb-6 space-y-4">
         <div>
@@ -130,3 +134,5 @@ export function AuthorizationTermPreview({ data }: AuthorizationTermPreviewProps
     </div>
   );
 }
+
+    

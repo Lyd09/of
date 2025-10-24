@@ -5,6 +5,7 @@ import React from 'react';
 import { ServiceContractData, companyData } from '@/types/contract';
 import { boldenContractTerms } from '@/lib/contract-utils';
 import numero from 'numero-por-extenso';
+import Image from 'next/image';
 
 interface ContractPreviewProps {
   data: ServiceContractData;
@@ -95,7 +96,10 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
 
   return (
     <div className="bg-white text-black p-12" style={{ fontFamily: "Arial, Helvetica, sans-serif", fontSize: '12pt', lineHeight: '1.5', width: '210mm', minHeight: '297mm' }}>
-      <h1 className="text-center font-bold text-lg mb-8">{contractTitle || 'TÍTULO DO CONTRATO'}</h1>
+      <header className="flex justify-between items-center mb-8 no-break">
+        {companyData.logoUrl && <Image src={companyData.logoUrl} alt="Logo da Empresa" width={100} height={100} />}
+        <h1 className="text-center font-bold text-lg">{contractTitle || 'TÍTULO DO CONTRATO'}</h1>
+      </header>
 
       <div className="mb-6 space-y-4 no-break">
         <div>
@@ -190,5 +194,7 @@ export function ContractPreviewForPdf({ data }: ContractPreviewProps) {
     </div>
   );
 }
+
+    
 
     

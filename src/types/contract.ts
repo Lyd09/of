@@ -89,7 +89,10 @@ export const companyData = {
     name: "FastFilms",
     cnpj: "53.525.841/0001-89",
     address: "Rua Bartolomeu Bueno de Gusmao, 594 - Aeronautas, Lagoa Santa - MG, 33.236-454",
-    email: "fastfilmsoficial@gmail.com"
+    email: "fastfilmsoficial@gmail.com",
+    logoUrl: "https://raw.githubusercontent.com/Lyd09/of/refs/heads/main/logoFF-F-Transparente.png"
 }
+
+    
 
     

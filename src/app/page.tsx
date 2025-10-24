@@ -71,7 +71,7 @@ export type CompanyInfo = {
 
 export const companyInfo: CompanyInfo = {
   name: "FastFilms",
-  logoUrl: "/LOGO-ORCAFAST-RED.png",
+  logoUrl: "https://raw.githubusercontent.com/Lyd09/of/refs/heads/main/logoFF-F-Transparente.png",
   slogan: "Cada momento merece um bom take!",
 };
 
@@ -681,6 +681,8 @@ export default function OrcaFastPage() {
         </>
     );
 }
+
+    
 
     
 
