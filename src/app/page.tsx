@@ -81,7 +81,7 @@ const formatCurrency = (value: number) => {
 const AppHeader = () => (
     <header className="mb-10 text-center">
         <Image 
-            src="/LOGO-OF.png" 
+            src="/LOGO-ORCAFAST-RED.png" 
             alt="OrçaFAST Logo" 
             width={400} 
             height={100} 
@@ -481,34 +481,39 @@ export default function OrcaFastPage() {
         }
 
         const validItems = items.filter(item => item.description || item.quantity > 0 || item.unitPrice > 0);
+        
+        let subtotal = 0;
 
         const itemsWithTotals: BudgetItemType[] = validItems.map(item => {
-            const total = (item.quantity || 0) * (item.unitPrice || 0);
+            const itemSubtotal = (item.quantity || 0) * (item.unitPrice || 0);
+            subtotal += itemSubtotal;
+
             let discountValue = item.discount || 0;
             if (item.discountType === 'percentage' && discountValue > 0) {
-                discountValue = total * (discountValue / 100);
+                discountValue = itemSubtotal * (discountValue / 100);
             }
+
             return {
                 ...item,
-                itemTotal: total - discountValue,
+                itemTotal: itemSubtotal - discountValue,
                 itemDiscountValue: discountValue,
                 discount: item.discount || 0,
             };
         });
 
-        const subtotal = itemsWithTotals.reduce((acc, item) => acc + item.itemTotal, 0);
+        const totalAfterItemDiscounts = itemsWithTotals.reduce((acc, item) => acc + item.itemTotal, 0);
         
         let generalDiscountValue = generalDiscount || 0;
         let generalDiscountPercentage = 0;
 
         if(generalDiscountType === 'percentage' && generalDiscountValue > 0) {
             generalDiscountPercentage = generalDiscount || 0;
-            generalDiscountValue = subtotal * (generalDiscountValue / 100);
-        } else if (subtotal > 0 && generalDiscountValue > 0) {
-            generalDiscountPercentage = (generalDiscountValue / subtotal) * 100;
+            generalDiscountValue = totalAfterItemDiscounts * (generalDiscountValue / 100);
+        } else if (totalAfterItemDiscounts > 0 && generalDiscountValue > 0) {
+            generalDiscountPercentage = (generalDiscountValue / totalAfterItemDiscounts) * 100;
         }
         
-        const totalAmount = subtotal - generalDiscountValue;
+        const totalAmount = totalAfterItemDiscounts - generalDiscountValue;
 
         return {
             ...rest,
@@ -628,6 +633,8 @@ export default function OrcaFastPage() {
         </>
     );
 }
+
+    
 
     
 
