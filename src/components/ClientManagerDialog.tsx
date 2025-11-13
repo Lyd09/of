@@ -47,7 +47,7 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
     if (isOpen) {
       fetchClients();
     }
-  }, [isOpen, toast]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (editingClient) {
