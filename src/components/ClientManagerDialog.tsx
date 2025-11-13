@@ -170,13 +170,13 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
                         <Input id="client-email" type="email" {...register('email')} placeholder="cliente@email.com" />
                         {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                     </div>
+                    <div className="flex gap-2 pt-4">
+                        <Button type="submit">
+                            {editingClient ? 'Salvar Alterações' : 'Adicionar Cliente'}
+                        </Button>
+                        {editingClient && <Button type="button" variant="ghost" onClick={cancelEditing}>Cancelar</Button>}
+                    </div>
                 </form>
-                 <div className="flex gap-2 pt-4">
-                    <Button type="submit" form="client-form">
-                        {editingClient ? 'Salvar Alterações' : 'Adicionar Cliente'}
-                    </Button>
-                    {editingClient && <Button type="button" variant="ghost" onClick={cancelEditing}>Cancelar</Button>}
-                </div>
             </div>
             
             {/* Lista de Clientes */}
