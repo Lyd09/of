@@ -1,0 +1,46 @@
+
+{
+  "entities": {
+    "Client": {
+      "title": "Client",
+      "type": "object",
+      "description": "Represents a client in the system.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name or company name of the client."
+        },
+        "cpfCnpj": {
+          "type": "string",
+          "description": "CPF or CNPJ of the client."
+        },
+        "address": {
+          "type": "string",
+          "description": "Full address of the client."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Contact email of the client."
+        },
+        "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the client was created."
+        }
+      },
+      "required": ["name", "cpfCnpj", "address", "email"]
+    }
+  },
+  "auth": {
+    "providers": []
+  },
+  "firestore": {
+    "/clients/{clientId}": {
+      "schema": {
+        "$ref": "#/entities/Client"
+      },
+      "description": "Stores client data."
+    }
+  }
+}
