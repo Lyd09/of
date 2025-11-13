@@ -3,9 +3,11 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Permite que usuários autenticados leiam e escrevam na coleção 'clients'
+    // Permite leitura e escrita pública na coleção 'clients'
+    // CUIDADO: Isso torna seus dados de clientes publicamente acessíveis.
+    // Para um aplicativo de produção, você deve implementar autenticação.
     match /clients/{clientId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if true;
     }
   }
 }
