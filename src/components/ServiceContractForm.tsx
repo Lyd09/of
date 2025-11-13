@@ -147,6 +147,18 @@ export function ServiceContractForm() {
     }
   }, [selectedService, setValue]);
 
+  const handleObjectChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = e.target.value;
+    const newText = text.replace(/\[(\d+)\]/g, (match, numberStr) => {
+        const num = parseInt(numberStr, 10);
+        if (!isNaN(num)) {
+            return `[${numero.porExtenso(num)}]`;
+        }
+        return match;
+    });
+    setValue('object', newText, { shouldValidate: true });
+  };
+
 
   return (
     <div className="space-y-6">
@@ -210,7 +222,7 @@ export function ServiceContractForm() {
                      <FormField control={control} name={`contractors.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Nome Completo</FormLabel><FormControl><Input {...field} placeholder="Nome do Contratante" /></FormControl><FormMessage /></FormItem>)} />
                      <FormField control={control} name={`contractors.${index}.cpfCnpj`} render={({ field }) => ( <FormItem><FormLabel>CPF/CNPJ</FormLabel><FormControl><Input {...field} placeholder="000.000.000-00" /></FormControl><FormMessage /></FormItem>)} />
                      <FormField control={control} name={`contractors.${index}.address`} render={({ field }) => ( <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input {...field} placeholder="Rua, Número, Bairro, Cidade - UF" /></FormControl><FormMessage /></FormItem>)} />
-                     <FormField control={control} name={`contractors.${index}.email`} render={({ field }) => ( <FormItem><FormLabel>E-mail</FormLabel><FormControl><Input {...field} type="email" placeholder="email@exemplo.com" /></FormControl><FormMessage /></FormItem>)} />
+                     <FormField control={control} name={`contractors.${index}.email`} render={({ field }) => ( <FormItem><FormLabel>E-mail</FormLabel><FormControl><Input {...field} type="email" placeholder="email@contratante.com" /></FormControl><FormMessage /></FormItem>)} />
                  </div>
             ))}
              <Button type="button" variant="outline" onClick={() => append({ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' })}>
@@ -223,7 +235,7 @@ export function ServiceContractForm() {
       <Card>
         <CardHeader><CardTitle>Cláusulas do Contrato</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-            <FormField control={control} name="object" render={({ field }) => ( <FormItem><FormLabel>Cláusula 1 - Objeto do Contrato</FormLabel><FormControl><Textarea {...field} rows={5} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={control} name="object" render={({ field }) => ( <FormItem><FormLabel>Cláusula 1 - Objeto do Contrato</FormLabel><FormControl><Textarea {...field} rows={5} onChange={handleObjectChange} /></FormControl><FormMessage /></FormItem>)} />
             
             <div>
                 <FormLabel>Cláusula 2 - Valor e Forma de Pagamento</FormLabel>
