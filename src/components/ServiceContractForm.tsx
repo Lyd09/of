@@ -31,24 +31,24 @@ const serviceInclusionOptions: ServiceInclusion[] = [
     'Vídeo e Fotos',
 ];
 
-const getInitialObjectText = (service: ServiceType, inclusion: ServiceInclusion) => {
-    const videoText = 'O presente contrato tem como objeto a prestação de serviços de gravação e edição de [NÚMERO] vídeos, conforme briefing e orientações fornecidas pelo CONTRATANTE.';
-    const photoText = ' e a entrega de [NÚMERO] fotos editadas em alta resolução';
-
+const getObjectText = (service: ServiceType, inclusion: ServiceInclusion, videoCount?: number, photoCount?: number) => {
     let baseText = '';
+
+    const videoStr = videoCount ? `${videoCount} (${numero.porExtenso(videoCount)})` : '[NÚMERO]';
+    const photoStr = photoCount ? `${photoCount} (${numero.porExtenso(photoCount)})` : '[NÚMERO]';
 
     switch (service) {
         case 'Produção de Vídeo':
+            baseText = `O presente contrato tem como objeto a prestação de serviços de gravação e edição de ${videoStr} vídeo(s)`;
             if (inclusion === 'Vídeo e Fotos') {
-                baseText = `O presente contrato tem como objeto a prestação de serviços de gravação e edição de [NÚMERO] vídeos${photoText}, conforme briefing e orientações fornecidas pelo CONTRATANTE.`;
-            } else {
-                baseText = videoText;
+                baseText += ` e a entrega de ${photoStr} foto(s) editada(s) em alta resolução`;
             }
+            baseText += ', conforme briefing e orientações fornecidas pelo CONTRATANTE.';
             break;
         case 'Edição de Vídeo':
-            baseText = 'O presente contrato tem como objeto a prestação de serviços de edição de vídeo a partir de material bruto fornecido pelo CONTRATANTE e/ou captado anteriormente pela CONTRATADA.';
-            if (inclusion === 'Vídeo e Fotos') {
-                 baseText += `${photoText}`;
+            baseText = `O presente contrato tem como objeto a prestação de serviços de edição de ${videoStr} vídeo(s) a partir de material bruto fornecido pelo CONTRATANTE e/ou captado anteriormente pela CONTRATADA.`;
+             if (inclusion === 'Vídeo e Fotos') {
+                baseText += ` Inclui também a edição e entrega de ${photoStr} foto(s).`;
             }
             break;
         case 'Website':
@@ -57,14 +57,16 @@ const getInitialObjectText = (service: ServiceType, inclusion: ServiceInclusion)
         case 'Drone':
             baseText = 'O presente contrato tem como objeto a captação de imagens aéreas com drone, conforme plano de voo e orientações acordadas com o CONTRATANTE.';
              if (inclusion === 'Vídeo e Fotos') {
-                 baseText += ` Inclui a entrega do material bruto de vídeo e [NÚMERO] fotos editadas.`;
+                 baseText += ` Inclui a entrega do material bruto de vídeo e ${photoStr} foto(s) editada(s).`;
+            } else {
+                 baseText += ` Inclui a entrega do material bruto de ${videoStr} vídeo(s).`;
             }
             break;
         case 'Desenvolvimento de Software':
             baseText = 'O presente contrato tem como objeto o desenvolvimento e implementação de uma solução de software customizada, conforme especificações técnicas e requisitos detalhados em anexo ou briefing.';
             break;
         case 'Motion Graphics':
-            baseText = 'O presente contrato tem como objeto a criação e produção de animação 2D/3D (motion graphics), incluindo design de elementos gráficos, personagens, cenários e animação, para explicar um conceito, promover um produto ou contar uma história, conforme roteiro e storyboard aprovados.';
+            baseText = `O presente contrato tem como objeto a criação e produção de ${videoStr} animação(ões) 2D/3D (motion graphics), incluindo design de elementos gráficos, personagens, cenários e animação, para explicar um conceito, promover um produto ou contar uma história, conforme roteiro e storyboard aprovados.`;
             break;
         default:
             return '';
@@ -133,6 +135,8 @@ export function ServiceContractForm() {
 
   const selectedService = watch('serviceType') as ServiceType;
   const selectedInclusion = watch('serviceInclusion') as ServiceInclusion;
+  const videoCount = watch('videoCount');
+  const photoCount = watch('photoCount');
   const paymentMethod = watch('paymentMethod');
   const totalValue = watch('totalValue');
 
@@ -142,6 +146,8 @@ export function ServiceContractForm() {
     if (!watch('serviceType')) {
         setValue('serviceType', initialService, { shouldDirty: true });
         setValue('serviceInclusion', initialInclusion, { shouldDirty: true });
+        setValue('videoCount', 1);
+        setValue('photoCount', 10);
         setValue('contractors', [{ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' }], { shouldDirty: true });
         setValue('paymentMethod', 'Sinal + Entrega', { shouldDirty: true });
         setValue('paymentSignalPercentage', 50, { shouldDirty: true });
@@ -167,28 +173,14 @@ export function ServiceContractForm() {
             titleText = 'SERVIÇOS DE DRONE';
         }
         setValue('contractTitle', `CONTRATO DE PRESTAÇÃO DE ${titleText}`);
-        setValue('object', getInitialObjectText(selectedService, selectedInclusion));
+        setValue('object', getObjectText(selectedService, selectedInclusion, videoCount, photoCount));
         setValue('contractorResponsibilities', getInitialContractorResponsibilitiesText(selectedService));
         setValue('clientResponsibilities', getInitialClientResponsibilitiesText(selectedService));
         setValue('generalDispositions', getInitialGeneralDispositions());
         setValue('warranty', getInitialWarrantyClause(selectedService));
         setValue('specifications', getInitialSpecificationsClause(selectedService));
     }
-  }, [selectedService, selectedInclusion, setValue]);
-
-  const handleObjectChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    const newText = text.replace(/\[(\d+)\]/g, (match, numberStr) => {
-        const num = parseInt(numberStr, 10);
-        if (!isNaN(num)) {
-            // Mantém o número e adiciona o extenso entre parênteses
-            return `${num} (${numero.porExtenso(num)})`;
-        }
-        return match;
-    }).replace(/\[NÚMERO\]/g, '[NÚMERO]'); // Garante que a tag [NÚMERO] não seja processada
-    
-    setValue('object', newText, { shouldValidate: true });
-  };
+  }, [selectedService, selectedInclusion, videoCount, photoCount, setValue]);
 
 
   return (
@@ -303,8 +295,34 @@ export function ServiceContractForm() {
       <Card>
         <CardHeader><CardTitle>Cláusulas do Contrato</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-            <FormField control={control} name="object" render={({ field }) => ( <FormItem><FormLabel>Cláusula 1 - Objeto do Contrato</FormLabel><FormControl><Textarea {...field} rows={5} onChange={handleObjectChange} /></FormControl><FormMessage /></FormItem>)} />
             
+             <div>
+                <FormLabel>Cláusula 1 - Objeto do Contrato</FormLabel>
+                 <div className="p-4 border rounded-md mt-2 space-y-4">
+                    {(selectedService !== 'Website' && selectedService !== 'Desenvolvimento de Software') && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                             <FormField control={control} name="videoCount" render={({ field }) => ( 
+                                <FormItem>
+                                    <FormLabel>Nº de Vídeos</FormLabel>
+                                    <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                            {selectedInclusion === 'Vídeo e Fotos' && (
+                                <FormField control={control} name="photoCount" render={({ field }) => ( 
+                                    <FormItem>
+                                        <FormLabel>Nº de Fotos</FormLabel>
+                                        <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            )}
+                        </div>
+                    )}
+                    <FormField control={control} name="object" render={({ field }) => ( <FormItem><FormControl><Textarea {...field} rows={5} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+            </div>
+
             <div>
                 <FormLabel>Cláusula 2 - Valor e Forma de Pagamento</FormLabel>
                 <div className="p-4 border rounded-md mt-2 space-y-4">
@@ -395,7 +413,5 @@ export function ServiceContractForm() {
     </div>
   );
 }
-
-    
 
     

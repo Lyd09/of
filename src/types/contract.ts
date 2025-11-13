@@ -27,6 +27,8 @@ export const serviceContractSchema = z.object({
   contractTitle: z.string().min(1),
   contractors: z.array(contractorSchema).min(1, "Adicione pelo menos um contratante."),
   object: z.string().min(1, "Objeto do contrato é obrigatório."),
+  videoCount: z.number().optional(),
+  photoCount: z.number().optional(),
   totalValue: z.number().positive("Valor deve ser maior que zero."),
   paymentMethod: z.enum(['À vista', 'Sinal + Entrega', 'Outro']),
   paymentSignalPercentage: z.number().optional(),
@@ -95,7 +97,5 @@ export const companyData = {
     email: "fastfilmsoficial@gmail.com",
     logoUrl: "https://raw.githubusercontent.com/Lyd09/of/refs/heads/main/logoFF-F-Transparente.png"
 }
-
-    
 
     
