@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FileText, Users, Repeat } from 'lucide-react';
+import { FileText, Users, Repeat, UserPlus } from 'lucide-react';
 import { ContractGeneratorDialog } from './ContractGeneratorDialog';
 import { AgreementsContractDialog } from './AgreementsContractDialog';
 
@@ -43,16 +43,16 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
   return (
     <>
       <Dialog open={isMainDialogOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[650px]">
+        <DialogContent className="sm:max-w-[800px]">
           <DialogHeader>
             <DialogTitle>Gerar Novo Documento</DialogTitle>
             <DialogDescription>
-              Escolha o tipo de documento que você deseja gerar.
+              Escolha o tipo de documento que você deseja gerar ou gerencie seus clientes.
             </DialogDescription>
           </DialogHeader>
 
           <div className="py-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                  <Button
                   variant="outline"
                   className="h-32 flex flex-col gap-2 p-6 group"
@@ -64,19 +64,27 @@ export function ContractDialog({ isOpen, onOpenChange }: ContractDialogProps) {
                 <Button
                   variant="outline"
                   className="h-32 flex flex-col gap-2 p-6 group"
+                  onClick={() => handleSelection('agreements')}
+                >
+                  <Repeat className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
+                  <span className="text-center">Acordos e Trocas</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-32 flex flex-col gap-2 p-6 group"
+                  onClick={() => { /* Lógica para gerenciar clientes virá aqui */ }}
+                >
+                  <UserPlus className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
+                  <span className="text-center">Gerenciar Clientes</span>
+                </Button>
+                 <Button
+                  variant="outline"
+                  className="h-32 flex flex-col gap-2 p-6 group"
                   onClick={() => handleSelection('hiring')}
                   disabled
                 >
                   <Users className="w-10 h-10 text-muted-foreground group-hover:text-white transition-colors" />
                   <span className="text-center text-muted-foreground">Contratações (em breve)</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-32 flex flex-col gap-2 p-6 group"
-                  onClick={() => handleSelection('agreements')}
-                >
-                  <Repeat className="w-10 h-10 text-primary group-hover:text-white transition-colors" />
-                  <span className="text-center">Acordos e Trocas</span>
                 </Button>
               </div>
           </div>
