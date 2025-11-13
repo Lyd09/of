@@ -28,21 +28,24 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
     resolver: zodResolver(clientSchema),
   });
 
+  const fetchClients = async () => {
+    setIsLoading(true);
+    try {
+        const res = await fetch('/api/clients');
+        const data = await res.json();
+        setClients(data);
+    } catch (err) {
+        toast({ title: 'Erro ao carregar clientes', description: 'Não foi possível buscar os dados.', variant: 'destructive'});
+        console.error(err);
+    } finally {
+        setIsLoading(false);
+    }
+  }
+
   // Fetch clients from API on mount
   useEffect(() => {
     if (isOpen) {
-      setIsLoading(true);
-      fetch('/api/clients')
-        .then(res => res.json())
-        .then(data => {
-            setClients(data);
-            setIsLoading(false);
-        })
-        .catch(err => {
-            toast({ title: 'Erro ao carregar clientes', description: 'Não foi possível buscar os dados.', variant: 'destructive'});
-            console.error(err);
-            setIsLoading(false);
-        });
+      fetchClients();
     }
   }, [isOpen, toast]);
 
@@ -70,15 +73,17 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
 
       if (!response.ok) throw new Error('Falha ao salvar cliente');
       
-      const savedClient = await response.json();
+      await response.json(); // Wait for the server to confirm
 
       if (isUpdating) {
-        setClients(clients.map(c => (c.id === savedClient.id ? savedClient : c)));
         toast({ title: 'Cliente atualizado com sucesso!' });
       } else {
-        setClients([...clients, savedClient]);
         toast({ title: 'Novo cliente adicionado!' });
       }
+      
+      // Refetch clients to show the new/updated one
+      await fetchClients();
+
       setEditingClient(null);
       reset();
 
