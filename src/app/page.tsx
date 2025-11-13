@@ -195,9 +195,10 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
 
     const handleResetForm = () => {
         const defaultValues = form.formState.defaultValues;
+        const currentBudgetNumber = form.getValues('budgetNumber');
         form.reset({
             ...defaultValues,
-            budgetNumber: Math.floor(Math.random() * 1000) + 1,
+            budgetNumber: (Number(currentBudgetNumber) || 0) + 1,
             items: [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed', finalPrice: 0 }],
         });
     }
