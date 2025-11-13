@@ -29,7 +29,7 @@ const serviceOptions: ServiceType[] = [
 const getInitialObjectText = (service: ServiceType) => {
     switch (service) {
         case 'Produção de Vídeo':
-            return 'O presente contrato tem como objeto a prestação de serviços de gravação e edição de [NÚMERO] (por extenso) vídeos, conforme briefing e orientações fornecidas pelo CONTRATANTE.';
+            return 'O presente contrato tem como objeto a prestação de serviços de gravação e edição de [NÚMERO] vídeos, conforme briefing e orientações fornecidas pelo CONTRATANTE.';
         case 'Edição de Vídeo':
             return 'O presente contrato tem como objeto a prestação de serviços de edição de vídeo a partir de material bruto fornecido pelo CONTRATANTE e/ou captado anteriormente pela CONTRATADA.';
         case 'Website':
@@ -152,7 +152,7 @@ export function ServiceContractForm() {
     const newText = text.replace(/\[(\d+)\]/g, (match, numberStr) => {
         const num = parseInt(numberStr, 10);
         if (!isNaN(num)) {
-            return `[${numero.porExtenso(num)}]`;
+            return `${num} (${numero.porExtenso(num)})`;
         }
         return match;
     });
@@ -327,5 +327,7 @@ export function ServiceContractForm() {
     </div>
   );
 }
+
+    
 
     
