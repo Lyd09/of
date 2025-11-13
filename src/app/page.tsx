@@ -94,7 +94,7 @@ const AppHeader = () => (
     </header>
 );
 
-const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGeneratePdf: (data: BudgetFormValues) => void, isGeneratingPdf: boolean }) => {
+const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf, budgetNumber, setBudgetNumber }: { form: any, onGeneratePdf: (data: BudgetFormValues) => void, isGeneratingPdf: boolean, budgetNumber: number, setBudgetNumber: (n: number) => void }) => {
     const { fields, append, remove, update } = useFieldArray({
         control: form.control,
         name: "items",
@@ -195,10 +195,14 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
 
     const handleResetForm = () => {
         const defaultValues = form.formState.defaultValues;
-        const currentBudgetNumber = form.getValues('budgetNumber');
+        const nextBudgetNumber = (Number(budgetNumber) || 0) + 1;
+        
+        // Update state and localStorage
+        setBudgetNumber(nextBudgetNumber);
+
         form.reset({
             ...defaultValues,
-            budgetNumber: (Number(currentBudgetNumber) || 0) + 1,
+            budgetNumber: nextBudgetNumber,
             items: [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed', finalPrice: 0 }],
         });
     }
@@ -214,7 +218,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                 Criar Novo Orçamento
                             </CardTitle>
                              <div className="flex gap-2">
-                                <Button type="button" variant="outline" size="icon" onClick={handleResetForm}>
+                                <Button type="button" variant="outline" size="icon" onClick={handleResetForm} title="Resetar Formulário">
                                     <RefreshCw className="h-4 w-4" />
                                 </Button>
                                 <Button type="button" variant="outline" size="icon" onClick={() => form.setValue('isDroneFeatureEnabled', !form.getValues('isDroneFeatureEnabled'))}>
@@ -502,6 +506,7 @@ export default function OrcaFastPage() {
     const { toast } = useToast();
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
+    const [budgetNumber, setBudgetNumber] = useLocalStorage<number>('orcafast-budget-number', 101);
     
     const form = useForm<BudgetFormValues>({
         resolver: zodResolver(budgetSchema),
@@ -511,7 +516,7 @@ export default function OrcaFastPage() {
             slogan: companyInfo.slogan,
             clientName: '',
             clientAddress: '',
-            budgetNumber: 0,
+            budgetNumber: budgetNumber,
             budgetDate: format(new Date(), 'dd/MM/yyyy'),
             items: [],
             commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
@@ -524,10 +529,12 @@ export default function OrcaFastPage() {
     });
 
     useEffect(() => {
-        // Only run on client
-        if (typeof window !== 'undefined' && form.getValues('budgetNumber') === 0) {
-            form.setValue('budgetNumber', Math.floor(Math.random() * 1000) + 1);
-        }
+        // Set the budget number from localStorage when component mounts or budgetNumber changes
+        form.setValue('budgetNumber', budgetNumber);
+    }, [budgetNumber, form]);
+
+    useEffect(() => {
+        // Ensure items array is not empty on initial load
         if (form.getValues('items').length === 0) {
             form.setValue('items', [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed', finalPrice: 0 }]);
         }
@@ -594,6 +601,9 @@ export default function OrcaFastPage() {
     const previewData = getPreviewData();
 
     const onGeneratePdf = async () => {
+        // Since we are now managing budgetNumber outside the form, let's sync it before validation
+        form.setValue('budgetNumber', budgetNumber);
+
         const result = budgetSchema.safeParse(form.getValues());
         if (!result.success) {
             const errorKeys = Object.keys(result.error.flatten().fieldErrors);
@@ -605,15 +615,19 @@ export default function OrcaFastPage() {
             console.log(result.error.flatten().fieldErrors)
             return;
         }
+        
+        const nextBudgetNumber = budgetNumber + 1;
+        setBudgetNumber(nextBudgetNumber);
+        toast({
+            title: "Orçamento gerado!",
+            description: `O próximo número de orçamento será ${String(nextBudgetNumber).padStart(4, '0')}.`
+        });
 
         const data = getPreviewData();
         if (!data) return;
 
         setIsGeneratingPdf(true);
-        toast({
-            title: "Gerando PDF...",
-            description: "Seu orçamento está sendo processado.",
-        });
+        
 
         try {
             const html2pdf = (await import('html2pdf.js')).default;
@@ -668,6 +682,20 @@ export default function OrcaFastPage() {
         }
     };
     
+    const handlePdfGenerationAndReset = async () => {
+        await onGeneratePdf();
+        
+        // Reset form after PDF generation
+        const defaultValues = form.formState.defaultValues;
+        form.reset({
+            ...defaultValues,
+            clientName: '',
+            clientAddress: '',
+            budgetNumber: budgetNumber, // Already incremented and saved
+            items: [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed', finalPrice: 0 }],
+        });
+    }
+
     return (
         <>
             <main className="container mx-auto p-4 lg:p-8 font-sans">
@@ -675,7 +703,13 @@ export default function OrcaFastPage() {
                 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
                     <div className="lg:col-span-3">
-                        <BudgetForm form={form} onGeneratePdf={onGeneratePdf} isGeneratingPdf={isGeneratingPdf} />
+                        <BudgetForm 
+                            form={form} 
+                            onGeneratePdf={handlePdfGenerationAndReset} 
+                            isGeneratingPdf={isGeneratingPdf} 
+                            budgetNumber={budgetNumber}
+                            setBudgetNumber={setBudgetNumber}
+                        />
                     </div>
                     <div className="lg:col-span-2">
                         <div className="sticky top-8 space-y-4">
@@ -683,7 +717,7 @@ export default function OrcaFastPage() {
                                 <FileText className="mr-2 h-4 w-4" /> 
                                 Gerar Contrato
                             </Button>
-                           <BudgetPreview data={previewData} onGeneratePdf={onGeneratePdf} />
+                           <BudgetPreview data={previewData} onGeneratePdf={handlePdfGenerationAndReset} />
                         </div>
                     </div>
                 </div>
@@ -695,27 +729,3 @@ export default function OrcaFastPage() {
         </>
     );
 }
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
