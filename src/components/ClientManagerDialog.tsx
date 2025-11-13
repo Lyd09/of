@@ -149,7 +149,7 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
             {/* Formulário */}
             <div className='flex flex-col space-y-4'>
                 <h3 className="text-lg font-medium">{editingClient ? 'Editar Cliente' : 'Adicionar Novo Cliente'}</h3>
-                 <form id="client-form" onSubmit={handleSubmit(handleSaveClient)} className="space-y-4">
+                 <form onSubmit={handleSubmit(handleSaveClient)} className="space-y-4">
                     <div className="space-y-1">
                         <Label htmlFor="client-name">Nome Completo / Razão Social</Label>
                         <Input id="client-name" {...register('name')} placeholder="Nome do Cliente" />
