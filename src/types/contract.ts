@@ -1,4 +1,3 @@
-
 import * as z from 'zod';
 
 export const contractorSchema = z.object({
@@ -10,6 +9,18 @@ export const contractorSchema = z.object({
 });
 
 export type Contractor = z.infer<typeof contractorSchema>;
+
+// Schema para um cliente individual
+export const clientSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1, "O nome do cliente é obrigatório."),
+  cpfCnpj: z.string().min(1, "O CPF/CNPJ é obrigatório."),
+  address: z.string().min(1, "O endereço é obrigatório."),
+  email: z.string().email("O e-mail fornecido é inválido."),
+});
+
+export type Client = z.infer<typeof clientSchema>;
+
 
 export type ServiceType =
   | 'Produção de Vídeo'
@@ -97,5 +108,3 @@ export const companyData = {
     email: "fastfilmsoficial@gmail.com",
     logoUrl: "https://raw.githubusercontent.com/Lyd09/of/refs/heads/main/logoFF-F-Transparente.png"
 }
-
-    
