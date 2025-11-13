@@ -22,7 +22,8 @@ import {
     Send,
     Pencil,
     Airplay,
-    Download
+    Download,
+    RefreshCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from 'next/image';
@@ -192,6 +193,15 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
         });
     }
 
+    const handleResetForm = () => {
+        const defaultValues = form.formState.defaultValues;
+        form.reset({
+            ...defaultValues,
+            budgetNumber: Math.floor(Math.random() * 1000) + 1,
+            items: [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed', finalPrice: 0 }],
+        });
+    }
+
     return (
         <FormProvider {...form}>
             <Form {...form}>
@@ -203,6 +213,9 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                 Criar Novo Orçamento
                             </CardTitle>
                              <div className="flex gap-2">
+                                <Button type="button" variant="outline" size="icon" onClick={handleResetForm}>
+                                    <RefreshCw className="h-4 w-4" />
+                                </Button>
                                 <Button type="button" variant="outline" size="icon" onClick={() => form.setValue('isDroneFeatureEnabled', !form.getValues('isDroneFeatureEnabled'))}>
                                     <Airplay className="h-4 w-4" />
                                 </Button>
@@ -681,6 +694,8 @@ export default function OrcaFastPage() {
         </>
     );
 }
+
+    
 
     
 
