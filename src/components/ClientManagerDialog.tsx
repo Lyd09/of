@@ -29,15 +29,21 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
   });
 
   const fetchClients = async () => {
+    console.log('Dialog: fetchClients iniciado.');
     setIsLoading(true);
     try {
         const res = await fetch('/api/clients');
         const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Erro de rede ao buscar clientes');
+        }
+        console.log('Dialog: Clientes recebidos da API:', data);
         setClients(data);
     } catch (err) {
-        toast({ title: 'Erro ao carregar clientes', description: 'Não foi possível buscar os dados.', variant: 'destructive'});
-        console.error(err);
+        toast({ title: 'Erro ao carregar clientes', description: (err as Error).message, variant: 'destructive'});
+        console.error('Dialog: Erro em fetchClients:', err);
     } finally {
+        console.log('Dialog: fetchClients finalizado.');
         setIsLoading(false);
     }
   }
@@ -45,16 +51,19 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
   // Fetch clients from API on mount
   useEffect(() => {
     if (isOpen) {
+      console.log('Dialog: Componente montado, buscando clientes...');
       fetchClients();
     }
   }, [isOpen]);
 
   useEffect(() => {
     if (editingClient) {
+      console.log('Dialog: Preenchendo formulário para edição:', editingClient);
       Object.keys(editingClient).forEach(key => {
         setValue(key as keyof Client, editingClient[key as keyof Client]);
       });
     } else {
+      console.log('Dialog: Resetando formulário para novo cliente.');
       reset({ id: '', name: '', cpfCnpj: '', address: '', email: '' });
     }
   }, [editingClient, setValue, reset]);
@@ -63,6 +72,7 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
   const handleSaveClient = async (data: Client) => {
     const isUpdating = !!editingClient;
     const clientData = { ...data, id: isUpdating ? editingClient.id : crypto.randomUUID() };
+    console.log('Dialog: handleSaveClient chamado. Dados a serem salvos:', clientData);
 
     try {
       const response = await fetch('/api/clients', {
@@ -71,9 +81,13 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
         body: JSON.stringify(clientData),
       });
 
-      if (!response.ok) throw new Error('Falha ao salvar cliente');
-      
-      await response.json(); // Wait for the server to confirm
+      console.log(`Dialog: Resposta do servidor (Status: ${response.status})`);
+      const responseData = await response.json();
+      console.log('Dialog: Dados da resposta do servidor:', responseData);
+
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Falha ao salvar cliente');
+      }
 
       if (isUpdating) {
         toast({ title: 'Cliente atualizado com sucesso!' });
@@ -81,18 +95,20 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
         toast({ title: 'Novo cliente adicionado!' });
       }
       
-      // Refetch clients to show the new/updated one
+      console.log('Dialog: Cliente salvo com sucesso, atualizando a lista de clientes...');
       await fetchClients();
 
       setEditingClient(null);
       reset();
 
     } catch (error) {
+      console.error('Dialog: Erro em handleSaveClient:', error);
       toast({ title: 'Erro ao salvar', description: 'Não foi possível salvar os dados do cliente.', variant: 'destructive'});
     }
   };
 
   const handleDeleteClient = async (id: string) => {
+    console.log(`Dialog: handleDeleteClient chamado para o ID: ${id}`);
     try {
         const response = await fetch(`/api/clients?id=${id}`, {
             method: 'DELETE',
@@ -100,10 +116,12 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
 
         if (!response.ok) throw new Error('Falha ao deletar cliente');
 
+        console.log(`Dialog: Cliente ${id} deletado com sucesso, atualizando estado.`);
         setClients(clients.filter(c => c.id !== id));
         toast({ title: 'Cliente removido.', variant: 'destructive' });
 
     } catch (error) {
+        console.error(`Dialog: Erro ao deletar cliente ${id}:`, error);
         toast({ title: 'Erro ao remover', description: 'Não foi possível remover o cliente.', variant: 'destructive'});
     }
   };
