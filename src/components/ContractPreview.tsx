@@ -96,8 +96,7 @@ export function ContractPreview({ data }: ContractPreviewProps) {
 
   return (
     <div className="bg-white text-black p-12 shadow-lg" style={{ fontFamily: "'Geist Sans', sans-serif" }}>
-      <header className="flex justify-between items-center mb-8">
-        {companyData.logoUrl && <Image src={companyData.logoUrl} alt="Logo da Empresa" width={100} height={100} />}
+      <header className="flex justify-center items-center mb-8">
         <h1 className="text-center font-bold text-lg">{contractTitle || 'TÍTULO DO CONTRATO'}</h1>
       </header>
 

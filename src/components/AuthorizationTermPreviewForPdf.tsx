@@ -61,8 +61,7 @@ export function AuthorizationTermPreviewForPdf({ data }: AuthorizationTermPrevie
 
   return (
     <div className="bg-white text-black p-12" style={{ fontFamily: "Arial, Helvetica, sans-serif", fontSize: '12pt', lineHeight: '1.5', width: '210mm', minHeight: '297mm' }}>
-      <header className="flex justify-between items-center mb-8 no-break">
-        {companyData.logoUrl && <Image src={companyData.logoUrl} alt="Logo da Empresa" width={100} height={100} />}
+      <header className="flex justify-center items-center mb-8 no-break">
         <h1 className="text-center font-bold text-lg">TERMO DE AUTORIZAÇÃO DE USO DE MATERIAL</h1>
       </header>
 
