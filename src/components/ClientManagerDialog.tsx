@@ -240,3 +240,4 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
     </Dialog>
   );
 }
+    
