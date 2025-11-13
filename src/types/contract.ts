@@ -19,8 +19,11 @@ export type ServiceType =
   | 'Desenvolvimento de Software'
   | 'Motion Graphics';
 
+export type ServiceInclusion = 'Apenas Vídeo' | 'Vídeo e Fotos';
+
 export const serviceContractSchema = z.object({
   serviceType: z.string().min(1),
+  serviceInclusion: z.string().optional(),
   contractTitle: z.string().min(1),
   contractors: z.array(contractorSchema).min(1, "Adicione pelo menos um contratante."),
   object: z.string().min(1, "Objeto do contrato é obrigatório."),

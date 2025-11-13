@@ -11,7 +11,7 @@ import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Textarea } from './ui/textarea';
 import { PlusCircle, Trash2 } from 'lucide-react';
-import { ServiceContractData, ServiceType } from '@/types/contract';
+import { ServiceContractData, ServiceType, ServiceInclusion } from '@/types/contract';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import numero from 'numero-por-extenso';
@@ -26,23 +26,50 @@ const serviceOptions: ServiceType[] = [
   'Motion Graphics',
 ];
 
-const getInitialObjectText = (service: ServiceType) => {
+const serviceInclusionOptions: ServiceInclusion[] = [
+    'Apenas Vídeo',
+    'Vídeo e Fotos',
+];
+
+const getInitialObjectText = (service: ServiceType, inclusion: ServiceInclusion) => {
+    const videoText = 'O presente contrato tem como objeto a prestação de serviços de gravação e edição de [NÚMERO] vídeos, conforme briefing e orientações fornecidas pelo CONTRATANTE.';
+    const photoText = ' e a entrega de [NÚMERO] fotos editadas em alta resolução';
+
+    let baseText = '';
+
     switch (service) {
         case 'Produção de Vídeo':
-            return 'O presente contrato tem como objeto a prestação de serviços de gravação e edição de [NÚMERO] vídeos, conforme briefing e orientações fornecidas pelo CONTRATANTE.';
+            if (inclusion === 'Vídeo e Fotos') {
+                baseText = `O presente contrato tem como objeto a prestação de serviços de gravação e edição de [NÚMERO] vídeos${photoText}, conforme briefing e orientações fornecidas pelo CONTRATANTE.`;
+            } else {
+                baseText = videoText;
+            }
+            break;
         case 'Edição de Vídeo':
-            return 'O presente contrato tem como objeto a prestação de serviços de edição de vídeo a partir de material bruto fornecido pelo CONTRATANTE e/ou captado anteriormente pela CONTRATADA.';
+            baseText = 'O presente contrato tem como objeto a prestação de serviços de edição de vídeo a partir de material bruto fornecido pelo CONTRATANTE e/ou captado anteriormente pela CONTRATADA.';
+            if (inclusion === 'Vídeo e Fotos') {
+                 baseText += `${photoText}`;
+            }
+            break;
         case 'Website':
-            return 'O presente contrato tem como objeto a criação e desenvolvimento de um website institucional/plataforma online, conforme escopo e funcionalidades detalhadas em anexo ou briefing.';
+            baseText = 'O presente contrato tem como objeto a criação e desenvolvimento de um website institucional/plataforma online, conforme escopo e funcionalidades detalhadas em anexo ou briefing.';
+            break;
         case 'Drone':
-            return 'O presente contrato tem como objeto a captação de imagens aéreas com drone, conforme plano de voo e orientações acordadas com o CONTRATANTE.';
+            baseText = 'O presente contrato tem como objeto a captação de imagens aéreas com drone, conforme plano de voo e orientações acordadas com o CONTRATANTE.';
+             if (inclusion === 'Vídeo e Fotos') {
+                 baseText += ` Inclui a entrega do material bruto de vídeo e [NÚMERO] fotos editadas.`;
+            }
+            break;
         case 'Desenvolvimento de Software':
-            return 'O presente contrato tem como objeto o desenvolvimento e implementação de uma solução de software customizada, conforme especificações técnicas e requisitos detalhados em anexo ou briefing.';
+            baseText = 'O presente contrato tem como objeto o desenvolvimento e implementação de uma solução de software customizada, conforme especificações técnicas e requisitos detalhados em anexo ou briefing.';
+            break;
         case 'Motion Graphics':
-            return 'O presente contrato tem como objeto a criação e produção de animação 2D/3D (motion graphics), incluindo design de elementos gráficos, personagens, cenários e animação, para explicar um conceito, promover um produto ou contar uma história, conforme roteiro e storyboard aprovados.';
+            baseText = 'O presente contrato tem como objeto a criação e produção de animação 2D/3D (motion graphics), incluindo design de elementos gráficos, personagens, cenários e animação, para explicar um conceito, promover um produto ou contar uma história, conforme roteiro e storyboard aprovados.';
+            break;
         default:
             return '';
     }
+    return baseText;
 }
 
 const getInitialContractorResponsibilitiesText = (service: ServiceType) => {
@@ -105,14 +132,16 @@ export function ServiceContractForm() {
   });
 
   const selectedService = watch('serviceType') as ServiceType;
+  const selectedInclusion = watch('serviceInclusion') as ServiceInclusion;
   const paymentMethod = watch('paymentMethod');
   const totalValue = watch('totalValue');
 
   useEffect(() => {
-    // Seta os valores iniciais quando o formulário é montado pela primeira vez.
     const initialService = 'Produção de Vídeo';
+    const initialInclusion = 'Apenas Vídeo';
     if (!watch('serviceType')) {
         setValue('serviceType', initialService, { shouldDirty: true });
+        setValue('serviceInclusion', initialInclusion, { shouldDirty: true });
         setValue('contractors', [{ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' }], { shouldDirty: true });
         setValue('paymentMethod', 'Sinal + Entrega', { shouldDirty: true });
         setValue('paymentSignalPercentage', 50, { shouldDirty: true });
@@ -138,24 +167,26 @@ export function ServiceContractForm() {
             titleText = 'SERVIÇOS DE DRONE';
         }
         setValue('contractTitle', `CONTRATO DE PRESTAÇÃO DE ${titleText}`);
-        setValue('object', getInitialObjectText(selectedService));
+        setValue('object', getInitialObjectText(selectedService, selectedInclusion));
         setValue('contractorResponsibilities', getInitialContractorResponsibilitiesText(selectedService));
         setValue('clientResponsibilities', getInitialClientResponsibilitiesText(selectedService));
         setValue('generalDispositions', getInitialGeneralDispositions());
         setValue('warranty', getInitialWarrantyClause(selectedService));
         setValue('specifications', getInitialSpecificationsClause(selectedService));
     }
-  }, [selectedService, setValue]);
+  }, [selectedService, selectedInclusion, setValue]);
 
   const handleObjectChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     const newText = text.replace(/\[(\d+)\]/g, (match, numberStr) => {
         const num = parseInt(numberStr, 10);
         if (!isNaN(num)) {
+            // Mantém o número e adiciona o extenso entre parênteses
             return `${num} (${numero.porExtenso(num)})`;
         }
         return match;
-    });
+    }).replace(/\[NÚMERO\]/g, '[NÚMERO]'); // Garante que a tag [NÚMERO] não seja processada
+    
     setValue('object', newText, { shouldValidate: true });
   };
 
@@ -163,13 +194,14 @@ export function ServiceContractForm() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader><CardTitle>Serviço Principal</CardTitle></CardHeader>
-        <CardContent>
+        <CardHeader><CardTitle>Escopo do Serviço</CardTitle></CardHeader>
+        <CardContent className="space-y-6">
             <FormField
                 control={control}
                 name="serviceType"
                 render={({ field }) => (
                 <FormItem>
+                    <FormLabel>Tipo de Serviço</FormLabel>
                     <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -197,6 +229,42 @@ export function ServiceContractForm() {
                 </FormItem>
                 )}
             />
+            
+            {(selectedService === 'Produção de Vídeo' || selectedService === 'Edição de Vídeo' || selectedService === 'Drone') && (
+                 <FormField
+                    control={control}
+                    name="serviceInclusion"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Inclusões</FormLabel>
+                        <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="grid grid-cols-2 gap-4"
+                        >
+                        {serviceInclusionOptions.map((inclusion) => {
+                            const isSelected = field.value === inclusion;
+                            const labelClassName = cn(
+                                "flex flex-col items-center justify-center rounded-md border-2 border-muted p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer text-center",
+                                isSelected && "bg-accent text-accent-foreground border-accent-foreground/50"
+                            );
+                            return (
+                            <FormItem key={inclusion}>
+                                <FormControl>
+                                    <RadioGroupItem value={inclusion} className="sr-only" id={inclusion}/>
+                                </FormControl>
+                                <Label htmlFor={inclusion} className={labelClassName}>
+                                    {inclusion}
+                                </Label>
+                            </FormItem>
+                            )
+                        })}
+                        </RadioGroup>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+            )}
         </CardContent>
       </Card>
       
