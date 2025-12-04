@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -11,10 +12,15 @@ import { ContractPreview } from './ContractPreview';
 import { ServiceContractData, serviceContractSchema } from '@/types/contract';
 import { useToast } from '@/hooks/use-toast';
 import { ContractPreviewForPdf } from './ContractPreviewForPdf';
+import { format } from 'date-fns';
 
 interface ContractGeneratorDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+const getShortName = (fullName: string = '') => {
+  return fullName.split(' ').slice(0, 2).join('_');
 }
 
 export function ContractGeneratorDialog({ isOpen, onOpenChange }: ContractGeneratorDialogProps) {
@@ -66,10 +72,15 @@ export function ContractGeneratorDialog({ isOpen, onOpenChange }: ContractGenera
           root.render(previewElement);
           
           await new Promise(resolve => setTimeout(resolve, 500)); 
+          
+          const dateString = format(new Date(), 'dd-MM-yyyy');
+          const shortName = getShortName(data.contractors[0]?.name);
+          const serviceName = data.serviceType.replace(/\s/g, '_');
+
 
           const opt = {
               margin: [0, 0, 0, 0],
-              filename: `${data.serviceType} - ${data.contractors[0]?.name.replace(/\s/g, '_') || 'Serviços'}.pdf`,
+              filename: `${serviceName}_${shortName}_${dateString}.pdf`,
               image: { type: 'jpeg', quality: 0.98 },
               html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff' },
               jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }

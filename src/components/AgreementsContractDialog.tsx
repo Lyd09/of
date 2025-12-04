@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -22,12 +23,17 @@ import { AuthorizationTermPreviewForPdf } from './AuthorizationTermPreviewForPdf
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 type AgreementType = 'authorization' | 'permutation';
 
 interface AgreementsContractDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+const getShortName = (fullName: string = '') => {
+  return fullName.split(' ').slice(0, 2).join('_');
 }
 
 export function AgreementsContractDialog({ isOpen, onOpenChange }: AgreementsContractDialogProps) {
@@ -80,18 +86,22 @@ export function AgreementsContractDialog({ isOpen, onOpenChange }: AgreementsCon
         
         let previewElement;
         let pdfOptions;
+        const dateString = format(new Date(), 'dd-MM-yyyy');
+
 
         if (agreementType === 'authorization') {
+            const shortName = getShortName((data as AuthorizationTermData).authorizedName);
             previewElement = <AuthorizationTermPreviewForPdf data={data as AuthorizationTermData} />;
             pdfOptions = {
-                filename: `Termo_Autorizacao_${(data as AuthorizationTermData).authorizedName.replace(/\s/g, '_')}.pdf`,
+                filename: `Termo_Autorizacao_${shortName}_${dateString}.pdf`,
                 html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff' },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
         } else {
+            const shortName = getShortName((data as PermutationContractData).permutants[0]?.name);
             previewElement = <PermutationContractPreviewForPdf data={data as PermutationContractData} />;
             pdfOptions = {
-                filename: `Contrato_Permuta_${(data as PermutationContractData).permutants[0].name.replace(/\s/g, '_')}.pdf`,
+                filename: `Contrato_Permuta_${shortName}_${dateString}.pdf`,
                 html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff' },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
