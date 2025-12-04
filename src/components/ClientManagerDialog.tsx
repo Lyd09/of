@@ -12,15 +12,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { Trash2, Edit3 } from 'lucide-react';
 import { Client, clientSchema } from '@/types/contract';
-import { useFirestore, useCollection } from '@/firebase';
-import {
-  collection,
-  addDoc,
-  doc,
-  updateDoc,
-  deleteDoc,
-  serverTimestamp
-} from 'firebase/firestore';
+
+interface ClientWithId extends Client {
+  id: string;
+}
 
 interface ClientManagerDialogProps {
   isOpen: boolean;
@@ -29,22 +24,60 @@ interface ClientManagerDialogProps {
 
 export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialogProps) {
   const { toast } = useToast();
-  const [editingClient, setEditingClient] = useState<Client | null>(null);
-
-  const firestore = useFirestore();
-  const clientsCollection = collection(firestore, 'clients');
-  const { data: clients = [], isLoading, error } = useCollection(clientsCollection);
+  const [clients, setClients] = useState<ClientWithId[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingClient, setEditingClient] = useState<ClientWithId | null>(null);
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<Client>({
-    resolver: zodResolver(clientSchema.omit({ id: true })), // ID is handled by Firestore
+    resolver: zodResolver(clientSchema.omit({ id: true })),
   });
+  
+  // Fetch clients from the local API
+  const fetchClients = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/clients');
+      if (!response.ok) {
+        throw new Error('Failed to fetch clients.');
+      }
+      const data = await response.json();
+      // Ensure each client has a unique ID for local state management
+      const clientsWithIds = data.map((c: Client) => ({ ...c, id: c.id || crypto.randomUUID() }));
+      setClients(clientsWithIds);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast({ title: 'Erro ao carregar clientes', description: errorMessage, variant: 'destructive'});
+      console.error('Fetch Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Persist clients to the local API
+  const persistClients = async (updatedClients: ClientWithId[]) => {
+      try {
+          const response = await fetch('/api/clients', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(updatedClients),
+          });
+          if (!response.ok) {
+              throw new Error('Failed to save clients.');
+          }
+          return true;
+      } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+          toast({ title: 'Erro ao salvar', description: errorMessage, variant: 'destructive'});
+          console.error('Persist Error:', error);
+          return false;
+      }
+  }
 
   useEffect(() => {
-    if (error) {
-      toast({ title: 'Erro ao carregar clientes', description: error.message, variant: 'destructive'});
-      console.error('Firestore Error:', error);
+    if (isOpen) {
+      fetchClients();
     }
-  }, [error, toast]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (editingClient) {
@@ -59,43 +92,40 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
 
   const handleSaveClient = async (data: Omit<Client, 'id'>) => {
     const isUpdating = !!editingClient;
+    let updatedClients: ClientWithId[];
     
-    try {
-      if (isUpdating) {
-        if (!editingClient.id) throw new Error("Editing client has no ID.");
-        const clientDoc = doc(firestore, 'clients', editingClient.id);
-        await updateDoc(clientDoc, data);
-        toast({ title: 'Cliente atualizado com sucesso!' });
-      } else {
-        await addDoc(clientsCollection, { ...data, createdAt: serverTimestamp() });
-        toast({ title: 'Novo cliente adicionado!' });
-      }
-      setEditingClient(null);
-      reset();
-    } catch (error) {
-      console.error('Erro ao salvar cliente:', error);
-      toast({ title: 'Erro ao salvar', description: 'Não foi possível salvar os dados do cliente.', variant: 'destructive'});
+    if (isUpdating) {
+      updatedClients = clients.map(c => c.id === editingClient!.id ? { ...editingClient!, ...data } : c);
+      toast({ title: 'Cliente atualizado com sucesso!' });
+    } else {
+      const newClient = { ...data, id: crypto.randomUUID() };
+      updatedClients = [...clients, newClient];
+      toast({ title: 'Novo cliente adicionado!' });
+    }
+
+    const success = await persistClients(updatedClients);
+    if(success) {
+        setClients(updatedClients);
+        setEditingClient(null);
+        reset();
     }
   };
 
   const handleDeleteClient = async (id: string) => {
-    try {
-        const clientDoc = doc(firestore, 'clients', id);
-        await deleteDoc(clientDoc);
-        toast({ title: 'Cliente removido.', variant: 'destructive' });
-    } catch (error) {
-        console.error(`Erro ao deletar cliente ${id}:`, error);
-        toast({ title: 'Erro ao remover', description: 'Não foi possível remover o cliente.', variant: 'destructive'});
+    const updatedClients = clients.filter(c => c.id !== id);
+    const success = await persistClients(updatedClients);
+    if(success) {
+      setClients(updatedClients);
+      toast({ title: 'Cliente removido.', variant: 'destructive' });
     }
   };
 
-  const startEditing = (client: Client) => {
+  const startEditing = (client: ClientWithId) => {
     setEditingClient(client);
   };
   
   const cancelEditing = () => {
     setEditingClient(null);
-    reset();
   };
 
   return (
