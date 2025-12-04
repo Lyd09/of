@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
     Trash2,
     PlusCircle,
@@ -34,6 +33,7 @@ import { Preset, PresetManagerDialog } from '@/components/PresetManagerDialog';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import initialPresets from '@/data/presets.json';
 import { ContractDialog } from '@/components/ContractDialog';
+import { Combobox } from "@/components/ui/combobox";
 
 
 const budgetItemSchema = z.object({
@@ -238,6 +238,9 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
             observations: ''
         });
     }
+    
+    const clientOptions = clients.map(client => ({ value: client.id, label: `${client.name} - ${client.cpfCnpj}` }));
+
 
     return (
         <FormProvider {...form}>
@@ -264,23 +267,24 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                         <CardContent className="space-y-6 pt-6">
                            <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary flex items-center gap-2"><User size={20}/>Dados do Cliente</h3>
-                                    <FormItem>
-                                        <FormLabel>Selecionar Cliente Existente (Opcional)</FormLabel>
-                                        <Select onValueChange={handleClientSelection}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Escolha um cliente para preencher os dados" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {clients.map(client => (
-                                                    <SelectItem key={client.id} value={client.id}>
-                                                        {client.name} - {client.cpfCnpj}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </FormItem>
+                                <FormField
+                                    control={form.control}
+                                    name="clientName" // This field won't be directly rendered but will be controlled
+                                    render={() => (
+                                        <FormItem>
+                                            <FormLabel>Selecionar Cliente Existente (Opcional)</FormLabel>
+                                            <Combobox
+                                                options={clientOptions}
+                                                value={clients.find(c => c.name === form.watch('clientName'))?.id || ''}
+                                                onChange={(value) => handleClientSelection(value)}
+                                                placeholder="Busque ou selecione um cliente..."
+                                                searchPlaceholder="Digite para buscar..."
+                                                emptyPlaceholder="Nenhum cliente encontrado."
+                                            />
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                                     <FormField control={form.control} name="clientName" render={({ field }) => ( 
                                         <FormItem> 
                                             <FormLabel>Nome do Cliente</FormLabel> 
@@ -319,20 +323,14 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                             </div>
                                             <div className="md:col-span-2">
                                                 <FormItem>
-                                                    <Select onValueChange={(value) => handleApplyPreset(index, value)}>
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder="Selecione" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            {presets.map(preset => (
-                                                                <SelectItem key={preset.id} value={preset.id}>
-                                                                    {preset.description}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
+                                                    <Combobox
+                                                        options={presets.map(p => ({ value: p.id, label: p.description }))}
+                                                        value={''}
+                                                        onChange={(value) => handleApplyPreset(index, value)}
+                                                        placeholder="Selecione um preset"
+                                                        searchPlaceholder="Buscar preset..."
+                                                        emptyPlaceholder="Nenhum preset encontrado."
+                                                    />
                                                 </FormItem>
                                             </div>
                                             <div className="md:col-span-1">

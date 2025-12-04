@@ -17,7 +17,7 @@ import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Combobox } from './ui/combobox';
 
 const objectTypeOptions: PermutationObjectType[] = [
   'Equipamentos',
@@ -148,6 +148,8 @@ export function PermutationContractForm() {
           setValue('conditions', getInitialConditionsText(selectedConditionType, conditionDeadline));
       }
   }, [selectedConditionType, conditionDeadline, setValue]);
+  
+  const clientOptions = clients.map(client => ({ value: client.id, label: `${client.name} - ${client.cpfCnpj}` }));
 
   return (
     <div className="space-y-6">
@@ -168,20 +170,14 @@ export function PermutationContractForm() {
                         )}
                         <FormItem>
                             <FormLabel>Selecionar Cliente Existente</FormLabel>
-                            <Select onValueChange={(clientId) => handleClientSelection(clientId, index)}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Escolha um cliente para preencher os dados" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {clients.map(client => (
-                                        <SelectItem key={client.id} value={client.id}>
-                                            {client.name} - {client.cpfCnpj}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <Combobox
+                                options={clientOptions}
+                                value={clients.find(c => c.name === watch(`permutants.${index}.name`))?.id || ''}
+                                onChange={(value) => handleClientSelection(value, index)}
+                                placeholder="Busque ou selecione um cliente..."
+                                searchPlaceholder="Digite para buscar..."
+                                emptyPlaceholder="Nenhum cliente encontrado."
+                            />
                          </FormItem>
                         <FormField control={control} name={`permutants.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Nome Completo</FormLabel><FormControl><Input {...field} placeholder="Nome do Permutante" /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={control} name={`permutants.${index}.cpfCnpj`} render={({ field }) => ( <FormItem><FormLabel>CPF/CNPJ</FormLabel><FormControl><Input {...field} placeholder="000.000.000-00" /></FormControl><FormMessage /></FormItem>)} />

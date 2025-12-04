@@ -17,7 +17,7 @@ import { ptBR } from 'date-fns/locale';
 import numero from 'numero-por-extenso';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Combobox } from './ui/combobox';
 
 const serviceOptions: ServiceType[] = [
   'Produção de Vídeo',
@@ -217,6 +217,8 @@ export function ServiceContractForm() {
         setValue('specifications', getInitialSpecificationsClause(selectedService));
     }
   }, [selectedService, selectedInclusion, videoCount, photoCount, setValue]);
+  
+  const clientOptions = clients.map(client => ({ value: client.id, label: `${client.name} - ${client.cpfCnpj}` }));
 
 
   return (
@@ -317,20 +319,14 @@ export function ServiceContractForm() {
                     )}
                      <FormItem>
                         <FormLabel>Selecionar Cliente Existente</FormLabel>
-                        <Select onValueChange={(clientId) => handleClientSelection(clientId, index)}>
-                            <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Escolha um cliente para preencher os dados" />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                {clients.map(client => (
-                                    <SelectItem key={client.id} value={client.id}>
-                                        {client.name} - {client.cpfCnpj}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Combobox
+                            options={clientOptions}
+                            value={clients.find(c => c.name === watch(`contractors.${index}.name`))?.id || ''}
+                            onChange={(value) => handleClientSelection(value, index)}
+                            placeholder="Busque ou selecione um cliente..."
+                            searchPlaceholder="Digite para buscar..."
+                            emptyPlaceholder="Nenhum cliente encontrado."
+                        />
                      </FormItem>
                      <FormField control={control} name={`contractors.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Nome Completo</FormLabel><FormControl><Input {...field} placeholder="Nome do Contratante" /></FormControl><FormMessage /></FormItem>)} />
                      <FormField control={control} name={`contractors.${index}.cpfCnpj`} render={({ field }) => ( <FormItem><FormLabel>CPF/CNPJ</FormLabel><FormControl><Input {...field} placeholder="000.000.000-00" /></FormControl><FormMessage /></FormItem>)} />
@@ -466,5 +462,3 @@ export function ServiceContractForm() {
     </div>
   );
 }
-
-    

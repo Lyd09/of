@@ -11,7 +11,7 @@ import { AuthorizationTermData, Client } from '@/types/contract';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Combobox } from './ui/combobox';
 
 const initialPermissionsText = `O AUTORIZADO(A) poderá utilizar o material descrito na Cláusula 1ª exclusivamente para compor seu portfólio pessoal em sites, redes sociais de cunho profissional (como LinkedIn e Vimeo) e apresentações diretas a potenciais clientes.
 É expressamente vedado ao AUTORIZADO(A):
@@ -76,6 +76,7 @@ export function AuthorizationTermForm() {
     }
   }, [setValue, watch]);
 
+  const clientOptions = clients.map(client => ({ value: client.id, label: `${client.name} - ${client.cpfCnpj}` }));
 
   return (
     <div className="space-y-6">
@@ -89,20 +90,14 @@ export function AuthorizationTermForm() {
                 <h3 className='font-medium mb-4'>AUTORIZADO(A)</h3>
                  <FormItem>
                     <FormLabel>Selecionar Cliente Existente</FormLabel>
-                    <Select onValueChange={handleClientSelection}>
-                        <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Escolha um cliente para preencher os dados" />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            {clients.map(client => (
-                                <SelectItem key={client.id} value={client.id}>
-                                    {client.name} - {client.cpfCnpj}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                     <Combobox
+                        options={clientOptions}
+                        value={clients.find(c => c.name === watch('authorizedName'))?.id || ''}
+                        onChange={(value) => handleClientSelection(value)}
+                        placeholder="Busque ou selecione um cliente..."
+                        searchPlaceholder="Digite para buscar..."
+                        emptyPlaceholder="Nenhum cliente encontrado."
+                    />
                  </FormItem>
                  <FormField control={control} name="authorizedName" render={({ field }) => ( <FormItem><FormLabel>Nome Completo</FormLabel><FormControl><Input {...field} placeholder="Nome do Freelancer" /></FormControl><FormMessage /></FormItem>)} />
                  <FormField control={control} name="authorizedCpfCnpj" render={({ field }) => ( <FormItem><FormLabel>CPF/CNPJ</FormLabel><FormControl><Input {...field} placeholder="000.000.000-00" /></FormControl><FormMessage /></FormItem>)} />
