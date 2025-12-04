@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'OrçaFAST - Criador de Orçamentos',
+  title: 'OrçaFAST',
   description: 'Crie orçamentos profissionais de forma rápida e fácil.',
   icons: {
     icon: '/ICONE ORCAFAST.png',
