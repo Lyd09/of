@@ -2,11 +2,12 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import { Client } from '@/types/contract';
 
 // Adjust the path to point to src/data/clients.json
 const dataFilePath = path.join(process.cwd(), 'src', 'data', 'clients.json');
 
-async function readClients() {
+async function readClients(): Promise<Client[]> {
     try {
         const data = await fs.readFile(dataFilePath, 'utf8');
         return JSON.parse(data);
@@ -21,7 +22,7 @@ async function readClients() {
     }
 }
 
-async function writeClients(data: any) {
+async function writeClients(data: Client[]) {
     try {
         await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
     } catch (error) {
@@ -33,7 +34,8 @@ async function writeClients(data: any) {
 export async function GET() {
     try {
         const clients = await readClients();
-        return NextResponse.json(clients);
+        // Return clients in reverse order (newest first)
+        return NextResponse.json(clients.reverse());
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
         return NextResponse.json({ message: 'Failed to retrieve clients', error: errorMessage }, { status: 500 });
@@ -43,8 +45,19 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        // The body is expected to be the full array of clients
-        await writeClients(body);
+        // The body is expected to be the full array of clients.
+        // We will add the createdAt timestamp to new clients.
+        const existingClients = await readClients();
+        const existingIds = new Set(existingClients.map(c => c.id));
+
+        const updatedBody = body.map((client: Client) => {
+            if (!client.id || !existingIds.has(client.id)) {
+                return { ...client, createdAt: new Date().toISOString() };
+            }
+            return client;
+        });
+
+        await writeClients(updatedBody);
         return NextResponse.json({ message: 'Clients updated successfully' });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';

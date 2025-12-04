@@ -12,11 +12,12 @@ export type Contractor = z.infer<typeof contractorSchema>;
 
 // Schema para um cliente individual
 export const clientSchema = z.object({
-  id: z.string(), // ID will come from Firestore
+  id: z.string(), // ID will come from the client-side
   name: z.string().min(1, "O nome do cliente é obrigatório."),
   cpfCnpj: z.string().min(1, "O CPF/CNPJ é obrigatório."),
   address: z.string().min(1, "O endereço é obrigatório."),
   email: z.string().email("O e-mail fornecido é inválido."),
+  createdAt: z.string().optional(), // ISO date string
 });
 
 export type Client = z.infer<typeof clientSchema>;

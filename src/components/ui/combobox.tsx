@@ -72,7 +72,7 @@ export function Combobox({
                   onSelect={(currentLabel) => {
                     const selectedOption = options.find(o => o.label.toLowerCase() === currentLabel.toLowerCase());
                     if (selectedOption) {
-                      onChange(selectedOption.value === value ? "" : selectedOption.value)
+                      onChange(selectedOption.value)
                     }
                     setOpen(false)
                   }}

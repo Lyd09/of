@@ -28,8 +28,8 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
   const [isLoading, setIsLoading] = useState(true);
   const [editingClient, setEditingClient] = useState<ClientWithId | null>(null);
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<Client>({
-    resolver: zodResolver(clientSchema.omit({ id: true })),
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<Omit<Client, 'id' | 'createdAt'>>({
+    resolver: zodResolver(clientSchema.omit({ id: true, createdAt: true })),
   });
   
   // Fetch clients from the local API
@@ -41,7 +41,6 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
         throw new Error('Failed to fetch clients.');
       }
       const data = await response.json();
-      // Ensure each client has a unique ID for local state management
       const clientsWithIds = data.map((c: Client) => ({ ...c, id: c.id || crypto.randomUUID() }));
       setClients(clientsWithIds);
     } catch (error) {
@@ -54,15 +53,17 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
   };
 
   // Persist clients to the local API
-  const persistClients = async (updatedClients: ClientWithId[]) => {
+  const persistClients = async (updatedClients: Client[]) => {
       try {
+          // The API expects newest first, but we manage state as newest last, so we reverse it back before sending
           const response = await fetch('/api/clients', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(updatedClients),
+              body: JSON.stringify([...updatedClients].reverse()),
           });
           if (!response.ok) {
-              throw new Error('Failed to save clients.');
+              const errorData = await response.json();
+              throw new Error(errorData.message || 'Failed to save clients.');
           }
           return true;
       } catch (error) {
@@ -90,7 +91,7 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
     }
   }, [editingClient, setValue, reset]);
 
-  const handleSaveClient = async (data: Omit<Client, 'id'>) => {
+  const handleSaveClient = async (data: Omit<Client, 'id' | 'createdAt'>) => {
     const isUpdating = !!editingClient;
     let updatedClients: ClientWithId[];
     
@@ -98,14 +99,17 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
       updatedClients = clients.map(c => c.id === editingClient!.id ? { ...editingClient!, ...data } : c);
       toast({ title: 'Cliente atualizado com sucesso!' });
     } else {
-      const newClient = { ...data, id: crypto.randomUUID() };
+      const newClient: ClientWithId = { ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
+       // Add to the end so it appears at the top when reversed for display
       updatedClients = [...clients, newClient];
       toast({ title: 'Novo cliente adicionado!' });
     }
 
+    // Persist to API
     const success = await persistClients(updatedClients);
     if(success) {
-        setClients(updatedClients);
+        // Refetch to get the correct order from server
+        fetchClients();
         setEditingClient(null);
         reset();
     }
@@ -127,6 +131,9 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
   const cancelEditing = () => {
     setEditingClient(null);
   };
+  
+  const displayedClients = [...clients].reverse();
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -179,8 +186,8 @@ export function ClientManagerDialog({ isOpen, onOpenChange }: ClientManagerDialo
                     <div className="p-4 space-y-2">
                         {isLoading ? (
                              <p>Carregando clientes...</p>
-                        ) : clients.length > 0 ? (
-                            clients.map((client) => (
+                        ) : displayedClients.length > 0 ? (
+                            displayedClients.map((client) => (
                             <div key={client.id} className="flex justify-between items-center p-2 rounded-md hover:bg-muted">
                                 <div>
                                 <p className="font-medium">{client.name}</p>
