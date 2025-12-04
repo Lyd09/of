@@ -51,7 +51,6 @@ const budgetSchema = z.object({
     slogan: z.string().optional(),
     clientName: z.string().min(1, 'Nome do cliente é obrigatório.'),
     clientAddress: z.string().optional(),
-    budgetNumber: z.coerce.number().min(1, "Número do orçamento é obrigatório."),
     budgetDate: z.string().min(1, 'Data é obrigatória'),
     items: z.array(budgetItemSchema).min(1, 'Adicione pelo menos um item.'),
     commercialConditions: z.string().optional(),
@@ -94,7 +93,7 @@ const AppHeader = () => (
     </header>
 );
 
-const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf, budgetNumber, setBudgetNumber, fetchAndSetNextBudgetNumber }: { form: any, onGeneratePdf: (data: BudgetFormValues) => void, isGeneratingPdf: boolean, budgetNumber: number, setBudgetNumber: (n: number) => void, fetchAndSetNextBudgetNumber: () => Promise<void> }) => {
+const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGeneratePdf: (data: BudgetFormValues) => void, isGeneratingPdf: boolean }) => {
     const { fields, append, remove, update } = useFieldArray({
         control: form.control,
         name: "items",
@@ -193,12 +192,10 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf, budgetNumber, setBud
         });
     }
 
-    const handleResetForm = async () => {
-        await fetchAndSetNextBudgetNumber();
+    const handleResetForm = () => {
         const defaultValues = form.formState.defaultValues;
         form.reset({
             ...defaultValues,
-            budgetNumber: form.getValues('budgetNumber'), // The new number is already in the form state
             clientName: '',
             clientAddress: '',
             items: [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed', finalPrice: 0 }],
@@ -415,7 +412,6 @@ const BudgetPreviewForPdf = ({ data }: { data: BudgetPreviewData }) => {
                 </div>
                 <div className="text-right">
                     <h1 className="text-3xl font-bold text-white">ORÇAMENTO</h1>
-                    <p className="text-neutral-400">Número: {data.budgetNumber === "0000" ? 'PREVIEW' : data.budgetNumber}</p>
                     <p className="text-neutral-400">Data: {data.budgetDate}</p>
                 </div>
             </header>
@@ -509,7 +505,6 @@ export default function OrcaFastPage() {
     const { toast } = useToast();
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
-    const [budgetNumber, setBudgetNumber] = useState(0);
     
     const form = useForm<BudgetFormValues>({
         resolver: zodResolver(budgetSchema),
@@ -519,7 +514,6 @@ export default function OrcaFastPage() {
             slogan: companyInfo.slogan,
             clientName: '',
             clientAddress: '',
-            budgetNumber: 0,
             budgetDate: format(new Date(), 'dd/MM/yyyy'),
             items: [],
             commercialConditions: 'Forma de Pagamento: Transferência bancária, boleto ou PIX.',
@@ -531,44 +525,6 @@ export default function OrcaFastPage() {
         },
     });
 
-    const fetchCurrentBudgetNumber = async () => {
-        try {
-            const response = await fetch('/api/budget-number');
-            const data = await response.json();
-            if (response.ok) {
-                setBudgetNumber(data.nextBudgetNumber);
-                form.setValue('budgetNumber', data.nextBudgetNumber);
-            } else {
-                throw new Error(data.message || 'Failed to fetch budget number');
-            }
-        } catch (error) {
-            console.error(error);
-            toast({ title: 'Erro', description: 'Não foi possível carregar o número do orçamento.', variant: 'destructive' });
-        }
-    };
-
-    const fetchAndSetNextBudgetNumber = async () => {
-         try {
-            const response = await fetch('/api/budget-number', { method: 'POST' });
-            const data = await response.json();
-            if (response.ok) {
-                setBudgetNumber(data.nextBudgetNumber);
-                form.setValue('budgetNumber', data.nextBudgetNumber);
-            } else {
-                throw new Error(data.message || 'Failed to get next budget number');
-            }
-        } catch (error) {
-            console.error(error);
-            toast({ title: 'Erro', description: 'Não foi possível obter o próximo número do orçamento.', variant: 'destructive' });
-        }
-    }
-
-
-    useEffect(() => {
-        fetchCurrentBudgetNumber();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
     useEffect(() => {
         // Ensure items array is not empty on initial load
         if (form.getValues('items').length === 0) {
@@ -579,7 +535,7 @@ export default function OrcaFastPage() {
     const watchedForm = form.watch();
 
     const getPreviewData = (): BudgetPreviewData | null => {
-        const { items, generalDiscount = 0, generalDiscountType, budgetNumber, clientName, ...rest } = watchedForm;
+        const { items, generalDiscount = 0, generalDiscountType, clientName, ...rest } = watchedForm;
 
         if (!clientName && (!items || items.length === 0 || !items.some(item => item.description))) {
             return null;
@@ -629,7 +585,6 @@ export default function OrcaFastPage() {
             generalDiscountValue,
             generalDiscountPercentage: Number(generalDiscountPercentage || 0),
             totalAmount,
-            budgetNumber: String(budgetNumber).padStart(4, '0'),
             observations: rest.observations
         }
     }
@@ -674,9 +629,10 @@ export default function OrcaFastPage() {
             
             await new Promise(resolve => setTimeout(resolve, 500)); 
 
+            const dateString = format(new Date(), 'dd-MM-yyyy');
             const opt = {
                 margin: [0, 0, 0, 0],
-                filename: `orcamento_${data.budgetNumber}_${data.clientName.replace(/\s/g, '_')}.pdf`,
+                filename: `orcamento_${data.clientName.replace(/\s/g, '_')}_${dateString}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 3, useCORS: true, backgroundColor: '#18191b' },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -710,7 +666,6 @@ export default function OrcaFastPage() {
     
     const handlePdfGenerationAndReset = async () => {
         await onGeneratePdf();
-        await fetchAndSetNextBudgetNumber();
         
         // Reset form after PDF generation
         const defaultValues = form.formState.defaultValues;
@@ -718,7 +673,6 @@ export default function OrcaFastPage() {
             ...defaultValues,
             clientName: '',
             clientAddress: '',
-            budgetNumber: form.getValues('budgetNumber'), // Fetched new number
             items: [{ description: '', unit: 'Un', quantity: 1, unitPrice: 0, discount: 0, discountType: 'fixed', finalPrice: 0 }],
         });
     }
@@ -734,9 +688,6 @@ export default function OrcaFastPage() {
                             form={form} 
                             onGeneratePdf={handlePdfGenerationAndReset} 
                             isGeneratingPdf={isGeneratingPdf} 
-                            budgetNumber={budgetNumber}
-                            setBudgetNumber={setBudgetNumber}
-                            fetchAndSetNextBudgetNumber={fetchAndSetNextBudgetNumber}
                         />
                     </div>
                     <div className="lg:col-span-2">
@@ -757,5 +708,3 @@ export default function OrcaFastPage() {
         </>
     );
 }
-
-    

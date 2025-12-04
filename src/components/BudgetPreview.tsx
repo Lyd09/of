@@ -45,7 +45,6 @@ export const BudgetPreview = ({ data, onGeneratePdf }: { data: BudgetPreviewData
         logoUrl,
         slogan,
         isDroneFeatureEnabled,
-        budgetNumber,
         budgetDate,
         clientName,
         clientAddress,
@@ -91,7 +90,6 @@ export const BudgetPreview = ({ data, onGeneratePdf }: { data: BudgetPreviewData
                     <div className="text-right">
                         <h1 className="text-3xl font-bold text-white">ORÇAMENTO</h1>
                         {isDroneFeatureEnabled && <p className="text-sm text-drone-active">(com Drone)</p>}
-                        <p className="text-neutral-400">Nº: <span className="font-semibold">{clientName ? budgetNumber : 'PREVIEW'}</span></p>
                         <p className="text-neutral-400">Data: {budgetDate}</p>
                     </div>
                 </header>

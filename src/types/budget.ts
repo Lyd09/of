@@ -16,7 +16,6 @@ export interface BudgetPreviewData {
   logoUrl?: string;
   slogan?: string;
   isDroneFeatureEnabled: boolean;
-  budgetNumber: string;
   budgetDate: string;
   clientName: string;
   clientAddress?: string;
@@ -30,5 +29,3 @@ export interface BudgetPreviewData {
   paymentConditions?: string;
   observations?: string;
 }
-
-    
