@@ -75,7 +75,11 @@ export function ContractGeneratorDialog({ isOpen, onOpenChange }: ContractGenera
           
           const dateString = format(new Date(), 'dd-MM-yyyy');
           const shortName = getShortName(data.contractors[0]?.name);
-          const serviceName = data.serviceType.replace(/\s/g, '_');
+          
+          let serviceName = data.serviceType.replace(/\s/g, '_');
+          if (data.serviceType === 'Desenvolvimento de Software') {
+            serviceName = 'Software';
+          }
 
 
           const opt = {
