@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -9,13 +9,15 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from './ui/f
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { PlusCircle, Trash2 } from 'lucide-react';
-import { PermutationContractData, PermutationObjectType } from '@/types/contract';
+import { PermutationContractData, PermutationObjectType, Client } from '@/types/contract';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import numero from 'numero-por-extenso';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const objectTypeOptions: PermutationObjectType[] = [
   'Equipamentos',
@@ -70,12 +72,46 @@ export function PermutationContractForm() {
     control,
     name: 'permutants',
   });
+  
+  const [clients, setClients] = useState<Client[]>([]);
+  const { toast } = useToast();
 
   const permutantObjectValue = watch('permutantObjectValue');
   const selectedObjectType = watch('permutantObjectType');
   const selectedConditionType = watch('conditionType');
   const conditionDeadline = watch('conditionDeadline');
   
+  useEffect(() => {
+    const fetchClients = async () => {
+        try {
+            const response = await fetch('/api/clients');
+            if (response.ok) {
+                const data = await response.json();
+                setClients(data);
+            } else {
+                throw new Error('Falha ao buscar clientes');
+            }
+        } catch (error) {
+            toast({
+                title: 'Erro ao carregar clientes',
+                description: 'Não foi possível buscar a lista de clientes.',
+                variant: 'destructive'
+            })
+        }
+    };
+    fetchClients();
+  }, [toast]);
+  
+  const handleClientSelection = (clientId: string, index: number) => {
+    const selectedClient = clients.find(c => c.id === clientId);
+    if (selectedClient) {
+        setValue(`permutants.${index}.name`, selectedClient.name);
+        setValue(`permutants.${index}.cpfCnpj`, selectedClient.cpfCnpj);
+        setValue(`permutants.${index}.address`, selectedClient.address);
+        setValue(`permutants.${index}.email`, selectedClient.email);
+    }
+  }
+
   useEffect(() => {
     // Set initial default values if they are not set yet
     if (fields.length === 0) {
@@ -124,12 +160,29 @@ export function PermutationContractForm() {
             <div className="space-y-4">
                 <h3 className='font-medium mb-2'>PERMUTANTE(S)</h3>
                 {fields.map((field, index) => (
-                    <div key={field.id} className="p-4 border rounded-md relative space-y-2">
+                    <div key={field.id} className="p-4 border rounded-md relative space-y-4">
                         {fields.length > 1 && (
                             <Button variant="ghost" size="icon" className="absolute top-2 right-2 text-muted-foreground hover:text-destructive" onClick={() => remove(index)}>
                                 <Trash2 className="w-4 h-4" />
                             </Button>
                         )}
+                        <FormItem>
+                            <FormLabel>Selecionar Cliente Existente</FormLabel>
+                            <Select onValueChange={(clientId) => handleClientSelection(clientId, index)}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Escolha um cliente para preencher os dados" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {clients.map(client => (
+                                        <SelectItem key={client.id} value={client.id}>
+                                            {client.name} - {client.cpfCnpj}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                         </FormItem>
                         <FormField control={control} name={`permutants.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Nome Completo</FormLabel><FormControl><Input {...field} placeholder="Nome do Permutante" /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={control} name={`permutants.${index}.cpfCnpj`} render={({ field }) => ( <FormItem><FormLabel>CPF/CNPJ</FormLabel><FormControl><Input {...field} placeholder="000.000.000-00" /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={control} name={`permutants.${index}.address`} render={({ field }) => ( <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input {...field} placeholder="Rua, Número, Bairro, Cidade - UF" /></FormControl><FormMessage /></FormItem>)} />

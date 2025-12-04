@@ -1,2 +1,23 @@
-
-[]
+[
+  {
+    "name": "Marcus José Pinheiro Fonseca",
+    "cpfCnpj": "508.471.982-00",
+    "address": "Rua Primavera, 50 - Moradas da Lapinha - Lagoa Santa/MG",
+    "email": "marcusfonsecaimoveis@gmail.com",
+    "id": "3a1237a1-0220-4d29-a132-3a9bb70be0c5"
+  },
+  {
+    "name": "Aline Cristina Dias de Moura",
+    "cpfCnpj": "041.989.146-30 ",
+    "address": "Rua Varginha 68 - Ovídio Guerra",
+    "email": "alinecdm@gmail.com",
+    "id": "2e5d10a4-ad2e-4f86-8435-252b4a42334c"
+  },
+  {
+    "name": "CENTRO HIPICO FAZENDA DO MOINHO LTDA",
+    "cpfCnpj": "50.729.273/0001-40",
+    "address": "Rua Antônio Higino Costa, 817",
+    "email": "cadastro@adcal.com.br",
+    "id": "c8df78e4-589c-4452-a8d9-1d9b2e40f3a1"
+  }
+]

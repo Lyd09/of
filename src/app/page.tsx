@@ -28,6 +28,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import Image from 'next/image';
 import { BudgetPreviewData, BudgetItem as BudgetItemType } from '@/types/budget';
+import { Client } from '@/types/contract';
 import { BudgetPreview } from '@/components/BudgetPreview';
 import { Preset, PresetManagerDialog } from '@/components/PresetManagerDialog';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -99,12 +100,43 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
         name: "items",
     });
     
+    const { toast } = useToast();
+    const [clients, setClients] = useState<Client[]>([]);
     const [presets, setPresets] = useLocalStorage<Preset[]>('orcafast-presets', initialPresets);
     const [isPresetManagerOpen, setIsPresetManagerOpen] = useState(false);
     const [lastEditedField, setLastEditedField] = useState<{index: number, field: 'discount' | 'finalPrice'} | null>(null);
 
     const watchedItems = form.watch('items');
     const watchedDroneFeature = form.watch('isDroneFeatureEnabled');
+    
+    useEffect(() => {
+        const fetchClients = async () => {
+            try {
+                const response = await fetch('/api/clients');
+                if (response.ok) {
+                    const data = await response.json();
+                    setClients(data);
+                } else {
+                    throw new Error('Falha ao buscar clientes');
+                }
+            } catch (error) {
+                toast({
+                    title: 'Erro ao carregar clientes',
+                    description: 'Não foi possível buscar a lista de clientes.',
+                    variant: 'destructive'
+                })
+            }
+        };
+        fetchClients();
+    }, [toast]);
+    
+    const handleClientSelection = (clientId: string) => {
+        const selectedClient = clients.find(c => c.id === clientId);
+        if (selectedClient) {
+            form.setValue('clientName', selectedClient.name, { shouldValidate: true });
+            form.setValue('clientAddress', selectedClient.address, { shouldValidate: true });
+        }
+    }
     
     useEffect(() => {
         const droneText = 'Se a gravação com drone for *realizada no mesmo dia e local de outro serviço contratado*, você garante a inclusão do equipamento aéreo pagando apenas o *valor único*, aproveitando o máximo do nosso deslocamento e estrutura.';
@@ -231,7 +263,24 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                         </CardHeader>
                         <CardContent className="space-y-6 pt-6">
                            <div className="space-y-4">
-                                     <h3 className="text-lg font-medium text-primary flex items-center gap-2"><User size={20}/>Dados do Cliente</h3>
+                                <h3 className="text-lg font-medium text-primary flex items-center gap-2"><User size={20}/>Dados do Cliente</h3>
+                                    <FormItem>
+                                        <FormLabel>Selecionar Cliente Existente (Opcional)</FormLabel>
+                                        <Select onValueChange={handleClientSelection}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Escolha um cliente para preencher os dados" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {clients.map(client => (
+                                                    <SelectItem key={client.id} value={client.id}>
+                                                        {client.name} - {client.cpfCnpj}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormItem>
                                     <FormField control={form.control} name="clientName" render={({ field }) => ( 
                                         <FormItem> 
                                             <FormLabel>Nome do Cliente</FormLabel> 
@@ -686,7 +735,7 @@ export default function OrcaFastPage() {
                     <div className="lg:col-span-3">
                         <BudgetForm 
                             form={form} 
-                            onGeneratePdf={handlePdfGenerationAndReset} 
+                            onGeneratePdf={onGeneratePdf}
                             isGeneratingPdf={isGeneratingPdf} 
                         />
                     </div>
@@ -696,7 +745,7 @@ export default function OrcaFastPage() {
                                 <FileText className="mr-2 h-4 w-4" /> 
                                 Gerar Contrato
                             </Button>
-                           <BudgetPreview data={previewData} onGeneratePdf={handlePdfGenerationAndReset} />
+                           <BudgetPreview data={previewData} onGeneratePdf={onGeneratePdf} />
                         </div>
                     </div>
                 </div>

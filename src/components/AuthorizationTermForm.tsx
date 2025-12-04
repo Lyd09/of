@@ -1,16 +1,17 @@
 
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from './ui/form';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { AuthorizationTermData } from '@/types/contract';
+import { AuthorizationTermData, Client } from '@/types/contract';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const initialPermissionsText = `O AUTORIZADO(A) poderá utilizar o material descrito na Cláusula 1ª exclusivamente para compor seu portfólio pessoal em sites, redes sociais de cunho profissional (como LinkedIn e Vimeo) e apresentações diretas a potenciais clientes.
 É expressamente vedado ao AUTORIZADO(A):
@@ -21,6 +22,39 @@ const initialPermissionsText = `O AUTORIZADO(A) poderá utilizar o material desc
 
 export function AuthorizationTermForm() {
   const { control, watch, setValue } = useFormContext<AuthorizationTermData>();
+  const [clients, setClients] = useState<Client[]>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchClients = async () => {
+        try {
+            const response = await fetch('/api/clients');
+            if (response.ok) {
+                const data = await response.json();
+                setClients(data);
+            } else {
+                throw new Error('Falha ao buscar clientes');
+            }
+        } catch (error) {
+            toast({
+                title: 'Erro ao carregar clientes',
+                description: 'Não foi possível buscar a lista de clientes.',
+                variant: 'destructive'
+            })
+        }
+    };
+    fetchClients();
+  }, [toast]);
+
+  const handleClientSelection = (clientId: string) => {
+    const selectedClient = clients.find(c => c.id === clientId);
+    if (selectedClient) {
+        setValue('authorizedName', selectedClient.name);
+        setValue('authorizedCpfCnpj', selectedClient.cpfCnpj);
+        setValue('authorizedAddress', selectedClient.address);
+        setValue('authorizedEmail', selectedClient.email);
+    }
+  }
 
   useEffect(() => {
     // Set initial default values if they are not set yet
@@ -51,8 +85,25 @@ export function AuthorizationTermForm() {
             <p className='text-sm p-4 bg-background rounded-md'>
                 <strong>AUTORIZANTE:</strong> FastFilms (dados preenchidos automaticamente no documento).
             </p>
-            <div className="p-4 border rounded-md space-y-2">
+            <div className="p-4 border rounded-md space-y-4">
                 <h3 className='font-medium mb-4'>AUTORIZADO(A)</h3>
+                 <FormItem>
+                    <FormLabel>Selecionar Cliente Existente</FormLabel>
+                    <Select onValueChange={handleClientSelection}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Escolha um cliente para preencher os dados" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {clients.map(client => (
+                                <SelectItem key={client.id} value={client.id}>
+                                    {client.name} - {client.cpfCnpj}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                 </FormItem>
                  <FormField control={control} name="authorizedName" render={({ field }) => ( <FormItem><FormLabel>Nome Completo</FormLabel><FormControl><Input {...field} placeholder="Nome do Freelancer" /></FormControl><FormMessage /></FormItem>)} />
                  <FormField control={control} name="authorizedCpfCnpj" render={({ field }) => ( <FormItem><FormLabel>CPF/CNPJ</FormLabel><FormControl><Input {...field} placeholder="000.000.000-00" /></FormControl><FormMessage /></FormItem>)} />
                  <FormField control={control} name="authorizedAddress" render={({ field }) => ( <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input {...field} placeholder="Rua, Número, Bairro, Cidade - UF" /></FormControl><FormMessage /></FormItem>)} />

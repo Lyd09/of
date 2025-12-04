@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -11,11 +11,13 @@ import { Label } from './ui/label';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Textarea } from './ui/textarea';
 import { PlusCircle, Trash2 } from 'lucide-react';
-import { ServiceContractData, ServiceType, ServiceInclusion } from '@/types/contract';
+import { ServiceContractData, ServiceType, ServiceInclusion, Client } from '@/types/contract';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import numero from 'numero-por-extenso';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const serviceOptions: ServiceType[] = [
   'Produção de Vídeo',
@@ -132,6 +134,9 @@ export function ServiceContractForm() {
     control,
     name: 'contractors',
   });
+  
+  const [clients, setClients] = useState<Client[]>([]);
+  const { toast } = useToast();
 
   const selectedService = watch('serviceType') as ServiceType;
   const selectedInclusion = watch('serviceInclusion') as ServiceInclusion;
@@ -139,6 +144,37 @@ export function ServiceContractForm() {
   const photoCount = watch('photoCount');
   const paymentMethod = watch('paymentMethod');
   const totalValue = watch('totalValue');
+
+  useEffect(() => {
+    const fetchClients = async () => {
+        try {
+            const response = await fetch('/api/clients');
+            if (response.ok) {
+                const data = await response.json();
+                setClients(data);
+            } else {
+                throw new Error('Falha ao buscar clientes');
+            }
+        } catch (error) {
+            toast({
+                title: 'Erro ao carregar clientes',
+                description: 'Não foi possível buscar a lista de clientes.',
+                variant: 'destructive'
+            })
+        }
+    };
+    fetchClients();
+  }, [toast]);
+  
+  const handleClientSelection = (clientId: string, index: number) => {
+    const selectedClient = clients.find(c => c.id === clientId);
+    if (selectedClient) {
+        setValue(`contractors.${index}.name`, selectedClient.name);
+        setValue(`contractors.${index}.cpfCnpj`, selectedClient.cpfCnpj);
+        setValue(`contractors.${index}.address`, selectedClient.address);
+        setValue(`contractors.${index}.email`, selectedClient.email);
+    }
+  }
 
   useEffect(() => {
     const initialService = 'Produção de Vídeo';
@@ -273,12 +309,29 @@ export function ServiceContractForm() {
         <CardHeader><CardTitle>Contratante(s)</CardTitle></CardHeader>
         <CardContent className="space-y-4">
             {fields.map((field, index) => (
-                 <div key={field.id} className="p-4 border rounded-md relative space-y-2">
+                 <div key={field.id} className="p-4 border rounded-md relative space-y-4">
                     {fields.length > 1 && (
                         <Button variant="ghost" size="icon" className="absolute top-2 right-2 text-muted-foreground hover:text-destructive" onClick={() => remove(index)}>
                             <Trash2 className="w-4 h-4" />
                         </Button>
                     )}
+                     <FormItem>
+                        <FormLabel>Selecionar Cliente Existente</FormLabel>
+                        <Select onValueChange={(clientId) => handleClientSelection(clientId, index)}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Escolha um cliente para preencher os dados" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {clients.map(client => (
+                                    <SelectItem key={client.id} value={client.id}>
+                                        {client.name} - {client.cpfCnpj}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                     </FormItem>
                      <FormField control={control} name={`contractors.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Nome Completo</FormLabel><FormControl><Input {...field} placeholder="Nome do Contratante" /></FormControl><FormMessage /></FormItem>)} />
                      <FormField control={control} name={`contractors.${index}.cpfCnpj`} render={({ field }) => ( <FormItem><FormLabel>CPF/CNPJ</FormLabel><FormControl><Input {...field} placeholder="000.000.000-00" /></FormControl><FormMessage /></FormItem>)} />
                      <FormField control={control} name={`contractors.${index}.address`} render={({ field }) => ( <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input {...field} placeholder="Rua, Número, Bairro, Cidade - UF" /></FormControl><FormMessage /></FormItem>)} />
