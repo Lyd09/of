@@ -47,12 +47,17 @@ export function AuthorizationTermForm() {
   }, [toast]);
 
   const handleClientSelection = (clientId: string) => {
-    const selectedClient = clients.find(c => c.id === clientId);
+    const selectedClient = clients.find(c => c.id.toLowerCase() === clientId.toLowerCase());
     if (selectedClient) {
         setValue('authorizedName', selectedClient.name);
         setValue('authorizedCpfCnpj', selectedClient.cpfCnpj);
         setValue('authorizedAddress', selectedClient.address);
         setValue('authorizedEmail', selectedClient.email);
+    } else {
+        setValue('authorizedName', '');
+        setValue('authorizedCpfCnpj', '');
+        setValue('authorizedAddress', '');
+        setValue('authorizedEmail', '');
     }
   }
 
@@ -88,18 +93,31 @@ export function AuthorizationTermForm() {
             </p>
             <div className="p-4 border rounded-md space-y-4">
                 <h3 className='font-medium mb-4'>AUTORIZADO(A)</h3>
-                 <FormItem>
-                    <FormLabel>Selecionar Cliente Existente</FormLabel>
-                     <Combobox
-                        options={clientOptions}
-                        value={clients.find(c => c.name === watch('authorizedName'))?.id || ''}
-                        onChange={(value) => handleClientSelection(value)}
-                        placeholder="Busque ou selecione um cliente..."
-                        searchPlaceholder="Digite para buscar..."
-                        emptyPlaceholder="Nenhum cliente encontrado."
-                    />
-                 </FormItem>
-                 <FormField control={control} name="authorizedName" render={({ field }) => ( <FormItem><FormLabel>Nome Completo</FormLabel><FormControl><Input {...field} placeholder="Nome do Freelancer" /></FormControl><FormMessage /></FormItem>)} />
+                 <FormField
+                    control={control}
+                    name="authorizedName"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                            <FormLabel>Nome do Autorizado(a)</FormLabel>
+                            <Combobox
+                                options={clientOptions}
+                                value={clients.find(c => c.name === field.value)?.id || ''}
+                                onChange={handleClientSelection}
+                                placeholder="Busque ou digite um novo cliente..."
+                                searchPlaceholder="Digite para buscar..."
+                                emptyPlaceholder="Nenhum cliente encontrado."
+                            />
+                            <FormControl>
+                                <Input 
+                                    {...field} 
+                                    placeholder="Ou digite o nome de um novo cliente" 
+                                    className="mt-2"
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
                  <FormField control={control} name="authorizedCpfCnpj" render={({ field }) => ( <FormItem><FormLabel>CPF/CNPJ</FormLabel><FormControl><Input {...field} placeholder="000.000.000-00" /></FormControl><FormMessage /></FormItem>)} />
                  <FormField control={control} name="authorizedAddress" render={({ field }) => ( <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input {...field} placeholder="Rua, Número, Bairro, Cidade - UF" /></FormControl><FormMessage /></FormItem>)} />
                  <FormField control={control} name="authorizedEmail" render={({ field }) => ( <FormItem><FormLabel>E-mail</FormLabel><FormControl><Input {...field} type="email" placeholder="email@exemplo.com" /></FormControl><FormMessage /></FormItem>)} />

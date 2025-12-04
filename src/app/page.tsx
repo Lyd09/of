@@ -131,10 +131,14 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
     }, [toast]);
     
     const handleClientSelection = (clientId: string) => {
-        const selectedClient = clients.find(c => c.id === clientId);
+        const selectedClient = clients.find(c => c.id.toLowerCase() === clientId.toLowerCase());
         if (selectedClient) {
             form.setValue('clientName', selectedClient.name, { shouldValidate: true });
             form.setValue('clientAddress', selectedClient.address, { shouldValidate: true });
+        } else {
+             // If the combobox is cleared, we might want to clear the dependent fields too
+            form.setValue('clientName', '', { shouldValidate: true });
+            form.setValue('clientAddress', '', { shouldValidate: true });
         }
     }
     
@@ -269,29 +273,32 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                 <h3 className="text-lg font-medium text-primary flex items-center gap-2"><User size={20}/>Dados do Cliente</h3>
                                 <FormField
                                     control={form.control}
-                                    name="clientName" // This field won't be directly rendered but will be controlled
-                                    render={() => (
-                                        <FormItem>
-                                            <FormLabel>Selecionar Cliente Existente (Opcional)</FormLabel>
+                                    name="clientName"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel>Nome do Cliente</FormLabel>
                                             <Combobox
                                                 options={clientOptions}
-                                                value={clients.find(c => c.name === form.watch('clientName'))?.id || ''}
-                                                onChange={(value) => handleClientSelection(value)}
-                                                placeholder="Busque ou selecione um cliente..."
+                                                value={clients.find(c => c.name === field.value)?.id || ''}
+                                                onChange={(value) => {
+                                                    handleClientSelection(value);
+                                                    // Since handleClientSelection sets clientName, we don't need to call field.onChange
+                                                }}
+                                                placeholder="Busque ou digite um novo cliente..."
                                                 searchPlaceholder="Digite para buscar..."
                                                 emptyPlaceholder="Nenhum cliente encontrado."
                                             />
+                                            <FormControl>
+                                                <Input 
+                                                    {...field} 
+                                                    placeholder="Ou digite o nome de um novo cliente" 
+                                                    className="mt-2"
+                                                />
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
-                                    <FormField control={form.control} name="clientName" render={({ field }) => ( 
-                                        <FormItem> 
-                                            <FormLabel>Nome do Cliente</FormLabel> 
-                                            <FormControl><Input placeholder="Ex: Paula (SaborInclusão)" {...field} /></FormControl> 
-                                            <FormMessage /> 
-                                        </FormItem> 
-                                    )} />
                                     <FormField control={form.control} name="clientAddress" render={({ field }) => ( 
                                         <FormItem> 
                                             <FormLabel>Endereço (Opcional)</FormLabel> 

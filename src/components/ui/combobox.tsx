@@ -42,6 +42,7 @@ export function Combobox({
   emptyPlaceholder = "No results found."
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
+  const selectedLabel = options.find((option) => option.value.toLowerCase() === value.toLowerCase())?.label;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -53,7 +54,7 @@ export function Combobox({
           className="w-full justify-between"
         >
           {value
-            ? options.find((option) => option.value === value)?.label
+            ? selectedLabel
             : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -67,16 +68,19 @@ export function Combobox({
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
-                  value={option.value}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue)
+                  value={option.label} // Search against the label
+                  onSelect={(currentLabel) => {
+                    const selectedOption = options.find(o => o.label.toLowerCase() === currentLabel.toLowerCase());
+                    if (selectedOption) {
+                      onChange(selectedOption.value === value ? "" : selectedOption.value)
+                    }
                     setOpen(false)
                   }}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0"
+                      value.toLowerCase() === option.value.toLowerCase() ? "opacity-100" : "opacity-0"
                     )}
                   />
                   {option.label}
