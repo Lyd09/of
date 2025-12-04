@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
 import {
     Trash2,
     PlusCircle,
@@ -104,6 +105,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
     const [clients, setClients] = useState<Client[]>([]);
     const [presets, setPresets] = useLocalStorage<Preset[]>('orcafast-presets', initialPresets);
     const [isPresetManagerOpen, setIsPresetManagerOpen] = useState(false);
+    const [isSearchingClient, setIsSearchingClient] = useState(false);
     const [lastEditedField, setLastEditedField] = useState<{index: number, field: 'discount' | 'finalPrice'} | null>(null);
 
     const watchedItems = form.watch('items');
@@ -135,11 +137,13 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
         if (selectedClient) {
             form.setValue('clientName', selectedClient.name, { shouldValidate: true });
             form.setValue('clientAddress', selectedClient.address, { shouldValidate: true });
-        } else {
-             // If the combobox is cleared, we might want to clear the dependent fields too
-            form.setValue('clientName', '', { shouldValidate: true });
-            form.setValue('clientAddress', '', { shouldValidate: true });
         }
+    }
+
+    const handleSearchToggle = (isSearching: boolean) => {
+        setIsSearchingClient(isSearching);
+        form.setValue('clientName', '');
+        form.setValue('clientAddress', '');
     }
     
     useEffect(() => {
@@ -241,6 +245,7 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
             generalDiscountType: 'fixed',
             observations: ''
         });
+        setIsSearchingClient(false);
     }
     
     const clientOptions = clients.map(client => ({ value: client.id, label: `${client.name} - ${client.cpfCnpj}` }));
@@ -271,34 +276,42 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                         <CardContent className="space-y-6 pt-6">
                            <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-primary flex items-center gap-2"><User size={20}/>Dados do Cliente</h3>
-                                <FormField
-                                    control={form.control}
-                                    name="clientName"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel>Nome do Cliente</FormLabel>
-                                            <Combobox
-                                                options={clientOptions}
-                                                value={clients.find(c => c.name === field.value)?.id || ''}
-                                                onChange={(value) => {
-                                                    handleClientSelection(value);
-                                                    // Since handleClientSelection sets clientName, we don't need to call field.onChange
-                                                }}
-                                                placeholder="Busque ou digite um novo cliente..."
-                                                searchPlaceholder="Digite para buscar..."
-                                                emptyPlaceholder="Nenhum cliente encontrado."
-                                            />
-                                            <FormControl>
-                                                <Input 
-                                                    {...field} 
-                                                    placeholder="Ou digite o nome de um novo cliente" 
-                                                    className="mt-2"
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                 <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id="client-search-mode"
+                                        checked={isSearchingClient}
+                                        onCheckedChange={handleSearchToggle}
+                                    />
+                                    <Label htmlFor="client-search-mode">Buscar cliente cadastrado</Label>
+                                </div>
+
+                                {isSearchingClient ? (
+                                    <FormItem className="flex flex-col">
+                                        <FormLabel>Buscar Cliente</FormLabel>
+                                        <Combobox
+                                            options={clientOptions}
+                                            value={clients.find(c => c.name === form.watch('clientName'))?.id || ''}
+                                            onChange={handleClientSelection}
+                                            placeholder="Busque por nome ou CPF/CNPJ..."
+                                            searchPlaceholder="Digite para buscar..."
+                                            emptyPlaceholder="Nenhum cliente encontrado."
+                                        />
+                                    </FormItem>
+                                ) : (
+                                     <FormField
+                                        control={form.control}
+                                        name="clientName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Nome do Cliente</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} placeholder="Digite o nome de um novo cliente" />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
                                     <FormField control={form.control} name="clientAddress" render={({ field }) => ( 
                                         <FormItem> 
                                             <FormLabel>Endereço (Opcional)</FormLabel> 

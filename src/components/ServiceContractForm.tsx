@@ -18,6 +18,7 @@ import numero from 'numero-por-extenso';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Combobox } from './ui/combobox';
+import { Switch } from './ui/switch';
 
 const serviceOptions: ServiceType[] = [
   'Produção de Vídeo',
@@ -136,6 +137,7 @@ export function ServiceContractForm() {
   });
   
   const [clients, setClients] = useState<Client[]>([]);
+  const [searchingStates, setSearchingStates] = useState<boolean[]>([]);
   const { toast } = useToast();
 
   const selectedService = watch('serviceType') as ServiceType;
@@ -165,6 +167,11 @@ export function ServiceContractForm() {
     };
     fetchClients();
   }, [toast]);
+
+   useEffect(() => {
+    // Initialize searching states for existing fields
+    setSearchingStates(fields.map(() => false));
+  }, [fields.length]);
   
   const handleClientSelection = (clientId: string, index: number) => {
     const selectedClient = clients.find(c => c.id.toLowerCase() === clientId.toLowerCase());
@@ -173,13 +180,24 @@ export function ServiceContractForm() {
         setValue(`contractors.${index}.cpfCnpj`, selectedClient.cpfCnpj);
         setValue(`contractors.${index}.address`, selectedClient.address);
         setValue(`contractors.${index}.email`, selectedClient.email);
-    } else {
-        setValue(`contractors.${index}.name`, '');
-        setValue(`contractors.${index}.cpfCnpj`, '');
-        setValue(`contractors.${index}.address`, '');
-        setValue(`contractors.${index}.email`, '');
     }
   }
+
+  const handleSearchToggle = (isSearching: boolean, index: number) => {
+      const newStates = [...searchingStates];
+      newStates[index] = isSearching;
+      setSearchingStates(newStates);
+      
+      setValue(`contractors.${index}.name`, '');
+      setValue(`contractors.${index}.cpfCnpj`, '');
+      setValue(`contractors.${index}.address`, '');
+      setValue(`contractors.${index}.email`, '');
+  };
+  
+  const handleAppendContractor = () => {
+    append({ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' });
+  };
+
 
   useEffect(() => {
     const initialService = 'Produção de Vídeo';
@@ -322,37 +340,47 @@ export function ServiceContractForm() {
                             <Trash2 className="w-4 h-4" />
                         </Button>
                     )}
-                     <FormField
-                        control={control}
-                        name={`contractors.${index}.name`}
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Nome do Contratante</FormLabel>
-                                <Combobox
-                                    options={clientOptions}
-                                    value={clients.find(c => c.name === field.value)?.id || ''}
-                                    onChange={(value) => handleClientSelection(value, index)}
-                                    placeholder="Busque ou digite um novo cliente..."
-                                    searchPlaceholder="Digite para buscar..."
-                                    emptyPlaceholder="Nenhum cliente encontrado."
-                                />
-                                <FormControl>
-                                    <Input 
-                                        {...field} 
-                                        placeholder="Ou digite o nome de um novo cliente" 
-                                        className="mt-2"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                     <div className="flex items-center space-x-2">
+                        <Switch
+                            id={`contractor-search-mode-${index}`}
+                            checked={searchingStates[index]}
+                            onCheckedChange={(checked) => handleSearchToggle(checked, index)}
+                        />
+                        <Label htmlFor={`contractor-search-mode-${index}`}>Buscar contratante cadastrado</Label>
+                    </div>
+                     {searchingStates[index] ? (
+                        <FormItem className="flex flex-col">
+                            <FormLabel>Buscar Contratante</FormLabel>
+                            <Combobox
+                                options={clientOptions}
+                                value={clients.find(c => c.name === watch(`contractors.${index}.name`))?.id || ''}
+                                onChange={(clientId) => handleClientSelection(clientId, index)}
+                                placeholder="Busque por nome ou CPF/CNPJ..."
+                                searchPlaceholder="Digite para buscar..."
+                                emptyPlaceholder="Nenhum cliente encontrado."
+                            />
+                        </FormItem>
+                    ) : (
+                        <FormField
+                            control={control}
+                            name={`contractors.${index}.name`}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Nome do Contratante</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} placeholder="Digite o nome do novo contratante" />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
                      <FormField control={control} name={`contractors.${index}.cpfCnpj`} render={({ field }) => ( <FormItem><FormLabel>CPF/CNPJ</FormLabel><FormControl><Input {...field} placeholder="000.000.000-00" /></FormControl><FormMessage /></FormItem>)} />
                      <FormField control={control} name={`contractors.${index}.address`} render={({ field }) => ( <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input {...field} placeholder="Rua, Número, Bairro, Cidade - UF" /></FormControl><FormMessage /></FormItem>)} />
                      <FormField control={control} name={`contractors.${index}.email`} render={({ field }) => ( <FormItem><FormLabel>E-mail</FormLabel><FormControl><Input {...field} type="email" placeholder="email@contratante.com" /></FormControl><FormMessage /></FormItem>)} />
                  </div>
             ))}
-             <Button type="button" variant="outline" onClick={() => append({ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' })}>
+             <Button type="button" variant="outline" onClick={handleAppendContractor}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Contratante
             </Button>
         </CardContent>

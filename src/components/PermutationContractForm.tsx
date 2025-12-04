@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Combobox } from './ui/combobox';
+import { Switch } from './ui/switch';
 
 const objectTypeOptions: PermutationObjectType[] = [
   'Equipamentos',
@@ -74,6 +75,7 @@ export function PermutationContractForm() {
   });
   
   const [clients, setClients] = useState<Client[]>([]);
+  const [searchingStates, setSearchingStates] = useState<boolean[]>([]);
   const { toast } = useToast();
 
   const permutantObjectValue = watch('permutantObjectValue');
@@ -101,6 +103,10 @@ export function PermutationContractForm() {
     };
     fetchClients();
   }, [toast]);
+
+  useEffect(() => {
+    setSearchingStates(fields.map(() => false));
+  }, [fields.length]);
   
   const handleClientSelection = (clientId: string, index: number) => {
     const selectedClient = clients.find(c => c.id.toLowerCase() === clientId.toLowerCase());
@@ -109,18 +115,24 @@ export function PermutationContractForm() {
         setValue(`permutants.${index}.cpfCnpj`, selectedClient.cpfCnpj);
         setValue(`permutants.${index}.address`, selectedClient.address);
         setValue(`permutants.${index}.email`, selectedClient.email);
-    } else {
-        setValue(`permutants.${index}.name`, '');
-        setValue(`permutants.${index}.cpfCnpj`, '');
-        setValue(`permutants.${index}.address`, '');
-        setValue(`permutants.${index}.email`, '');
     }
   }
+
+  const handleSearchToggle = (isSearching: boolean, index: number) => {
+      const newStates = [...searchingStates];
+      newStates[index] = isSearching;
+      setSearchingStates(newStates);
+      
+      setValue(`permutants.${index}.name`, '');
+      setValue(`permutants.${index}.cpfCnpj`, '');
+      setValue(`permutants.${index}.address`, '');
+      setValue(`permutants.${index}.email`, '');
+  };
 
   useEffect(() => {
     // Set initial default values if they are not set yet
     if (fields.length === 0) {
-        setValue('permutants', [{ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' }]);
+        append({ id: crypto.randomUUID(), name: '', cpfCnpj: '', address: '', email: '' });
         const initialObjectType: PermutationObjectType = 'Equipamentos';
         const initialConditionType: 'Com prazo' | 'Sem prazo' = 'Sem prazo';
 
@@ -139,7 +151,7 @@ export function PermutationContractForm() {
         setValue('signatureCity', 'Lagoa Santa');
         setValue('signatureDate', format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }));
     }
-  }, [fields.length, setValue]);
+  }, [fields.length, setValue, append]);
 
   useEffect(() => {
       if (selectedObjectType) {
@@ -173,31 +185,41 @@ export function PermutationContractForm() {
                                 <Trash2 className="w-4 h-4" />
                             </Button>
                         )}
-                        <FormField
-                            control={control}
-                            name={`permutants.${index}.name`}
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>Nome do Permutante</FormLabel>
-                                    <Combobox
-                                        options={clientOptions}
-                                        value={clients.find(c => c.name === field.value)?.id || ''}
-                                        onChange={(value) => handleClientSelection(value, index)}
-                                        placeholder="Busque ou digite um novo cliente..."
-                                        searchPlaceholder="Digite para buscar..."
-                                        emptyPlaceholder="Nenhum cliente encontrado."
-                                    />
-                                    <FormControl>
-                                        <Input 
-                                            {...field} 
-                                            placeholder="Ou digite o nome de um novo cliente" 
-                                            className="mt-2"
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <div className="flex items-center space-x-2">
+                            <Switch
+                                id={`perm-search-mode-${index}`}
+                                checked={searchingStates[index]}
+                                onCheckedChange={(checked) => handleSearchToggle(checked, index)}
+                            />
+                            <Label htmlFor={`perm-search-mode-${index}`}>Buscar permutante cadastrado</Label>
+                        </div>
+                        {searchingStates[index] ? (
+                            <FormItem className="flex flex-col">
+                                <FormLabel>Buscar Permutante</FormLabel>
+                                <Combobox
+                                    options={clientOptions}
+                                    value={clients.find(c => c.name === watch(`permutants.${index}.name`))?.id || ''}
+                                    onChange={(clientId) => handleClientSelection(clientId, index)}
+                                    placeholder="Busque por nome ou CPF/CNPJ..."
+                                    searchPlaceholder="Digite para buscar..."
+                                    emptyPlaceholder="Nenhum cliente encontrado."
+                                />
+                            </FormItem>
+                        ) : (
+                            <FormField
+                                control={control}
+                                name={`permutants.${index}.name`}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Nome do Permutante</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} placeholder="Digite o nome do novo permutante" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
                         <FormField control={control} name={`permutants.${index}.cpfCnpj`} render={({ field }) => ( <FormItem><FormLabel>CPF/CNPJ</FormLabel><FormControl><Input {...field} placeholder="000.000.000-00" /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={control} name={`permutants.${index}.address`} render={({ field }) => ( <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input {...field} placeholder="Rua, Número, Bairro, Cidade - UF" /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={control} name={`permutants.${index}.email`} render={({ field }) => ( <FormItem><FormLabel>E-mail</FormLabel><FormControl><Input {...field} type="email" placeholder="email@permutante.com" /></FormControl><FormMessage /></FormItem>)} />

@@ -12,6 +12,8 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { Combobox } from './ui/combobox';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
 
 const initialPermissionsText = `O AUTORIZADO(A) poderá utilizar o material descrito na Cláusula 1ª exclusivamente para compor seu portfólio pessoal em sites, redes sociais de cunho profissional (como LinkedIn e Vimeo) e apresentações diretas a potenciais clientes.
 É expressamente vedado ao AUTORIZADO(A):
@@ -23,6 +25,7 @@ const initialPermissionsText = `O AUTORIZADO(A) poderá utilizar o material desc
 export function AuthorizationTermForm() {
   const { control, watch, setValue } = useFormContext<AuthorizationTermData>();
   const [clients, setClients] = useState<Client[]>([]);
+  const [isSearchingClient, setIsSearchingClient] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -53,12 +56,15 @@ export function AuthorizationTermForm() {
         setValue('authorizedCpfCnpj', selectedClient.cpfCnpj);
         setValue('authorizedAddress', selectedClient.address);
         setValue('authorizedEmail', selectedClient.email);
-    } else {
-        setValue('authorizedName', '');
-        setValue('authorizedCpfCnpj', '');
-        setValue('authorizedAddress', '');
-        setValue('authorizedEmail', '');
     }
+  }
+
+  const handleSearchToggle = (isSearching: boolean) => {
+      setIsSearchingClient(isSearching);
+      setValue('authorizedName', '');
+      setValue('authorizedCpfCnpj', '');
+      setValue('authorizedAddress', '');
+      setValue('authorizedEmail', '');
   }
 
   useEffect(() => {
@@ -92,32 +98,42 @@ export function AuthorizationTermForm() {
                 <strong>AUTORIZANTE:</strong> FastFilms (dados preenchidos automaticamente no documento).
             </p>
             <div className="p-4 border rounded-md space-y-4">
-                <h3 className='font-medium mb-4'>AUTORIZADO(A)</h3>
-                 <FormField
-                    control={control}
-                    name="authorizedName"
-                    render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                            <FormLabel>Nome do Autorizado(a)</FormLabel>
-                            <Combobox
-                                options={clientOptions}
-                                value={clients.find(c => c.name === field.value)?.id || ''}
-                                onChange={handleClientSelection}
-                                placeholder="Busque ou digite um novo cliente..."
-                                searchPlaceholder="Digite para buscar..."
-                                emptyPlaceholder="Nenhum cliente encontrado."
-                            />
-                            <FormControl>
-                                <Input 
-                                    {...field} 
-                                    placeholder="Ou digite o nome de um novo cliente" 
-                                    className="mt-2"
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                <h3 className='font-medium mb-2'>AUTORIZADO(A)</h3>
+                 <div className="flex items-center space-x-2">
+                    <Switch
+                        id="auth-search-mode"
+                        checked={isSearchingClient}
+                        onCheckedChange={handleSearchToggle}
+                    />
+                    <Label htmlFor="auth-search-mode">Buscar cliente cadastrado</Label>
+                </div>
+                 {isSearchingClient ? (
+                    <FormItem className="flex flex-col">
+                        <FormLabel>Buscar Autorizado</FormLabel>
+                        <Combobox
+                            options={clientOptions}
+                            value={clients.find(c => c.name === watch('authorizedName'))?.id || ''}
+                            onChange={handleClientSelection}
+                            placeholder="Busque por nome ou CPF/CNPJ..."
+                            searchPlaceholder="Digite para buscar..."
+                            emptyPlaceholder="Nenhum cliente encontrado."
+                        />
+                    </FormItem>
+                ) : (
+                    <FormField
+                        control={control}
+                        name="authorizedName"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Nome do Autorizado(a)</FormLabel>
+                                <FormControl>
+                                    <Input {...field} placeholder="Digite o nome do novo autorizado" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
                  <FormField control={control} name="authorizedCpfCnpj" render={({ field }) => ( <FormItem><FormLabel>CPF/CNPJ</FormLabel><FormControl><Input {...field} placeholder="000.000.000-00" /></FormControl><FormMessage /></FormItem>)} />
                  <FormField control={control} name="authorizedAddress" render={({ field }) => ( <FormItem><FormLabel>Endereço</FormLabel><FormControl><Input {...field} placeholder="Rua, Número, Bairro, Cidade - UF" /></FormControl><FormMessage /></FormItem>)} />
                  <FormField control={control} name="authorizedEmail" render={({ field }) => ( <FormItem><FormLabel>E-mail</FormLabel><FormControl><Input {...field} type="email" placeholder="email@exemplo.com" /></FormControl><FormMessage /></FormItem>)} />
