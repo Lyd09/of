@@ -35,6 +35,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import initialPresets from '@/data/presets.json';
 import { ContractDialog } from '@/components/ContractDialog';
 import { Combobox } from "@/components/ui/combobox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 const budgetItemSchema = z.object({
@@ -343,14 +344,18 @@ const BudgetForm = ({ form, onGeneratePdf, isGeneratingPdf }: { form: any, onGen
                                             </div>
                                             <div className="md:col-span-2">
                                                 <FormItem>
-                                                    <Combobox
-                                                        options={presets.map(p => ({ value: p.id, label: p.description }))}
-                                                        value={''}
-                                                        onChange={(value) => handleApplyPreset(index, value)}
-                                                        placeholder="Selecione um preset"
-                                                        searchPlaceholder="Buscar preset..."
-                                                        emptyPlaceholder="Nenhum preset encontrado."
-                                                    />
+                                                    <Select onValueChange={(value) => handleApplyPreset(index, value)}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Selecione um preset" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {presets.map(p => (
+                                                                <SelectItem key={p.id} value={p.id}>{p.description}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
                                                 </FormItem>
                                             </div>
                                             <div className="md:col-span-1">
